@@ -1,4 +1,4 @@
-package com.project.backend.domain.book.entitiy;
+package com.project.backend.domain.book.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
