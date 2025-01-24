@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/book
     username: root
-    password: book1234
+    password: 456456
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,3 +17,7 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+naver:
+  client-id: 6CryI4ygsAq3XwpGIaBN
+  client-secret: ZxazVEi_Dq
+  book-search-url: https://openapi.naver.com/v1/search/book.json
