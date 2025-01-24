@@ -50,15 +50,12 @@ public class BookService {
     public NaverBookVo searchBooks(String query) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", clientId);
         headers.set("X-Naver-Client-Secret", clientSecret);
 
-        // 요청 파라미터 설정
         String url = apiUrl + "?query=" + query;
 
-        // 요청 보내기
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<NaverBookVo> response = restTemplate.exchange(url,
                 org.springframework.http.HttpMethod.GET, entity, NaverBookVo.class);
