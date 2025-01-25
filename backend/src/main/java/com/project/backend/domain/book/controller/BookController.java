@@ -22,8 +22,8 @@ public class BookController {
      * @author -- 정재익 --
      * @since -- 1월 24일 --
      */
-    @GetMapping("/book/list")
-    public NaverBookVo searchBooks(@RequestParam(value = "query") String query) {
-        return bookService.searchBooks(query);
+    @GetMapping("/book")
+    public NaverBookVo searchBooks(@RequestParam(value = "title") String title) {
+        return bookService.searchBooks(title);
     }
 }

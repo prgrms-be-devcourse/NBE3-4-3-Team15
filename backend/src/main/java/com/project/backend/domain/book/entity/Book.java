@@ -1,7 +1,6 @@
-package com.project.backend.domain.book.entitiy;
+package com.project.backend.domain.book.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -13,14 +12,14 @@ import lombok.*;
 public class Book {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String title;
 
     private String author;
 
-    private String kind;
-
+    @Column(columnDefinition = "TEXT")
     private String discription;
 
     private String image;

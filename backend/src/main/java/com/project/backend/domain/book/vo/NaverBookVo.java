@@ -18,11 +18,12 @@ public class NaverBookVo {
 
     /**
      * -- 네이버 api와 통신하기 위한 VO --
-     * -- 조회값을 받아와 읽기전용으로만 쓰기 때문에 DTO대신 VO로 설정했다.
-     * -- 네이버 api의 리턴값이 중첩된 JSON구조로 되어있기 때문에 내부클래스를 이용해서 중첩구조로 구현했다.
+     * 조회값을 받아와 읽기전용으로만 쓰기 때문에 DTO대신 VO로 설정했다.
+     * 네이버 api의 리턴값이 중첩된 JSON구조로 되어있기 때문에 내부클래스를 이용해서 중첩구조로 구현했다.
+     * description은 검색조회에 보여지지않도록 어노테이션을 통해 접근을 제어했다.
      *
      * @author -- 정재익 --
-     * @since -- 1월 24일 --
+     * @since -- 1월 25일 --
      */
 
     @JsonProperty("items")
@@ -44,7 +45,7 @@ public class NaverBookVo {
         @JsonProperty("author")
         private String author;
 
-        @JsonProperty("description")
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         private String description;
     }
 }
