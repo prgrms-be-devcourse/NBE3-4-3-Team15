@@ -20,7 +20,7 @@ public class Book {
     private String author;
 
     @Column(columnDefinition = "TEXT")
-    private String discription;
+    private String description;
 
     private String image;
 }
