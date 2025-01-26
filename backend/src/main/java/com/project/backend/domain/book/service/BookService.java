@@ -1,9 +1,11 @@
 package com.project.backend.domain.book.service;
 
+import com.project.backend.domain.book.dto.BookDto;
 import com.project.backend.domain.book.dto.BookSimpleDto;
 import com.project.backend.domain.book.entity.Book;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.vo.NaverBookVo;
+import com.project.backend.domain.favorite.service.FavoriteService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +29,9 @@ public class BookService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private FavoriteService favoriteService;
 
 
     /**
@@ -50,7 +57,7 @@ public class BookService {
     /**
      * -- 네이버api를 통해 검색어에 대한 도서데이터를 가져오는 메소드 --
      * 책은 한번에 30권 조회되도록 설정했다.
-     *
+     * <p>
      * 1. HttpHeader에 클라이언트ID와 비밀번호를 삽입한다
      * 2. 요청 url에 검색어를 더해서 네이버에 요청할 url을 완성시킨다
      * 3. HttpEntity를 이용하여 헤더값을 삽입한다.
@@ -107,18 +114,17 @@ public class BookService {
 
     /**
      * -- 책 리스트를 DB에 저장하는 메소드 --
-     * 현재 동일한 책도 저장되는 에러가 있어서 수정해야함.
-     * 책을 구분하는 고유값인 isbn데이터를 추가로 받아와서 그것으로 중복책을 판별해야함
+     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
      *
      * @param -- List<Book> books --
      * @author -- 정재익 --
-     * @since -- 1월 25일 --
+     * @since -- 1월 26일 --
      */
 
     private void saveBooks(List<Book> books) {
-        List<Book> newBooks = books.stream().filter(book -> !bookRepository.existsById(book.getId())).collect(Collectors.toList());
+        List<Book> saveBooks = books.stream().filter(book -> !bookRepository.existsByIsbn(book.getIsbn())).collect(Collectors.toList());
 
-        bookRepository.saveAll(newBooks);
+        bookRepository.saveAll(saveBooks);
     }
 
 
@@ -137,5 +143,28 @@ public class BookService {
         return books.stream().map(book -> modelMapper.map(book, BookSimpleDto.class)).toList();
     }
 
+    /**
+     * -- 책의 상세정보를 반환하는 메서드 --
+     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
+     * 책의 추천받은 개수도 favoriteService 클래스를 이용하여 받아와서 Dto에 추가
+     * 해당 id의 책이 없으면 예외 처리
+     *
+     * @param -- id (책의 id) --
+     * @return -- BookDto --
+     * @author -- 정재익 --
+     * @since -- 1월 26일 --
+     */
 
+    public BookDto searchDetailsBook(int id) {
+        Optional<Book> book = bookRepository.findById(id);
+
+        return book.map(b -> {
+            BookDto bookDto = modelMapper.map(b, BookDto.class);
+
+            int favoriteCount = favoriteService.getFavoriteCountByBook(b.getId());
+            bookDto.setFavoriteCount(favoriteCount);
+            return bookDto;
+        }).orElseThrow(() -> new NoSuchElementException("Book not found with ID: " + id));
+    }
 }
+
