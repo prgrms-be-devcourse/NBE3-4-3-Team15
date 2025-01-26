@@ -18,4 +18,6 @@ public class BookDto {
     private String description;
 
     private String image;
+
+    private int favoriteCount;
 }

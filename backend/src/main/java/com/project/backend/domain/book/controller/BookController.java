@@ -1,9 +1,11 @@
 package com.project.backend.domain.book.controller;
 
+import com.project.backend.domain.book.dto.BookDto;
 import com.project.backend.domain.book.dto.BookSimpleDto;
 import com.project.backend.domain.book.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,5 +44,19 @@ public class BookController {
     @GetMapping("/book/list")
     public List<BookSimpleDto> searchAllBooks() {
         return bookService.searchAllBooks();
+    }
+
+    /**
+     * -- 도서 상세 조회 --
+     *
+     * @param -- 책의 id --
+     * @return -- BookDto --
+     * @author -- 정재익 --
+     * @since -- 1월 26일 --
+     */
+
+    @GetMapping("/book/{id}")
+    public BookDto searchDetailBook(@PathVariable("id") int id) {
+        return bookService.searchDetailsBook(id);
     }
 }

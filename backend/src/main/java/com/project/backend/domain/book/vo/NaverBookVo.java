@@ -42,6 +42,9 @@ public class NaverBookVo {
 
         @JsonProperty("description")
         private String description;
+
+        @JsonProperty("isbn")
+        private String isbn;
     }
 }
 
