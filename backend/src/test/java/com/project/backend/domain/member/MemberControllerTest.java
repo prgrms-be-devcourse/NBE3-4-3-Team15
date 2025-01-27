@@ -160,4 +160,76 @@ public class MemberControllerTest {
                 .andExpect(handler().methodName("join"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("로그인")
+    void t6() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/members/login")
+                                .content("""
+                                        {
+                                            "id" : "test1",
+                                            "password" : "12345678"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        Member member = memberService.getMember("test1").get();
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("login"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(member.getId()))
+                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.gender").value(member.getGender()))
+                .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
+    }
+
+    @Test
+    @DisplayName("로그인, 없는 사용자")
+    void t7() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/members/login")
+                                .content("""
+                                        {
+                                            "id" : "test3",
+                                            "password" : "12345678"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("login"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("존재하지 않는 사용자 입니다."));
+    }
+
+    @Test
+    @DisplayName("로그인, 비밀번호 맞지 않음")
+    void t8() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/members/login")
+                                .content("""
+                                        {
+                                            "id" : "test1",
+                                            "password" : "12345678999"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("login"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("비밀번호가 맞지 않습니다."));
+    }
 }
