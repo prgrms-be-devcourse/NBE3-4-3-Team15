@@ -1,4 +1,4 @@
-package com.project.backend.domain.favorite.key;
+package com.project.backend.domain.book.key;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -13,6 +13,7 @@ import java.util.Objects;
 public class FavoriteId implements Serializable {
 
     private String memberId;
+
     private int bookId;
 
     /**
