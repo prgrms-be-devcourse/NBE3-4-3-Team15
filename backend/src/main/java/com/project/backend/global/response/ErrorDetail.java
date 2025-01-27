@@ -6,7 +6,7 @@ package com.project.backend.global.response;
  * @param field 에러가 발생한 필드
  * @param reason 에러 발생 원인
  * author 이원재
- * since 2021.01.27
+ * since 2025.01.27
  */
 public record ErrorDetail(String field, String reason) {
     /**

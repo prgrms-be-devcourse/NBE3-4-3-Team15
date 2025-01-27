@@ -12,7 +12,7 @@ import java.util.List;
  * @param errorDetails  에러 상세 정보
  * @param timeStamp     에러 발생 시간
  * author 이원재
- * since 2021.01.27
+ * since 2025.01.27
  */
 public record HttpErrorInfo(String code,
                             String path,
