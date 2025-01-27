@@ -1,12 +1,117 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.member.Member;
+import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
+import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
+/**
+ * 리뷰 서비스
+ *
+ * @author 이광석
+ * @since 25.01.27
+ */
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
+
+
+    /**
+     * 리뮤 전체 조회
+     *
+     * @return List<ReviewsDTO>
+     *
+     * @author 이광석
+     * @since 25.01.27
+     */
+    public List<ReviewsDTO> findAll() {
+        return reviewRepository.findAll().stream()
+                .map(review -> ReviewsDTO.builder()
+                        .id(review.getId())
+                        .bookId(review.getBookId())
+                        .rating(review.getRating())
+                        .rating(review.getRating())
+                        .recommendCount(review.getListsMember().size())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 리뷰 생성
+     * @param -- ReviewsDTO(rating,content,bookId,memberId)
+     *
+     * @author 이광석
+     * @since 25.01.27
+     */
+    public void save(ReviewsDTO reviewsDTO) {
+        reviewRepository.save(Review.builder()
+                        .listsMember(new ArrayList<>())
+                        .rating(reviewsDTO.getRating())
+                        .content(reviewsDTO.getContent())
+                        .bookId(reviewsDTO.getBookId())
+                        .memberId(reviewsDTO.getMemberId())
+                .build());
+
+    }
+
+    /**
+     * 리뷰 수정
+     * @param -- reviewsDTO(content,rating)
+     *
+     * @author 이광석
+     * @since 25.01.27
+     */
+    public void modify(ReviewsDTO reviewsDTO,Long id) {
+        Review review = reviewRepository.findById(id).get();
+        review.setContent(reviewsDTO.getContent());
+        review.setRating(reviewsDTO.getRating());
+    }
+
+    /**
+     * 리뷰 삭제
+     * @param -- id
+     *
+     * @author 이광석
+     * @since 25.01.27
+     */
+    public void delete(Long id) {
+
+        reviewRepository.delete(reviewRepository.findById(id).get());
+    }
+
+    /**
+     * 리뷰 추천/추천 취소
+     * @param -- reviewId -- 리뷰 id
+     * @param -- memberId -- 추천인 id
+     *
+     * @author 이광석
+     * @since 25.01.27
+     */
+    public void recommend(Long reviewId, Long memberId) {
+        Review review = reviewRepository.findById(reviewId).get();
+
+        //임시로 작성, 나중에 memberRepository 사용 예정
+        Member member = new Member();
+
+        if(review.getListsMember().contains(member)){
+            List<Member> list = review.getListsMember();
+            list.remove(member);
+            review.setListsMember(list);
+        }
+        else{
+            List<Member> list = review.getListsMember();
+            list.add(member);
+            review.setListsMember(list);
+        }
+        reviewRepository.save(review);
+    }
 }

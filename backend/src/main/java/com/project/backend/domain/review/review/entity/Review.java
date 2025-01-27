@@ -1,12 +1,19 @@
 package com.project.backend.domain.review.review.entity;
 
 
+import com.project.backend.domain.member.Member;
 import com.project.backend.global.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+
+
+/**
+ * 리뷰 dto
+ */
 @Entity
 @Getter
 @Setter
@@ -15,7 +22,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Review extends BaseEntity {
     @Id
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String bookId;
 
@@ -26,5 +34,5 @@ public class Review extends BaseEntity {
 
     private Integer rating;
 
-    private String likesMembers;
+    private List<Member> listsMember;
 }
