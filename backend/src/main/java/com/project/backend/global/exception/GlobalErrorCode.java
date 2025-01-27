@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
  */
 @Getter
 public enum GlobalErrorCode {
-    NOT_VALID(HttpStatus.BAD_REQUEST, "400-1", "요청이 올바르지 않습니다."),;
+    NOT_VALID(HttpStatus.BAD_REQUEST, "400-1", "요청이 올바르지 않습니다.");
 
     final HttpStatus status;
     final String code;
