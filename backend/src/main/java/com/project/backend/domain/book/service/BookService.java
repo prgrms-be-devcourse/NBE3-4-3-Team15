@@ -9,10 +9,10 @@ import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.book.vo.NaverBookVO;
-import com.project.backend.domain.member.Member;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -136,15 +136,23 @@ public class BookService {
      * -- DB에 있는 책을 컨트롤러에 전달하는 메소드 --
      * 1. List<Book>형태로 있는 데이터를 List<BookSimpleDto>로 변환한 후 컨트롤러에 전달
      * 2. 상세 조회가 아니기 때문에 설명 데이터는 전달되지 않음
+     * 3. 정렬조건과 오름차순,내림차순이 입력될시에 정렬기능 작동
      *
      * @return -- List<BookSimpleDto> --
      * @author -- 정재익 --
-     * @since -- 1월 25일 --
+     * @since -- 1월 27일 --
      */
-    public List<BookSimpleDTO> searchAllBooks() {
-        List<Book> books = bookRepository.findAll();
+    public List<BookSimpleDTO> searchAllBooks(String sortBy, String direction) {
+        Sort.Order order = direction.equalsIgnoreCase("desc")
+                ? Sort.Order.desc(sortBy)
+                : Sort.Order.asc(sortBy);
+
+        Sort sort = Sort.by(order);
+
+        List<Book> books = bookRepository.findAll(sort);
         return books.stream().map(book -> modelMapper.map(book, BookSimpleDTO.class)).toList();
     }
+
 
     /**
      * -- 책의 상세정보를 반환하는 메서드 --

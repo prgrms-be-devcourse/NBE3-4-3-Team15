@@ -38,12 +38,14 @@ public class BookController {
      * @return -- List<BookSimpleDto> --
      * DB에 있는 책을 토대로 도서를 조회함
      * 많은 책을 간략하게 보여줄때는 BooksimpleDto를 사용하고 책 세부 내용을 보여줄 때는 BookDto를 사용
+     * 기본정렬은 id의 내림차순 book엔티티의 각 요스들을 임력하여 내림차순 오름차순 조절 가능
      * @author -- 정재익 --
      * @since -- 1월 27일 --
      */
     @GetMapping("/list")
-    public List<BookSimpleDTO> searchAllBooks() {
-        return bookService.searchAllBooks();
+    public List<BookSimpleDTO> searchAllBooks(@RequestParam(defaultValue = "id") String sortBy,
+                                              @RequestParam(defaultValue = "desc") String direction) {
+        return bookService.searchAllBooks(sortBy, direction);
     }
 
     /**
@@ -88,8 +90,5 @@ public class BookController {
     @GetMapping("/favorite")
     public List<BookSimpleDTO> searchFavoriteBooks(@RequestBody MemberDTO memberDto) {
         return bookService.searchFavoriteBooks(memberDto);
-
-
     }
-
 }
