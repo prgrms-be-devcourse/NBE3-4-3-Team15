@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -231,5 +232,64 @@ public class MemberControllerTest {
                 .andExpect(handler().methodName("login"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("비밀번호가 맞지 않습니다."));
+    }
+
+    @Test
+    @DisplayName("내 정보 조회")
+    void t9() throws Exception {
+
+        Member member = memberService.getMember("test1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/members/mine")
+                                .header("Authorization", "Bearer " + member.getId())
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(member.getId()))
+                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.gender").value(member.getGender()))
+                .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
+    }
+
+    @Test
+    @DisplayName("내 정보 조회, 인증정보 없을 때")
+    void t10() throws Exception {
+
+        Member member = memberService.getMember("test1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/members/mine")
+                                .header("Authorization", "Bearer ")
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증정보가 없습니다."));
+    }
+
+    @Test
+    @DisplayName("내 정보 조회, 인증정보로 조회 안됨")
+    void t11() throws Exception {
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/members/mine")
+                                .header("Authorization", "Bearer test2")
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증정보가 올바르지 않습니다."));
     }
 }
