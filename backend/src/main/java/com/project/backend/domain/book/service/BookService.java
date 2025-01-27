@@ -1,11 +1,15 @@
 package com.project.backend.domain.book.service;
 
-import com.project.backend.domain.book.dto.BookDto;
-import com.project.backend.domain.book.dto.BookSimpleDto;
+import com.project.backend.domain.book.dto.BookDTO;
+import com.project.backend.domain.book.dto.BookSimpleDTO;
+import com.project.backend.domain.book.dto.FavoriteDTO;
 import com.project.backend.domain.book.entity.Book;
+import com.project.backend.domain.book.entity.Favorite;
+import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
-import com.project.backend.domain.book.vo.NaverBookVo;
-import com.project.backend.domain.favorite.service.FavoriteService;
+import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.book.vo.NaverBookVO;
+import com.project.backend.domain.member.Member;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +32,13 @@ public class BookService {
     private BookRepository bookRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private FavoriteRepository favoriteRepository;
 
     @Autowired
-    private FavoriteService favoriteService;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
 
     /**
@@ -53,6 +60,7 @@ public class BookService {
     @Value("${naver.book-search-url}")
     private String apiUrl;
 
+
     /**
      * -- 네이버api를 통해 검색어에 대한 도서데이터를 가져오는 메소드 --
      * 책은 한번에 30권 조회되도록 설정했다.
@@ -68,7 +76,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 25일 --
      */
-    private NaverBookVo BookDataFromApi(String title) {
+    private NaverBookVO BookDataFromApi(String title) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", clientId);
@@ -77,7 +85,7 @@ public class BookService {
         String url = apiUrl + "?query=" + title + "&display=30";
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<NaverBookVo> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVo.class);
+        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
 
         return response.getBody();
     }
@@ -96,8 +104,8 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 25일 --
      */
-    public List<BookSimpleDto> searchTitleBooks(String title) {
-        NaverBookVo naverBookVo = BookDataFromApi(title);
+    public List<BookSimpleDTO> searchTitleBooks(String title) {
+        NaverBookVO naverBookVo = BookDataFromApi(title);
 
         if (naverBookVo != null && naverBookVo.getItems() != null) {
             List<Book> books = naverBookVo.getItems().stream().map(item -> modelMapper.map(item, Book.class)).collect(Collectors.toList());
@@ -105,7 +113,7 @@ public class BookService {
             saveBooks(books);
         }
 
-        return naverBookVo.getItems().stream().map(item -> modelMapper.map(item, BookSimpleDto.class)).toList();
+        return naverBookVo.getItems().stream().map(item -> modelMapper.map(item, BookSimpleDTO.class)).toList();
 
     }
 
@@ -133,15 +141,15 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 25일 --
      */
-    public List<BookSimpleDto> searchAllBooks() {
+    public List<BookSimpleDTO> searchAllBooks() {
         List<Book> books = bookRepository.findAll();
-        return books.stream().map(book -> modelMapper.map(book, BookSimpleDto.class)).toList();
+        return books.stream().map(book -> modelMapper.map(book, BookSimpleDTO.class)).toList();
     }
 
     /**
      * -- 책의 상세정보를 반환하는 메서드 --
      * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
-     * 책의 추천받은 개수는 favoriteService 클래스를 이용하여 받아와서 Dto에 추가후 db에 저장
+     * 책의 추천받은 개수는 favoriteRepository 에서 받아와서 Dto에 추가후 db에 저장
      * 해당 id의 책이 없으면 예외 처리
      *
      * @param -- id (책의 id) --
@@ -149,18 +157,71 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 27일 --
      */
-    public BookDto searchDetailsBook(int id) {
+    public BookDTO searchDetailsBook(int id) {
         Optional<Book> book = bookRepository.findById(id);
 
         return book.map(b -> {
-            BookDto bookDto = modelMapper.map(b, BookDto.class);
+            BookDTO bookDto = modelMapper.map(b, BookDTO.class);
 
-            int favoriteCount = favoriteService.getFavoriteCountByBook(b.getId());
+            int favoriteCount = favoriteRepository.countByIdBookId(id);
 
             b.setFavoriteCount(favoriteCount);
             bookRepository.save(b);
             return bookDto;
         }).orElseThrow(() -> new NoSuchElementException("Book not found with ID: " + id));
     }
+
+
+    /**
+     * -- 책을 찜하거나 찜취소하는 메소드 --
+     * 1. favoriteDTO의 멤버id와 책id로 복합키 구현
+     * 2. 복합키의 고유성을 이용하여 해당 복합키의 존재유무 확인
+     * 3. 이미 존재할 시 (이미 찜을 했을 경우) 찜 취소
+     * 4. 존재 하지 않을 시 책id와 멤버id로 멤버와 책 객체 가져옴 (이 과정에서 memberRepository에 직접 접근하는데 member가 구현되면 수정해야함)
+     * 5. Dto를 Favorite로 변환하고 명시적 복합키 지정후에 DB에 저장
+     *
+     * @param -- favoriteDTO --
+     * @author -- 정재익 --
+     * @since -- 1월 27일 --
+     */
+    public void favoriteBook(FavoriteDTO favoriteDTO) {
+        FavoriteId favoriteId = new FavoriteId(favoriteDTO.getMemberId(), favoriteDTO.getBookId());
+
+        if (favoriteRepository.existsById(favoriteId)) {
+            favoriteRepository.deleteById(favoriteId);
+        } else {
+            Book book = bookRepository.findById(favoriteDTO.getBookId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid book ID: " + bookId));
+            Member member = memberRepository.findById(favoriteDTO.getMemberId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid member ID: " + memberId));
+
+            Favorite favorite = modelMapper.map(favoriteDTO, Favorite.class);
+
+            favorite.setBook(book);
+            favorite.setMember(member);
+
+            favoriteRepository.save(favorite);
+        }
+    }
+
+    /**
+     * -- 찜한 책 목록을 확인하는 메소드 --
+     * 1. memberDto를 받아와서 memberId를 추출 (아직 memberDto가 구현되지 앟음)
+     * 2. favoriteRepository에서 해당 멤버가 찜한 책 목록을 반환받는다
+     * 3. favorite 리스트를 BookSimpleDto로 변환한 뒤 반환한다.
+     *
+     * @param -- MemberDTO  --
+     * @return -- List<BookSimpleDTO> --
+     * @author -- 정재익 --
+     * @since -- 1월 27일 --
+     */
+    public List<BookSimpleDTO> searchFavoriteBooks(MemberDTO memberDto) {
+        List<Favorite> favorites = favoriteRepository.findByIdMemberId(memberDto.getMemberId);
+
+        return favorites.stream()
+                .map(favorite -> modelMapper.map(favorite.getBook(), BookSimpleDTO.class))
+                .collect(Collectors.toList());
+    }
 }
+
 

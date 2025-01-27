@@ -1,7 +1,7 @@
-package com.project.backend.domain.favorite.entity;
+package com.project.backend.domain.book.entity;
 
-import com.project.backend.domain.book.entity.Book;
-import com.project.backend.domain.favorite.key.FavoriteId;
+import com.project.backend.domain.book.key.FavoriteId;
+import com.project.backend.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,4 +20,9 @@ public class Favorite {
     @MapsId("bookId")
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("memberId")
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 }

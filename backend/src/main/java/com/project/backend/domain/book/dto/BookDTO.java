@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BookDto {
+public class BookDTO {
 
     @NonNull
     private int id;

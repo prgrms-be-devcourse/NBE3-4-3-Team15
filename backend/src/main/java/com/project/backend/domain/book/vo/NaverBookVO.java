@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class NaverBookVo {
+public class NaverBookVO {
 
     @JsonProperty("items")
     private List<Item> items;
