@@ -5,8 +5,11 @@ import com.project.backend.global.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 팔로우 엔티티
@@ -22,8 +25,9 @@ import java.io.Serializable;
 @Getter
 @NoArgsConstructor
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @IdClass(Follow.FollowId.class) // 복합 키를 정의하기 위해 IdClass 사용
-public class Follow extends BaseEntity {
+public class Follow {
 
     /**
      * 팔로워
@@ -44,6 +48,10 @@ public class Follow extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "following_id", nullable = false)
     private Member following;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     /**
      * 팔로우 생성자
