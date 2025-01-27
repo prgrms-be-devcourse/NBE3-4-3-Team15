@@ -9,6 +9,12 @@ package com.project.backend.global.response;
  * since 2021.01.27
  */
 public record ErrorDetail(String field, String reason) {
+    /**
+     * ErrorDetail 생성 팩토리 메서드
+     * @param field
+     * @param reason
+     * @return {@link ErrorDetail}
+     */
     public static ErrorDetail of(String field, String reason) {
         return new ErrorDetail(field, reason);
     }
