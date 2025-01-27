@@ -1,4 +1,4 @@
-package com.project.backend.global;
+package com.project.backend.global.response;
 
 import lombok.AccessLevel;
 import lombok.Builder;
