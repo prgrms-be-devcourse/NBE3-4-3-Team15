@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ReviewsDTO {
-    Long id;
+    Integer id;
     String bookId;
     String memberId;
     String content;

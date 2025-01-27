@@ -4,6 +4,8 @@ import com.project.backend.domain.review.comment.entity.ReviewComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  *
  * 댓글 Repository
@@ -13,4 +15,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ReviewCommentRepository extends JpaRepository<ReviewComment, Integer> {
+    List<ReviewComment> findAllByReviewId(Long reviewId);
 }
