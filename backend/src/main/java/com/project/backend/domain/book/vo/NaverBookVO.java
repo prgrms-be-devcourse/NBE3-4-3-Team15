@@ -28,7 +28,6 @@ public class NaverBookVO {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-
     public static class Item {
         @JsonProperty("title")
         private String title;
