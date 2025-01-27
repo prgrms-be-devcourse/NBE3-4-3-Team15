@@ -44,7 +44,6 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 24일 --
      */
-
     @Value("${naver.client-id}")
     private String clientId;
 
@@ -69,7 +68,6 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 25일 --
      */
-
     private NaverBookVo BookDataFromApi(String title) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -98,7 +96,6 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 25일 --
      */
-
     public List<BookSimpleDto> searchTitleBooks(String title) {
         NaverBookVo naverBookVo = BookDataFromApi(title);
 
@@ -120,7 +117,6 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 26일 --
      */
-
     private void saveBooks(List<Book> books) {
         List<Book> saveBooks = books.stream().filter(book -> !bookRepository.existsByIsbn(book.getIsbn())).collect(Collectors.toList());
 
@@ -137,7 +133,6 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 25일 --
      */
-
     public List<BookSimpleDto> searchAllBooks() {
         List<Book> books = bookRepository.findAll();
         return books.stream().map(book -> modelMapper.map(book, BookSimpleDto.class)).toList();
@@ -146,15 +141,14 @@ public class BookService {
     /**
      * -- 책의 상세정보를 반환하는 메서드 --
      * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
-     * 책의 추천받은 개수도 favoriteService 클래스를 이용하여 받아와서 Dto에 추가
+     * 책의 추천받은 개수는 favoriteService 클래스를 이용하여 받아와서 Dto에 추가후 db에 저장
      * 해당 id의 책이 없으면 예외 처리
      *
      * @param -- id (책의 id) --
      * @return -- BookDto --
      * @author -- 정재익 --
-     * @since -- 1월 26일 --
+     * @since -- 1월 27일 --
      */
-
     public BookDto searchDetailsBook(int id) {
         Optional<Book> book = bookRepository.findById(id);
 
@@ -162,7 +156,9 @@ public class BookService {
             BookDto bookDto = modelMapper.map(b, BookDto.class);
 
             int favoriteCount = favoriteService.getFavoriteCountByBook(b.getId());
-            bookDto.setFavoriteCount(favoriteCount);
+
+            b.setFavoriteCount(favoriteCount);
+            bookRepository.save(b);
             return bookDto;
         }).orElseThrow(() -> new NoSuchElementException("Book not found with ID: " + id));
     }

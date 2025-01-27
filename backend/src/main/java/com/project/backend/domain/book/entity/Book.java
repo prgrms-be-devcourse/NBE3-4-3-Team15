@@ -15,18 +15,18 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NonNull
     private String title;
 
-    @NonNull
     private String author;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NonNull
     private String image;
 
     @NonNull
     private String isbn;
+
+    private int favoriteCount;
+
 }

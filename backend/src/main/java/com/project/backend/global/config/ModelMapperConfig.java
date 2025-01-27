@@ -14,7 +14,6 @@ public class ModelMapperConfig {
      * @author -- 정재익 --
      * @since -- 1월 26일 --
      */
-
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
