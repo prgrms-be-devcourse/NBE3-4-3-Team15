@@ -38,9 +38,10 @@ public class ReviewService {
                 .map(review -> ReviewsDTO.builder()
                         .id(review.getId())
                         .bookId(review.getBookId())
+                        .memberId(review.getMemberId())
+                        .content(review.getContent())
                         .rating(review.getRating())
-                        .rating(review.getRating())
-                        .recommendCount(review.getListsMember().size())
+                        .recommendCount(review.getRecommendMember().size())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -52,14 +53,14 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void save(ReviewsDTO reviewsDTO) {
+    public void write(ReviewsDTO reviewsDTO) {
         reviewRepository.save(Review.builder()
-                        .listsMember(new ArrayList<>())
-                        .rating(reviewsDTO.getRating())
-                        .content(reviewsDTO.getContent())
                         .bookId(reviewsDTO.getBookId())
                         .memberId(reviewsDTO.getMemberId())
-                .build());
+                        .content(reviewsDTO.getContent())
+                        .rating(reviewsDTO.getRating())
+                        .recommendMember(new ArrayList<>())
+                    .build());
 
     }
 
@@ -70,10 +71,12 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void modify(ReviewsDTO reviewsDTO,Long id) {
-        Review review = reviewRepository.findById(id).get();
+    public void modify(ReviewsDTO reviewsDTO,Integer id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("리뷰를 찾을 수 없습니다."));
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
+        reviewRepository.save(review);
     }
 
     /**
@@ -83,9 +86,10 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void delete(Long id) {
-
-        reviewRepository.delete(reviewRepository.findById(id).get());
+    public void delete(Integer id) {
+        Review review = reviewRepository.findById(id)
+                        .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없다"));
+        reviewRepository.delete(review);
     }
 
     /**
@@ -96,21 +100,21 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void recommend(Long reviewId, Long memberId) {
+    public void recommend(Integer reviewId, String memberId) {
         Review review = reviewRepository.findById(reviewId).get();
 
         //임시로 작성, 나중에 memberRepository 사용 예정
         Member member = new Member();
 
-        if(review.getListsMember().contains(member)){
-            List<Member> list = review.getListsMember();
+        if(review.getRecommendMember().contains(member)){
+            List<Member> list = review.getRecommendMember();
             list.remove(member);
-            review.setListsMember(list);
+            review.setRecommendMember(list);
         }
         else{
-            List<Member> list = review.getListsMember();
+            List<Member> list = review.getRecommendMember();
             list.add(member);
-            review.setListsMember(list);
+            review.setRecommendMember(list);
         }
         reviewRepository.save(review);
     }

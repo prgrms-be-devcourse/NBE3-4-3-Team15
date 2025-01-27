@@ -17,22 +17,24 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @Builder
-@AllArgsConstructor
 public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String bookId;
 
     private String memberId;
 
-
     private String content;
 
     private Integer rating;
 
-    private List<Member> listsMember;
+
+    @OneToMany
+   // @JoinColumn(name="")
+    private List<Member> recommendMember;
+
+
 }

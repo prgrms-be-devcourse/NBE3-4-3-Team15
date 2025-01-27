@@ -1,8 +1,8 @@
 package com.project.backend.domain.review.comment.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,11 +15,13 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
+@Builder
+
 public class ReviewCommentDto {
 
     private Integer id;
 
-    @NotBlank
+    @NotNull
     private Integer reviewId;
 
     @NotBlank
@@ -27,6 +29,8 @@ public class ReviewCommentDto {
 
     @NotBlank
     private String comment;
+
+    private Integer recommendCount;
 
     private LocalDateTime createdAt;
 

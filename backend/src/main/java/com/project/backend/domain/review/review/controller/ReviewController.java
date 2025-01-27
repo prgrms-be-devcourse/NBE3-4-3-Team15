@@ -44,13 +44,17 @@ public class ReviewController {
      */
     @PostMapping
     public ResponseEntity<String> postReview(@RequestBody ReviewsDTO reviewsDTO){
-        reviewService.save(reviewsDTO);
+        try {
+            reviewService.write(reviewsDTO);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("잘못된 요청입니다");
+        }
         return ResponseEntity.ok("성공적으로 저장되었습니다.");
     }
 
 
     /**
-     *
+     *리뷰 수정
      * @param -- ReviewsDTO(content,rating)
      * @param -- id
      * @return -- 성공메시지(상태코드 200)
@@ -60,14 +64,14 @@ public class ReviewController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<String> putReviews(@RequestBody ReviewsDTO reviewsDTO,
-                                             @PathVariable("id") Long id){
+                                             @PathVariable("id") Integer id){
         reviewService.modify(reviewsDTO,id);
         return ResponseEntity.ok("성공적으로 수정하였습니다.");
     }
 
 
     /**
-     *
+     *리뷰 삭제
      * @param -- id
      * @return -- 성공 메시지(상태코드 200)
      *
@@ -75,15 +79,15 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteReviews(@PathVariable("id") Long id){
+    public ResponseEntity<String> deleteReviews(@PathVariable("id") Integer id){
         reviewService.delete(id);
         return ResponseEntity.ok("성공적으로 삭제하였습니다.");
     }
 
 
     /**
-     *
-     * @param -- reviewId -- 리뮤 id
+     *리뷰 추천/추천 취소
+     * @param -- reviewId -- 리뷰 id
      * @param -- memberId -- 추천인 id
      * @return -- 성공 메시지(상태코드 200);
      *
@@ -91,9 +95,12 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
-    public ResponseEntity<String> recommendReview(@PathVariable("reviewId") Long reviewId,
-                                                  @PathVariable("memberId") Long memberId){
+    public ResponseEntity<String> recommendReview(@PathVariable("reviewId") Integer reviewId,
+                                                  @PathVariable("memberId") String memberId){
         reviewService.recommend(reviewId,memberId);
         return ResponseEntity.ok("성공적으로 삭제하였습니다.");
     }
+
+
+
 }
