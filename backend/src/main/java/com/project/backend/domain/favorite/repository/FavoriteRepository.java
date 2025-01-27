@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, FavoriteId> {
-   int countByIdBookId(int bookId);
+    int countByIdBookId(int bookId);
 }

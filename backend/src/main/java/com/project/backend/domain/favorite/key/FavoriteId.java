@@ -11,8 +11,9 @@ import java.util.Objects;
 @AllArgsConstructor
 @Embeddable
 public class FavoriteId implements Serializable {
-    private int bookId;
+
     private String memberId;
+    private int bookId;
 
     /**
      * -- 복합키의 고유성을 판별하는 메소드 --
@@ -27,7 +28,6 @@ public class FavoriteId implements Serializable {
      * @author -- 정재익 --
      * @since -- 1월 26일 --
      */
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -46,7 +46,6 @@ public class FavoriteId implements Serializable {
      * @author -- 정재익 --
      * @since -- 1월 26일 --
      */
-
     @Override
     public int hashCode() {
         return Objects.hash(bookId, memberId);

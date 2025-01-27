@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Naver ###
+/src/main/resources/application-naver.yml
