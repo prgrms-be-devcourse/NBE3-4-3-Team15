@@ -3,6 +3,12 @@ package com.project.backend.domain.book.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * -- 책 엔티티 --
+ *
+ * @author -- 정재익 --
+ * @since -- 1월 27일 --
+ */
 @Entity
 @Getter
 @Setter
@@ -32,5 +38,4 @@ public class Book {
     private String isbn;
 
     private int favoriteCount;
-
 }

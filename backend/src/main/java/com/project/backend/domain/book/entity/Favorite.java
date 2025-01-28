@@ -5,6 +5,12 @@ import com.project.backend.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * -- 찜 엔티티 --
+ *
+ * @author -- 정재익 --
+ * @since -- 1월 27일 --
+ */
 @Entity
 @Getter
 @Setter
