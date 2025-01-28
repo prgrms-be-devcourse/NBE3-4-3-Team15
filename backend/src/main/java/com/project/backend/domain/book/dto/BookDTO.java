@@ -4,6 +4,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+/**
+ * -- Book엔티티의 DTO --
+ *
+ * @author -- 정재익 --
+ * @since -- 1월 27일 --
+ */
 @Getter
 @Setter
 public class BookDTO {

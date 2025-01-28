@@ -4,6 +4,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * -- ModelMapper 설정 클래스 --
+ *
+ * @author -- 정재익 --
+ * @since -- 1월 27일 --
+ */
 @Configuration
 public class ModelMapperConfig {
 

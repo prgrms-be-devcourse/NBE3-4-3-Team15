@@ -3,17 +3,21 @@ package com.project.backend.domain.book.key;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * -- Favorite의 복합키를 관리하는 클래스 --
+ *
+ * @author -- 정재익 --
+ * @since -- 1월 27일 --
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
 public class FavoriteId implements Serializable {
 
     private String memberId;
-
     private int bookId;
 
     /**

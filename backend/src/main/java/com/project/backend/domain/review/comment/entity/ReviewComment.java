@@ -1,6 +1,6 @@
 package com.project.backend.domain.review.comment.entity;
 
-import com.project.backend.global.BaseEntity;
+import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
