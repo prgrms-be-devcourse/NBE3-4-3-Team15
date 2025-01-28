@@ -1,12 +1,19 @@
 package com.project.backend.domain.member.entity;
 
-import com.project.backend.global.BaseEntity;
+import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
 
 import java.time.LocalDate;
 
+/**
+ *
+ * 멤버 Entity
+ *
+ * @author 손진영
+ * @since 25. 1. 27.
+ */
 @Entity
 @Getter
 @Setter
