@@ -11,7 +11,14 @@ import org.springframework.http.HttpStatus;
  */
 @Getter
 public enum GlobalErrorCode {
-    NOT_VALID(HttpStatus.BAD_REQUEST, "400-1", "요청이 올바르지 않습니다.");
+    NOT_VALID(HttpStatus.BAD_REQUEST, "400-1", "요청이 올바르지 않습니다."),
+    /**
+     * 멤버 예외 코드
+     * author 손진영
+     * since 2025.01.28
+     */
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "400-2", "비밀번호가 잘못되었습니다."),
+    EXISTING_ID(HttpStatus.UNAUTHORIZED, "409-1", "이미 존재하는 아이디 입니다.");
 
     final HttpStatus status;
     final String code;
