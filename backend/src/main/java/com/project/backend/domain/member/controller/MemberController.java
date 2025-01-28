@@ -10,13 +10,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+/**
+ *
+ * 회원 컨트롤러
+ *
+ * @author 손진영
+ * @since 25. 1. 27.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
 
+    /**
+     * 회원가입 요청
+     *
+     * @param memberDto
+     * @Valid
+     * @return MemberDto
+     */
     @PostMapping
     public MemberDto join(@RequestBody @Valid MemberDto memberDto) {
         Member member = memberService.join(memberDto);
