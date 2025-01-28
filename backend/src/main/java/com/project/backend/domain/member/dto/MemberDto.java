@@ -11,6 +11,13 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
+/**
+ *
+ * 멤버 DTO
+ *
+ * @author 손진영
+ * @since 25. 1. 27.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +25,7 @@ import java.time.LocalDate;
 public class MemberDto {
 
     @NotBlank
-    @Length(min = 2)
+    @Length(min = 2, max = 16)
     private String id;
 
     @NotBlank
@@ -29,13 +36,14 @@ public class MemberDto {
     private String password2;
 
     @NotBlank
+    @Length(max = 25)
     @Email
     private String email;
 
     private int gender;
 
     @NotBlank
-    @Length(min = 2)
+    @Length(min = 2, max = 20)
     private String nickname;
 
     private LocalDate birth;

@@ -18,6 +18,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * 멤버 테스트
+ *
+ * author 손진영
+ * since 2025.01.27
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -28,6 +34,13 @@ public class MemberControllerTest {
     @Autowired
     private MemberService memberService;
 
+    /**
+     * 회원가입 테스트: 성공적인 회원가입을 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("회원가입")
     void t1() throws Exception {
@@ -62,6 +75,13 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
     }
 
+    /**
+     * 회원가입 시 중복된 아이디를 사용할 경우, 409 Conflict 상태 코드가 반환되는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("회원가입, 중복")
     void t2() throws Exception {
@@ -87,6 +107,13 @@ public class MemberControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    /**
+     * 회원가입 시 입력 값이 유효하지 않으면, 400 Bad Request가 반환되는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("회원가입, valid")
     void t3() throws Exception {
@@ -112,6 +139,13 @@ public class MemberControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /**
+     * 회원가입 시 비밀번호가 일치하지 않으면, 400 Bad Request가 반환되는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("회원가입, 비밀번호 확인")
     void t4() throws Exception {
@@ -137,6 +171,13 @@ public class MemberControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /**
+     * 회원가입 시 이메일 형식이 유효하지 않으면, 400 Bad Request가 반환되는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("회원가입, 이메일 형식")
     void t5() throws Exception {
@@ -162,6 +203,13 @@ public class MemberControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /**
+     * 로그인 성공 시, 200 OK와 함께 로그인된 회원 정보를 반환하는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("로그인")
     void t6() throws Exception {
@@ -190,6 +238,13 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
     }
 
+    /**
+     * 존재하지 않는 사용자가 로그인 시, 404 Not Found와 함께 "존재하지 않는 사용자 입니다." 메시지가 반환되는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("로그인, 없는 사용자")
     void t7() throws Exception {
@@ -212,6 +267,13 @@ public class MemberControllerTest {
                 .andExpect(content().string("존재하지 않는 사용자 입니다."));
     }
 
+    /**
+     * 비밀번호가 맞지 않는 경우, 401 Unauthorized 상태 코드와 함께 "비밀번호가 맞지 않습니다." 메시지가 반환되는지 검증
+     *
+     * @throws Exception
+     * author 손진영
+     * since 2025.01.27
+     */
     @Test
     @DisplayName("로그인, 비밀번호 맞지 않음")
     void t8() throws Exception {
