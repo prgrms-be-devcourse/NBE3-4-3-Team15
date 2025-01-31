@@ -4,6 +4,7 @@ import com.project.backend.domain.book.dto.BookDTO;
 import com.project.backend.domain.book.dto.BookSimpleDTO;
 import com.project.backend.domain.book.dto.FavoriteDTO;
 import com.project.backend.domain.book.service.BookService;
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.global.response.GenericResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +97,7 @@ public class BookController {
      * @since -- 1월 28일 --
      */
     @GetMapping("/favorite")
-    public GenericResponse<List<BookSimpleDTO>> searchFavoriteBooks(@Valid @RequestBody MemberDTO memberDto) {
+    public GenericResponse<List<BookSimpleDTO>> searchFavoriteBooks(@Valid @RequestBody MemberDto memberDto) {
         return GenericResponse.of(bookService.searchFavoriteBooks(memberDto));
     }
 }

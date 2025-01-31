@@ -1,7 +1,7 @@
 package com.project.backend.domain.book.entity;
 
 import com.project.backend.domain.book.key.FavoriteId;
-import com.project.backend.domain.member.Member;
+import com.project.backend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
