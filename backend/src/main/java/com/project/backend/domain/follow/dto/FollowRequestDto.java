@@ -9,5 +9,5 @@ import jakarta.validation.constraints.NotNull;
  */
 public record FollowRequestDto(
         @NotNull(message = "팔로우할 회원 ID는 필수입니다.")
-        Long followingId
+        String followingId
 ) {}
