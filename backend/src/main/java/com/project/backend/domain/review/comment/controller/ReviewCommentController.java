@@ -32,8 +32,13 @@ public class ReviewCommentController {
      */
     @GetMapping
     public ResponseEntity<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
-        List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
-        return ResponseEntity.ok(reviewCommentDtoList);
+        try {
+            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
+            return ResponseEntity.ok(reviewCommentDtoList);
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
+
     }
 
     /**
@@ -71,8 +76,12 @@ public class ReviewCommentController {
     public ResponseEntity<String> putComment(@PathVariable("reviewId") Long reviewId,
                                              @PathVariable("id") Integer commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
-        reviewCommentService.modify(reviewId,commentId,reviewCommentDto);
-        return ResponseEntity.ok("성공적으로 댓글을 수정했습니다.");
+        try {
+            reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
+            return ResponseEntity.ok("성공적으로 댓글을 수정했습니다.");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("댓글 수정을 실패했습니다.");
+        }
     }
 
     /**
@@ -87,8 +96,13 @@ public class ReviewCommentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable("reviewId") Long reviewId,
                                          @PathVariable("id") Integer commentId){
-        reviewCommentService.delete(commentId);
-        return ResponseEntity.ok("성공적으로 댓글을 삭제했습니다.");
+        try {
+            reviewCommentService.delete(commentId);
+            return ResponseEntity.ok("성공적으로 댓글을 삭제했습니다.");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("댓글 삭제를 실패했습니다");
+        }
+
     }
 
 //    /**
