@@ -18,7 +18,9 @@ public enum GlobalErrorCode {
      * since 2025.01.28
      */
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "400-2", "비밀번호가 잘못되었습니다."),
-    EXISTING_ID(HttpStatus.CONFLICT, "409-1", "이미 존재하는 아이디 입니다.");
+    EXISTING_ID(HttpStatus.CONFLICT, "409-1", "이미 존재하는 아이디 입니다."),
+    NON_EXISTING_ID(HttpStatus.NOT_FOUND, "404-1", "존재하지 않는 사용자 입니다."),
+    INCORRECT_PASSWORD(HttpStatus.UNAUTHORIZED, "401-1", "비밀번호가 맞지 않습니다.");
 
     final HttpStatus status;
     final String code;
