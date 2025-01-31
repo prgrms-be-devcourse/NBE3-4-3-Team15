@@ -13,6 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -557,5 +560,128 @@ public class MemberControllerTest {
                 .andExpect(handler().methodName("mine"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("요청이 올바르지 않습니다."));
+    }
+
+    /**
+     * 회원 탈퇴 테스트
+     * 회원 탈퇴 후 회원 조회를 하여 삭제 되었는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("회원 탈퇴")
+    void t17() throws Exception {
+
+        Member member = memberService.getMember("user1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/members/mine")
+                                .header("Authorization", "Bearer " + member.getId())
+                                .content("""    
+                                        {
+                                            "password" : "1234"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("탈퇴 성공"));
+
+        Optional<Member> user1 = memberService.getMember("user1");
+        assertTrue(user1.isEmpty());
+    }
+
+    /**
+     * 회원 탈퇴 시 비밀번호가 올바르지 않다면, 401 코드가 반환되는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("회원 탈퇴, 비밀번호 맞지 않음")
+    void t18() throws Exception {
+
+        Member member = memberService.getMember("user1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/members/mine")
+                                .header("Authorization", "Bearer " + member.getId())
+                                .content("""    
+                                        {
+                                            "password" : "123444555"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * 회원 탈퇴 시 인증정보 없다면, 401 코드가 반환되는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("회원 탈퇴, 인증정보 없을 때")
+    void t19() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/members/mine")
+                                .header("Authorization", "Bearer ")
+                                .content("""    
+                                        {
+                                            "password" : "1234"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * 회원 탈퇴 시 인증정보 없다면, 400 코드가 반환되는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("회원 탈퇴, Valid")
+    void t20() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/members/mine")
+                                .header("Authorization", "Bearer ")
+                                .content("""    
+                                        {
+                                            "password" : ""
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isBadRequest());
     }
 }
