@@ -36,9 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-<<<<<<< HEAD
-
-### application ###
-**/src/main/resources/application*.yml
-=======
-
+### application-secret ###
+/src/main/resources/application-secret.yml
+!**/src/main/resources/application-secret.yml
