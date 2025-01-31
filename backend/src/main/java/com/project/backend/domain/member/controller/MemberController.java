@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 /**
- *
  * 회원 컨트롤러
  *
  * @author 손진영
@@ -35,8 +34,8 @@ public class MemberController {
      * 회원가입 요청
      *
      * @param memberDto
-     * @Valid
      * @return GenericResponse<MemberDto>
+     * @Valid
      * @author 손진영
      * @since 2025.01.27
      */
@@ -70,10 +69,9 @@ public class MemberController {
      * 로그인 요청
      *
      * @param reqBody
-     * @return MemberDto
+     * @return GenericResponse<MemberDto>
      * @author 손진영
      * @since 2025.01.27
-     * @return GenericResponse<MemberDto>
      */
     @PostMapping("/login")
     public GenericResponse<MemberDto> login(@RequestBody @Valid LoginReqBody reqBody) {
@@ -92,12 +90,12 @@ public class MemberController {
     /**
      * 회원 정보 조회
      *
-     * @return MemberDto
+     * @return GenericResponse<MemberDto>
      * @author 손진영
      * @since 2025.01.27
      */
     @GetMapping("/mine")
-    public MemberDto mine() {
+    public GenericResponse<MemberDto> mine() {
 
         String authorization = request.getHeader("Authorization");
         String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
@@ -107,7 +105,10 @@ public class MemberController {
         Member member = memberService.getMember(apiKey)
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.INCORRECT_AUTHORIZED));
 
-        return new MemberDto(member);
+        return GenericResponse.of(
+                new MemberDto(member),
+                "회원 정보 조회 성공"
+        );
     }
 
     /**
@@ -132,19 +133,21 @@ public class MemberController {
             @Length(min = 2, max = 20)
             String nickname,
             LocalDate birth
-    ){}
+    ) {
+    }
 
     /**
      * 회원 정보 수정
      *
      * @param reqBody
-     * @return
+     * @return GenericResponse<MemberDto>
+     * @Valid
      * @author 손진영
      * @since 2025.01.28
      */
     @PutMapping("/mine")
     @Transactional
-    public MemberDto mine(@RequestBody @Valid MineReqBody reqBody) {
+    public GenericResponse<MemberDto> mine(@RequestBody @Valid MineReqBody reqBody) {
 
         String authorization = request.getHeader("Authorization");
         String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
@@ -156,6 +159,9 @@ public class MemberController {
 
         memberService.modify(member, reqBody.password, reqBody.email, reqBody.gender, reqBody.nickname, reqBody.birth);
 
-        return new MemberDto(member);
+        return GenericResponse.of(
+                new MemberDto(member),
+                "회원 정보 수정 성공"
+        );
     }
 }
