@@ -2,8 +2,8 @@ package com.project.backend.domain.member.service;
 
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
-import com.project.backend.global.exception.GlobalErrorCode;
 import com.project.backend.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static com.project.backend.global.exception.GlobalErrorCode.EXISTING_ID;
-import static com.project.backend.global.exception.GlobalErrorCode.INVALID_PASSWORD;
+import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
 /**
  *
@@ -39,12 +38,12 @@ public class MemberService {
      */
     public Member join(MemberDto memberDto) throws GlobalException {
         if (!memberDto.getPassword1().equals(memberDto.getPassword2())) {
-            throw new GlobalException(INVALID_PASSWORD);
+            throw new MemberException(INVALID_PASSWORD);
         }
 
         getMember(memberDto.getId())
                 .ifPresent((member) -> {
-                    throw new GlobalException(EXISTING_ID);
+                    throw new MemberException(EXISTING_ID);
                 });
 
         Member member = Member.builder()
@@ -87,12 +86,16 @@ public class MemberService {
      */
     public void modify(Member member, String password, String email, int gender, String nickname, LocalDate birth) {
         if (!password.isEmpty()) {
-            if (password.length() < 8) throw new GlobalException(GlobalErrorCode.PASSWORD_LENGTH);
+            if (password.length() < 8) throw new MemberException(PASSWORD_LENGTH);
             member.setPassword(password);
         }
         member.setEmail(email);
         member.setGender(gender);
         member.setNickname(nickname);
         member.setBirth(birth);
+    }
+
+    public void delete(Member member) {
+        memberRepository.delete(member);
     }
 }
