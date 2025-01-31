@@ -1,5 +1,5 @@
 /**
-  멤버 데이터
+  멤버 데이터 방식 1
   - 데이터가 있을 경우에는 수정 날짜 변경
   - 데이터가 없을 경우에는 데이터 저장
    */
@@ -9,6 +9,13 @@ insert into member(`id`, `created_at`, `modified_at`, `birth`, `email`, `gender`
            ('user2', now(), null, null, 'user2@users.com', 1, '유저2', '1234'),
            ('user3', now(), null, null, 'user3@users.com', 1, '유저3', '1234')
     ON DUPLICATE KEY UPDATE modified_at = now();
+/**
+  멤버 데이터 방식 2
+  - 데이터가 없는 경우에만 데이터 추가
+ */
+INSERT INTO member(`id`, `created_at`, `modified_at`, `birth`, `email`, `gender`, `nickname`, `password`)
+    SELECT 'user4', now(), null, null, 'user4@users.com', 0, '유저4', '1234' FROM DUAL
+    WHERE NOT EXISTS (SELECT `id` FROM member WHERE id = 'user4') LIMIT 1;
 
 /**
   책 데이터
