@@ -13,7 +13,7 @@ import java.time.LocalDate;
 
 /**
  *
- * 멤버 DTO
+ * 회원 DTO
  *
  * @author 손진영
  * @since 25. 1. 27.
