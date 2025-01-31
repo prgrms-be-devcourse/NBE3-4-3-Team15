@@ -3,7 +3,6 @@ package com.project.backend.domain.member;
 import com.project.backend.domain.member.controller.MemberController;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -51,7 +51,7 @@ public class MemberControllerTest {
                                             "id": "test2",
                                             "password1": "12345678",
                                             "password2": "12345678",
-                                            "nickname": "테스트",
+                                            "nickname": "테스트2",
                                             "email": "test@test.com",
                                             "gender" : "0",
                                             "birth" : "2024-10-12"
@@ -67,11 +67,11 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("join"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(member.getId()))
-                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
-                .andExpect(jsonPath("$.email").value(member.getEmail()))
-                .andExpect(jsonPath("$.gender").value(member.getGender()))
-                .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.data.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.data.gender").value(member.getGender()))
+                .andExpect(jsonPath("$.data.birth").value(member.getBirth().toString()));
     }
 
     /**
@@ -92,7 +92,7 @@ public class MemberControllerTest {
                                             "id": "test1",
                                             "password1": "12345678",
                                             "password2": "12345678",
-                                            "nickname": "테스트",
+                                            "nickname": "테스트1",
                                             "email": "test@test.com",
                                             "gender" : "0",
                                             "birth" : "2024-10-12"

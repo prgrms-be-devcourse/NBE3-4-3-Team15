@@ -1,6 +1,7 @@
 package com.project.backend.global.advice;
 
 import com.project.backend.global.exception.GlobalErrorCode;
+import com.project.backend.global.exception.GlobalException;
 import com.project.backend.global.response.ErrorDetail;
 import com.project.backend.global.response.HttpErrorInfo;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,6 +65,28 @@ public class GlobalControllerAdvice {
                         errors)
                 );
 
+    }
+
+    /**
+     * GlobalException 발생 시 처리하는 핸들러
+     * @param ex 발생한 예외
+     * @param request HttpServletRequest
+     * @return {@link HttpErrorInfo} 에러 정보
+     * @author 손진영
+     * @since 2025.01.28
+     */
+    @ExceptionHandler(GlobalException.class)
+    public ResponseEntity<HttpErrorInfo> handleGlobalException(
+            GlobalException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(HttpErrorInfo.of(
+                        ex.getCode(),
+                        request.getRequestURI(),
+                        ex.getMessage()
+                        )
+                );
     }
 
 }
