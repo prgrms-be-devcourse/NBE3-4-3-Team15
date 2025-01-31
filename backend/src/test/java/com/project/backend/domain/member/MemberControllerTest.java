@@ -48,10 +48,10 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""
                                         {
-                                            "id": "test2",
+                                            "id": "test",
                                             "password1": "12345678",
                                             "password2": "12345678",
-                                            "nickname": "테스트2",
+                                            "nickname": "테스트",
                                             "email": "test@test.com",
                                             "gender" : "0",
                                             "birth" : "2024-10-12"
@@ -61,7 +61,7 @@ public class MemberControllerTest {
                 )
                 .andDo(print());
 
-        Member member = memberService.getMember("test2").get();
+        Member member = memberService.getMember("test").get();
 
         resultActions
                 .andExpect(handler().handlerType(MemberController.class))
@@ -89,11 +89,11 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""    
                                         {
-                                            "id": "test1",
+                                            "id": "user1",
                                             "password1": "12345678",
                                             "password2": "12345678",
-                                            "nickname": "테스트1",
-                                            "email": "test@test.com",
+                                            "nickname": "유저1",
+                                            "email": "user1@users.com",
                                             "gender" : "0",
                                             "birth" : "2024-10-12"
                                         }
@@ -217,14 +217,14 @@ public class MemberControllerTest {
                         post("/members/login")
                                 .content("""
                                         {
-                                            "id" : "test1",
-                                            "password" : "12345678"
+                                            "id" : "user1",
+                                            "password" : "1234"
                                         }
                                         """)
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 );
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         resultActions
                 .andExpect(handler().handlerType(MemberController.class))
@@ -234,7 +234,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.data.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.data.gender").value(member.getGender()))
-                .andExpect(jsonPath("$.data.birth").value(member.getBirth().toString()));
+                .andExpect(jsonPath("$.data.birth").value(member.getBirth() == null ? null : member.getBirth().toString()));
     }
 
     /**
@@ -281,7 +281,7 @@ public class MemberControllerTest {
                         post("/members/login")
                                 .content("""
                                         {
-                                            "id" : "test1",
+                                            "id" : "user1",
                                             "password" : "12345678999"
                                         }
                                         """)
@@ -306,7 +306,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 조회")
     void t9() throws Exception {
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         ResultActions resultActions = mvc
                 .perform(
@@ -322,7 +322,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.data.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.data.gender").value(member.getGender()))
-                .andExpect(jsonPath("$.data.birth").value(member.getBirth().toString()));
+                .andExpect(jsonPath("$.data.birth").value(member.getBirth() == null ? null : member.getBirth().toString()));
     }
 
     /**
@@ -336,7 +336,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 조회, 인증정보 없을 때")
     void t10() throws Exception {
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         ResultActions resultActions = mvc
                 .perform(
@@ -386,7 +386,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정")
     void t12() throws Exception {
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         ResultActions resultActions = mvc
                 .perform(
@@ -425,7 +425,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정, 비밀번호 없을 때")
     void t13() throws Exception {
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         ResultActions resultActions = mvc
                 .perform(
@@ -464,7 +464,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정, 인증정보 없을 때")
     void t14() throws Exception {
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         ResultActions resultActions = mvc
                 .perform(
@@ -503,7 +503,7 @@ public class MemberControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         put("/members/mine")
-                                .header("Authorization", "Bearer test2")
+                                .header("Authorization", "Bearer test")
                                 .content("""    
                                         {
                                             "password" : "",
@@ -534,7 +534,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정, valid")
     void t16() throws Exception {
 
-        Member member = memberService.getMember("test1").get();
+        Member member = memberService.getMember("user1").get();
 
         ResultActions resultActions = mvc
                 .perform(
