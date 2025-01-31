@@ -31,7 +31,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @GetMapping
-    public ResponseEntity<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Long reviewId){
+    public ResponseEntity<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
         List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
         return ResponseEntity.ok(reviewCommentDtoList);
     }
@@ -48,7 +48,12 @@ public class ReviewCommentController {
     @PostMapping
     public ResponseEntity<String> postComment(@PathVariable("reviewId") Integer reviewId,
                                               @RequestBody ReviewCommentDto reviewCommentDto){
-        reviewCommentService.write(reviewId,reviewCommentDto);
+
+        try {
+            reviewCommentService.write(reviewId, reviewCommentDto);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("댓글 작성에 실패 했습니다");
+        }
         return ResponseEntity.ok("성공적으로 댓글을 작성했습니다.");
     }
 
@@ -86,21 +91,21 @@ public class ReviewCommentController {
         return ResponseEntity.ok("성공적으로 댓글을 삭제했습니다.");
     }
 
-    /**
-     * 코멘트 추천
-     * @param reviewId
-     * @param commentId
-     * @param memberId
-     * @return 성공 메시지(상태코드 200)
-     *
-     * @author -- 이광석
-     * @since -- 25.01.17
-     */
-    @PutMapping("/{id}/recommend")
-    public ResponseEntity<String> recommendComment(@PathVariable("reviewId") Long reviewId,
-                                                   @PathVariable("id") Integer commentId,
-                                                   @RequestParam("memberId") String memberId){
-        reviewCommentService.recommend(commentId,memberId);
-        return ResponseEntity.ok("성공적으로 작업을 완료했습니다.");
-    }
+//    /**
+//     * 코멘트 추천
+//     * @param reviewId
+//     * @param commentId
+//     * @param memberId
+//     * @return 성공 메시지(상태코드 200)
+//     *
+//     * @author -- 이광석
+//     * @since -- 25.01.17
+//     */
+//    @PutMapping("/{id}/recommend")
+//    public ResponseEntity<String> recommendComment(@PathVariable("reviewId") Long reviewId,
+//                                                   @PathVariable("id") Integer commentId,
+//                                                   @RequestParam("memberId") String memberId){
+////        reviewCommentService.recommend(commentId,memberId);
+//        return ResponseEntity.ok("성공적으로 작업을 완료했습니다.");
+//    }
 }

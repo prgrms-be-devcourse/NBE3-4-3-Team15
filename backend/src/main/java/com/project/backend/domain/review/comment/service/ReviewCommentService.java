@@ -4,6 +4,7 @@ import com.project.backend.domain.member.Member;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
+import com.project.backend.domain.review.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class ReviewCommentService {
 
     private final ReviewCommentRepository reviewCommentRepository;
+    private final ReviewRepository reviewRepository;
 
     /**
      *
@@ -32,16 +34,14 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public List<ReviewCommentDto> findByReview(Long reviewId) {
+    public List<ReviewCommentDto> findByReview(Integer reviewId) {
         return reviewCommentRepository.findAllByReviewId(reviewId).stream()
                 .map(comment->ReviewCommentDto.builder()
                         .id(comment.getId())
-                        .reviewId(comment.getReviewId())
+                        .reviewId(comment.getReview().getId())
                         .userId(comment.getUserId())
                         .comment(comment.getComment())
-                        .recommendCount(comment.getRecommend().size())
-                        .createdAt(comment.getCreatedAt())
-                        .modifiedAt(comment.getModifiedAt())
+//                        .recommendCount(comment.getRecommend().size())
                         .build()
                 ).collect(Collectors.toList());
     }
@@ -55,11 +55,13 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public void write(Integer reviewId, ReviewCommentDto reviewCommentDto) {
+
+
         reviewCommentRepository.save(ReviewComment.builder()
-                        .reviewId(reviewId)
+                        .review(reviewRepository.findById(reviewId).get())
                         .userId(reviewCommentDto.getUserId())
                         .comment(reviewCommentDto.getComment())
-                        .recommend(new ArrayList<>())
+//                        .recommend(new ArrayList<>())
                         .build());
     }
 
@@ -91,24 +93,24 @@ public class ReviewCommentService {
         reviewCommentRepository.delete(reviewComment);
     }
 
-    /**
-     * 댓글 추천
-     * @param commentId
-     * @param memberId
-     *
-     * @author -- 이광석
-     * @since -- 25.01.17
-     */
-    public void recommend(Integer commentId,String memberId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).get();
-
-        //임시, memberRepository 생성시 수정
-        Member member = new Member();
-        List<Member> list = reviewComment.getRecommend();
-        list.add(member);
-
-        reviewComment.setRecommend(list);
-        reviewCommentRepository.save(reviewComment);
-
-    }
+//    /**
+//     * 댓글 추천
+//     * @param commentId
+//     * @param memberId
+//     *
+//     * @author -- 이광석
+//     * @since -- 25.01.17
+//     */
+//    public void recommend(Integer commentId,String memberId) {
+//        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).get();
+//
+//        //임시, memberRepository 생성시 수정
+//        Member member = new Member();
+////        List<Member> list = reviewComment.getRecommend();
+//        list.add(member);
+//
+//        reviewComment.setRecommend(list);
+//        reviewCommentRepository.save(reviewComment);
+//
+//    }
 }

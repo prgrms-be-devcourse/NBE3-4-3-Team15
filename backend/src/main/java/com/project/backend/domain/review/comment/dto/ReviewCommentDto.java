@@ -16,12 +16,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReviewCommentDto {
 
     private Integer id;
 
-    @NotNull
+
     private Integer reviewId;
 
     @NotBlank
@@ -32,7 +33,5 @@ public class ReviewCommentDto {
 
     private Integer recommendCount;
 
-    private LocalDateTime createdAt;
 
-    private LocalDateTime modifiedAt;
 }

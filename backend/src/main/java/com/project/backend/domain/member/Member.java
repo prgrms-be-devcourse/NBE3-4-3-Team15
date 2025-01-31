@@ -1,6 +1,7 @@
 package com.project.backend.domain.member;
 
-import com.project.backend.global.BaseEntity;
+
+import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
