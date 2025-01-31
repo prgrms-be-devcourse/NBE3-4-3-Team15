@@ -66,18 +66,21 @@ public class MemberController {
      * 로그인 요청
      *
      * @param reqBody
-     * @return MemberDto
+     * @return GenericResponse<MemberDto>
      * author 손진영
      * since 2025.01.27
      */
     @PostMapping("/login")
-    public MemberDto login(@RequestBody @Valid LoginReqBody reqBody) {
+    public GenericResponse<MemberDto> login(@RequestBody @Valid LoginReqBody reqBody) {
         Member member = memberService.getMember(reqBody.id)
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.NON_EXISTING_ID));
 
         if (!member.getPassword().equals(reqBody.password))
             throw new GlobalException(GlobalErrorCode.INCORRECT_PASSWORD);
 
-        return new MemberDto(member);
+        return GenericResponse.of(
+                new MemberDto(member),
+                "로그인 성공"
+        );
     }
 }
