@@ -1,0 +1,1 @@
+insert into member values('admin', now(), null, null, 'admin@admin.com', 0, 'admin', 'admin');
