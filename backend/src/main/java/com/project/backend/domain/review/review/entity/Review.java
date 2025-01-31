@@ -34,17 +34,18 @@ public class Review extends BaseEntity {
 
     private Integer rating;
 
-
-
-
     @OneToMany(mappedBy = "review",cascade =CascadeType.ALL,orphanRemoval = true)
     private List<ReviewComment> comments;
 
-
+// //멤버관련 기능은 나중에 멤버 추가되는 데로
 //    @OneToMany
 //   // @JoinColumn(name="")
 //    private List<Member> recommendMember;
 
+
+    /**
+     * 상속 받은 CreateAt 초기화
+     */
     @PrePersist
     public void prePersist() {
         if (getCreatedAt() == null) {

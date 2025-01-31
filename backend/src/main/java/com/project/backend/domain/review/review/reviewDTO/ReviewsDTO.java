@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 
-
+/**
+ * 리뷰DTO
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

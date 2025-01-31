@@ -59,7 +59,6 @@ public class ReviewService {
                         .memberId(reviewsDTO.getMemberId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
-
 //                        .recommendMember(new ArrayList<>())
                     .build());
 
