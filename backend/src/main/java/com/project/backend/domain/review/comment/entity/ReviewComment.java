@@ -40,12 +40,7 @@ public class ReviewComment extends BaseEntity {
     private String comment;
 
 
-    @PrePersist
-    public void prePersist() {
-        if (getCreatedAt() == null) {
-            setCreatedAt(LocalDateTime.now());
-        }
-    }
+ 
 
     @ManyToMany
     private List<Member> recommend;
