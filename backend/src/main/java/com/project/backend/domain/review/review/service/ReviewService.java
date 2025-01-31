@@ -1,6 +1,7 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.review.review.entity.Review;
@@ -87,10 +88,18 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void delete(Integer id) {
+    public ReviewsDTO delete(Integer id) {
         Review review = reviewRepository.findById(id)
                         .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없다"));
         reviewRepository.delete(review);
+         return ReviewsDTO.builder()
+                .id(review.getId())
+                .content(review.getContent())
+                .memberId(review.getMemberId())
+                .bookId(review.getBookId())
+                .rating(review.getRating())
+                .build();
+
     }
 
     /**
@@ -101,7 +110,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void recommend(Integer reviewId, String memberId) {
+    public boolean recommend(Integer reviewId, String memberId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new RuntimeException("해당 리뷰를 찾을 수 없습니다."));
 
@@ -112,11 +121,33 @@ public class ReviewService {
 
         if (list.contains(member)) {
             list.remove(member);
+            review.setRecommendMember(list);
+            reviewRepository.save(review);
+            return false;
         }else{
             list.add(member);
+            review.setRecommendMember(list);
+            reviewRepository.save(review);
+            return true;
         }
 
-        review.setRecommendMember(list);
-        reviewRepository.save(review);
+
+    }
+
+
+    public ReviewsDTO findById(Integer reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(()->new RuntimeException("해당 id의 회원이 없습니다."));
+
+        List<MemberDto> memberDTOs = review.getRecommendMember().stream()
+                .map(MemberDto::new)
+                .toList();
+        ReviewsDTO reviewsDTO= ReviewsDTO.builder()
+                .id(review.getId())
+                .bookId(review.getBookId())
+                .content(review.getContent())
+                .memberDtos(memberDTOs)
+                .build();
+        return reviewsDTO;
     }
 }
