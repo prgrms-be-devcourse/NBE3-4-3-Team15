@@ -43,10 +43,5 @@ public class Review extends BaseEntity {
     /**
      * 상속 받은 CreateAt 초기화
      */
-    @PrePersist
-    public void prePersist() {
-        if (getCreatedAt() == null) {
-            setCreatedAt(LocalDateTime.now());
-        }
-    }
+
 }
