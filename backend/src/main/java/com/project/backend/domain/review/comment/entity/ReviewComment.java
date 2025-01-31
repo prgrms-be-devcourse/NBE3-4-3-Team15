@@ -40,7 +40,7 @@ public class ReviewComment extends BaseEntity {
     private String comment;
 
 
- 
+
 
     @ManyToMany
     private List<Member> recommend;
