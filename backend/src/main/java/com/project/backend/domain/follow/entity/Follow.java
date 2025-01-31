@@ -1,6 +1,6 @@
 package com.project.backend.domain.follow.entity;
 
-import com.project.backend.domain.member.Member;
+import com.project.backend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

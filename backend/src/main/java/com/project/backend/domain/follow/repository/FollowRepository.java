@@ -1,7 +1,7 @@
 package com.project.backend.domain.follow.repository;
 
 import com.project.backend.domain.follow.entity.Follow;
-import com.project.backend.domain.member.Member;
+import com.project.backend.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

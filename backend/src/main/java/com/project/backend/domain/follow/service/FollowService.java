@@ -6,7 +6,8 @@ import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.follow.exception.FollowErrorCode;
 import com.project.backend.domain.follow.exception.FollowException;
 import com.project.backend.domain.follow.repository.FollowRepository;
-import com.project.backend.domain.member.Member;
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +20,7 @@ import java.util.List;
 public class FollowService {
 
     private final FollowRepository followRepository;
-    // TODO : MemberRepository pr 후 수정
-    //private final MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 팔로우 / 언팔로우 기능
@@ -79,7 +79,6 @@ public class FollowService {
      * @param memberId 회원 ID
      * @return Member 엔티티
      */
-    // TODO : MemberRepository pr 후 수정
     private Member findMemberById(String memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new FollowException(FollowErrorCode.NOT_FOUND_MEMBER));
