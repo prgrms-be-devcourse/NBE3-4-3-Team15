@@ -13,8 +13,8 @@ import java.util.List;
  * @since -- 1월 27일 --
  */
 @Repository
-public interface BookRepository extends JpaRepository<Book, Integer> {
-    boolean existsByIsbn(String isbn);
+public interface BookRepository extends JpaRepository<Book, String> {
+    boolean existsById(String id);
 
     List<Book> findAll(Sort sort);
 }
