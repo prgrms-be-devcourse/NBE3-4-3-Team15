@@ -230,11 +230,11 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("login"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(member.getId()))
-                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
-                .andExpect(jsonPath("$.email").value(member.getEmail()))
-                .andExpect(jsonPath("$.gender").value(member.getGender()))
-                .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.data.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.data.gender").value(member.getGender()))
+                .andExpect(jsonPath("$.data.birth").value(member.getBirth().toString()));
     }
 
     /**
@@ -263,7 +263,7 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("login"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("존재하지 않는 사용자 입니다."));
+                .andExpect(jsonPath("$.message").value("존재하지 않는 사용자 입니다."));
     }
 
     /**
@@ -292,6 +292,6 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("login"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("비밀번호가 맞지 않습니다."));
+                .andExpect(jsonPath("$.message").value("비밀번호가 맞지 않습니다."));
     }
 }
