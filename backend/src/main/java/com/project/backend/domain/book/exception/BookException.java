@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 /**
  * BookException
  *
- * @author 손진영
+ * @author 정재익
  * @since 2025.01.31
  */
 public class BookException extends RuntimeException{
