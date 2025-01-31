@@ -12,6 +12,8 @@ import java.util.List;
 
 /**
  * 팔로우 기능을 처리하는 컨트롤러
+ * author: 이원재
+ * since: 2025.01.31
  */
 @RestController
 @RequestMapping("/members")
@@ -25,8 +27,6 @@ public class FollowController {
      * @param memberId 팔로우를 요청하는 회원 ID
      * @param requestDto 팔로우 대상 회원 ID
      * @return 팔로우 성공 여부
-     * author: 이원재
-     * since: 2025.01.31
      */
     @PostMapping("/{memberId}/follow")
     public ResponseEntity<GenericResponse<Void>> followOrUnfollow(@PathVariable String memberId,
