@@ -1,12 +1,12 @@
 package com.project.backend.domain.review.comment.entity;
 
 import com.project.backend.domain.member.Member;
-import com.project.backend.global.BaseEntity;
+import com.project.backend.domain.review.review.entity.Review;
+import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,17 +20,29 @@ import java.util.List;
 @Setter
 @Entity
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReviewComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Integer reviewId;
+
+    @ManyToOne
+    @JoinColumn(name = "review_id", nullable = false)
+    private Review review;
 
     private String userId;
 
     private String comment;
 
-    private List<Member> recommend;
+
+    @PrePersist
+    public void prePersist() {
+        if (getCreatedAt() == null) {
+            setCreatedAt(LocalDateTime.now());
+        }
+    }
+//    private List<Member> recommend;
 
 }

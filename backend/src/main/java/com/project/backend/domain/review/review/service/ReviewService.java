@@ -41,7 +41,7 @@ public class ReviewService {
                         .memberId(review.getMemberId())
                         .content(review.getContent())
                         .rating(review.getRating())
-                        .recommendCount(review.getRecommendMember().size())
+//                        .recommendCount(review.getRecommendMember().size())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -59,7 +59,8 @@ public class ReviewService {
                         .memberId(reviewsDTO.getMemberId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
-                        .recommendMember(new ArrayList<>())
+
+//                        .recommendMember(new ArrayList<>())
                     .build());
 
     }
@@ -92,30 +93,30 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    /**
-     * 리뷰 추천/추천 취소
-     * @param -- reviewId -- 리뷰 id
-     * @param -- memberId -- 추천인 id
-     *
-     * @author 이광석
-     * @since 25.01.27
-     */
-    public void recommend(Integer reviewId, String memberId) {
-        Review review = reviewRepository.findById(reviewId).get();
-
-        //임시로 작성, 나중에 memberRepository 사용 예정
-        Member member = new Member();
-
-        if(review.getRecommendMember().contains(member)){
-            List<Member> list = review.getRecommendMember();
-            list.remove(member);
-            review.setRecommendMember(list);
-        }
-        else{
-            List<Member> list = review.getRecommendMember();
-            list.add(member);
-            review.setRecommendMember(list);
-        }
-        reviewRepository.save(review);
-    }
+//    /**
+//     * 리뷰 추천/추천 취소
+//     * @param -- reviewId -- 리뷰 id
+//     * @param -- memberId -- 추천인 id
+//     *
+//     * @author 이광석
+//     * @since 25.01.27
+//     */
+//    public void recommend(Integer reviewId, String memberId) {
+//        Review review = reviewRepository.findById(reviewId).get();
+//
+//        //임시로 작성, 나중에 memberRepository 사용 예정
+//        Member member = new Member();
+//
+//        if(review.getRecommendMember().contains(member)){
+//            List<Member> list = review.getRecommendMember();
+//            list.remove(member);
+//            review.setRecommendMember(list);
+//        }
+//        else{
+//            List<Member> list = review.getRecommendMember();
+//            list.add(member);
+//            review.setRecommendMember(list);
+//        }
+//        reviewRepository.save(review);
+//    }
 }

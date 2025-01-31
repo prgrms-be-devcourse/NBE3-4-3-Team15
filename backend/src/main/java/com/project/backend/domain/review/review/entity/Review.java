@@ -2,7 +2,8 @@ package com.project.backend.domain.review.review.entity;
 
 
 import com.project.backend.domain.member.Member;
-import com.project.backend.global.BaseEntity;
+import com.project.backend.domain.review.comment.entity.ReviewComment;
+import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,8 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // JPA가 사용할 수 있도록 기본 생성자 추가
+@AllArgsConstructor
 public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +35,20 @@ public class Review extends BaseEntity {
     private Integer rating;
 
 
-    @OneToMany
-   // @JoinColumn(name="")
-    private List<Member> recommendMember;
 
 
+    @OneToMany(mappedBy = "review",cascade =CascadeType.ALL,orphanRemoval = true)
+    private List<ReviewComment> comments;
+
+
+//    @OneToMany
+//   // @JoinColumn(name="")
+//    private List<Member> recommendMember;
+
+    @PrePersist
+    public void prePersist() {
+        if (getCreatedAt() == null) {
+            setCreatedAt(LocalDateTime.now());
+        }
+    }
 }
