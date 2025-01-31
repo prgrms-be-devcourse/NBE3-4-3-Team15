@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  *
- * 멤버 Repository
+ * 회원 Repository
  *
  * @author 손진영
  * @since 25. 1. 27.

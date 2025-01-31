@@ -6,16 +6,18 @@ import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.response.GenericResponse;
 import com.project.backend.global.exception.GlobalErrorCode;
 import com.project.backend.global.exception.GlobalException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.hibernate.validator.constraints.Length;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 /**
- *
  * 회원 컨트롤러
  *
  * @author 손진영
@@ -26,13 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
+    private final HttpServletRequest request;
 
     /**
      * 회원가입 요청
      *
      * @param memberDto
-     * @Valid
      * @return GenericResponse<MemberDto>
+     * @Valid
      * @author 손진영
      * @since 2025.01.27
      */
@@ -51,8 +54,8 @@ public class MemberController {
      *
      * @param id
      * @param password
-     * author 손진영
-     * since 2025.01.27
+     * @author 손진영
+     * @since 2025.01.27
      */
     record LoginReqBody(
             @NotBlank
@@ -67,8 +70,8 @@ public class MemberController {
      *
      * @param reqBody
      * @return GenericResponse<MemberDto>
-     * author 손진영
-     * since 2025.01.27
+     * @author 손진영
+     * @since 2025.01.27
      */
     @PostMapping("/login")
     public GenericResponse<MemberDto> login(@RequestBody @Valid LoginReqBody reqBody) {
@@ -81,6 +84,84 @@ public class MemberController {
         return GenericResponse.of(
                 new MemberDto(member),
                 "로그인 성공"
+        );
+    }
+
+    /**
+     * 회원 정보 조회
+     *
+     * @return GenericResponse<MemberDto>
+     * @author 손진영
+     * @since 2025.01.27
+     */
+    @GetMapping("/mine")
+    public GenericResponse<MemberDto> mine() {
+
+        String authorization = request.getHeader("Authorization");
+        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
+
+        if (apiKey.isEmpty()) throw new GlobalException(GlobalErrorCode.NO_AUTHORIZED);
+
+        Member member = memberService.getMember(apiKey)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.INCORRECT_AUTHORIZED));
+
+        return GenericResponse.of(
+                new MemberDto(member),
+                "회원 정보 조회 성공"
+        );
+    }
+
+    /**
+     * 회원 정보 수정 레코드
+     *
+     * @param password
+     * @param email
+     * @param gender
+     * @param nickname
+     * @param birth
+     * @author 손진영
+     * @since 2025.01.28
+     */
+    record MineReqBody(
+            String password,
+            @NotBlank
+            @Length(max = 25)
+            @Email
+            String email,
+            int gender,
+            @NotBlank
+            @Length(min = 2, max = 20)
+            String nickname,
+            LocalDate birth
+    ) {
+    }
+
+    /**
+     * 회원 정보 수정
+     *
+     * @param reqBody
+     * @return GenericResponse<MemberDto>
+     * @Valid
+     * @author 손진영
+     * @since 2025.01.28
+     */
+    @PutMapping("/mine")
+    @Transactional
+    public GenericResponse<MemberDto> mine(@RequestBody @Valid MineReqBody reqBody) {
+
+        String authorization = request.getHeader("Authorization");
+        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
+
+        if (apiKey.isEmpty()) throw new GlobalException(GlobalErrorCode.NO_AUTHORIZED);
+
+        Member member = memberService.getMember(apiKey)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.INCORRECT_AUTHORIZED));
+
+        memberService.modify(member, reqBody.password, reqBody.email, reqBody.gender, reqBody.nickname, reqBody.birth);
+
+        return GenericResponse.of(
+                new MemberDto(member),
+                "회원 정보 수정 성공"
         );
     }
 }
