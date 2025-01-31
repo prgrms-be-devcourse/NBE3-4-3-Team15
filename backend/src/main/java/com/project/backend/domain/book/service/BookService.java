@@ -9,6 +9,9 @@ import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.book.vo.NaverBookVO;
+import com.project.backend.domain.member.dto.MemberDto;
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.global.exception.GlobalErrorCode;
 import com.project.backend.global.exception.GlobalException;
 import com.project.backend.global.response.GenericResponse;
@@ -236,8 +239,8 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 27일 --
      */
-    public List<BookSimpleDTO> searchFavoriteBooks(MemberDTO memberDto) {
-        String memberId = memberDto.getMemberId();
+    public List<BookSimpleDTO> searchFavoriteBooks(MemberDto memberDto) {
+        String memberId = memberDto.getId();
 
         if (!memberRepository.existsById(memberId)) {
             throw new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND);
