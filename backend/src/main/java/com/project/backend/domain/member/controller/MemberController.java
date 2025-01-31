@@ -2,10 +2,9 @@ package com.project.backend.domain.member.controller;
 
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.response.GenericResponse;
-import com.project.backend.global.exception.GlobalErrorCode;
-import com.project.backend.global.exception.GlobalException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -16,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+
+import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
 /**
  * 회원 컨트롤러
@@ -76,10 +77,10 @@ public class MemberController {
     @PostMapping("/login")
     public GenericResponse<MemberDto> login(@RequestBody @Valid LoginReqBody reqBody) {
         Member member = memberService.getMember(reqBody.id)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NON_EXISTING_ID));
+                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
 
         if (!member.getPassword().equals(reqBody.password))
-            throw new GlobalException(GlobalErrorCode.INCORRECT_PASSWORD);
+            throw new MemberException(INCORRECT_PASSWORD);
 
         return GenericResponse.of(
                 new MemberDto(member),
@@ -97,13 +98,7 @@ public class MemberController {
     @GetMapping("/mine")
     public GenericResponse<MemberDto> mine() {
 
-        String authorization = request.getHeader("Authorization");
-        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
-
-        if (apiKey.isEmpty()) throw new GlobalException(GlobalErrorCode.NO_AUTHORIZED);
-
-        Member member = memberService.getMember(apiKey)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.INCORRECT_AUTHORIZED));
+        Member member = checkAuthMember();
 
         return GenericResponse.of(
                 new MemberDto(member),
@@ -149,13 +144,7 @@ public class MemberController {
     @Transactional
     public GenericResponse<MemberDto> mine(@RequestBody @Valid MineReqBody reqBody) {
 
-        String authorization = request.getHeader("Authorization");
-        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
-
-        if (apiKey.isEmpty()) throw new GlobalException(GlobalErrorCode.NO_AUTHORIZED);
-
-        Member member = memberService.getMember(apiKey)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.INCORRECT_AUTHORIZED));
+        Member member = checkAuthMember();
 
         memberService.modify(member, reqBody.password, reqBody.email, reqBody.gender, reqBody.nickname, reqBody.birth);
 
@@ -163,5 +152,55 @@ public class MemberController {
                 new MemberDto(member),
                 "회원 정보 수정 성공"
         );
+    }
+
+    /**
+     * 회원 탈퇴 레코드
+     *
+     * @param password
+     * @author 손진영
+     * @since 2025.01.28
+     */
+    record QuitReqBody(
+         @NotBlank
+         String password
+    ){}
+
+    /**
+     * 회원 탈퇴
+     *
+     * @param reqBody
+     * @return GenericResponse
+     * @Valid
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @DeleteMapping("/mine")
+    public GenericResponse mine(@RequestBody @Valid QuitReqBody reqBody) {
+        Member member = checkAuthMember();
+
+        if (!reqBody.password.equals(member.getPassword()))
+            throw new MemberException(INCORRECT_AUTHORIZED);
+
+        memberService.delete(member);
+
+        return GenericResponse.of("탈퇴 성공");
+    }
+
+    /**
+     * Request Authorization Check
+     *
+     * @return Member
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    private Member checkAuthMember() {
+        String authorization = request.getHeader("Authorization");
+        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
+
+        if (apiKey.isEmpty()) throw new MemberException(NO_AUTHORIZED);
+
+        return memberService.getMember(apiKey)
+                .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
     }
 }
