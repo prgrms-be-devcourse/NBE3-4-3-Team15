@@ -5,6 +5,7 @@ import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import java.util.List;
 
@@ -105,21 +106,26 @@ public class ReviewCommentController {
 
     }
 
-//    /**
-//     * 코멘트 추천
-//     * @param reviewId
-//     * @param commentId
-//     * @param memberId
-//     * @return 성공 메시지(상태코드 200)
-//     *
-//     * @author -- 이광석
-//     * @since -- 25.01.17
-//     */
-//    @PutMapping("/{id}/recommend")
-//    public ResponseEntity<String> recommendComment(@PathVariable("reviewId") Long reviewId,
-//                                                   @PathVariable("id") Integer commentId,
-//                                                   @RequestParam("memberId") String memberId){
-////        reviewCommentService.recommend(commentId,memberId);
-//        return ResponseEntity.ok("성공적으로 작업을 완료했습니다.");
-//    }
+    /**
+     * 코멘트 추천
+     * @param reviewId
+     * @param commentId
+     * @param memberId
+     * @return 성공 메시지(상태코드 200)
+     *
+     * @author -- 이광석
+     * @since -- 25.01.17
+     */
+    @PutMapping("/{id}/recommend/{memberId}")
+    public ResponseEntity<String> recommendComment(@PathVariable("reviewId") Long reviewId,
+                                                   @PathVariable("id") Integer commentId,
+                                                   @PathVariable("memberId") String memberId){
+        System.out.println(memberId);
+        try {
+            reviewCommentService.recommend(commentId, memberId);
+        }catch (RuntimeException re){
+            return ResponseEntity.badRequest().body("뭔가 잘못된");
+        }
+       return ResponseEntity.ok("성공적으로 작업을 완료했습니다.");
+    }
 }

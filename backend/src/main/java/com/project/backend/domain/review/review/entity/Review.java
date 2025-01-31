@@ -1,6 +1,7 @@
 package com.project.backend.domain.review.review.entity;
 
 
+import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
@@ -36,11 +37,8 @@ public class Review extends BaseEntity {
     @OneToMany(mappedBy = "review",cascade =CascadeType.ALL,orphanRemoval = true)
     private List<ReviewComment> comments;
 
-// //멤버관련 기능은 나중에 멤버 추가되는 데로
-//    @OneToMany
-//   // @JoinColumn(name="")
-//    private List<Member> recommendMember;
-
+    @ManyToMany
+    private List<Member> recommendMember;
 
     /**
      * 상속 받은 CreateAt 초기화

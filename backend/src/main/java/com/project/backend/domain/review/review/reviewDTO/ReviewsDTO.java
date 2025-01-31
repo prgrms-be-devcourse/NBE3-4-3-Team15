@@ -21,5 +21,5 @@ public class ReviewsDTO {
     String memberId;
     String content;
     Integer rating;
-//    Integer recommendCount;
+    Integer recommendCount;
 }
