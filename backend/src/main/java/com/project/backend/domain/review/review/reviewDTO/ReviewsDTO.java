@@ -1,6 +1,5 @@
 package com.project.backend.domain.review.review.reviewDTO;
 
-import com.project.backend.domain.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

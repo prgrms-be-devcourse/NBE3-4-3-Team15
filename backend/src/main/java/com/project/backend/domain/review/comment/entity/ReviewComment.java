@@ -1,13 +1,14 @@
 package com.project.backend.domain.review.comment.entity;
 
-import com.project.backend.domain.member.Member;
+
+
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 /**
  *

@@ -1,7 +1,6 @@
 package com.project.backend.domain.review.review.service;
 
 
-import com.project.backend.domain.member.Member;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
