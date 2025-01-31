@@ -318,11 +318,11 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("mine"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(member.getId()))
-                .andExpect(jsonPath("$.nickname").value(member.getNickname()))
-                .andExpect(jsonPath("$.email").value(member.getEmail()))
-                .andExpect(jsonPath("$.gender").value(member.getGender()))
-                .andExpect(jsonPath("$.birth").value(member.getBirth().toString()));
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
+                .andExpect(jsonPath("$.data.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.data.gender").value(member.getGender()))
+                .andExpect(jsonPath("$.data.birth").value(member.getBirth().toString()));
     }
 
     /**
@@ -348,7 +348,7 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("mine"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("인증정보가 없습니다."));
+                .andExpect(jsonPath("$.message").value("인증정보가 없습니다."));
     }
 
     /**
@@ -372,11 +372,11 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("mine"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("인증정보가 올바르지 않습니다."));
+                .andExpect(jsonPath("$.message").value("인증정보가 올바르지 않습니다."));
     }
 
     /**
-     * 인증 정보가 올바르지 않은 경우, 401 Unauthorized와 함께 "인증정보가 올바르지 않습니다." 메시지가 반환되는지 검증
+     * 인증된 사용자로 자신의 정보를 수정하는 테스트
      *
      * @throws Exception
      * @author 손진영
@@ -395,10 +395,88 @@ public class MemberControllerTest {
                                 .content("""    
                                         {
                                             "password": "12345678",
-                                            "nickname": "테스트",
+                                            "nickname": "수정테스트",
                                             "email": "test@naver.com",
-                                            "gender" : "0",
-                                            "birth" : "2024-10-12"
+                                            "gender" : "1",
+                                            "birth" : "1996-08-02"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.nickname").value("수정테스트"))
+                .andExpect(jsonPath("$.data.email").value("test@naver.com"))
+                .andExpect(jsonPath("$.data.gender").value(1))
+                .andExpect(jsonPath("$.data.birth").value("1996-08-02"));
+    }
+
+    /**
+     * 인증된 사용자로 자신의 정보를 수정할 때 비밀번호 값이 없을 때 성공 테스트
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("내 정보 수정, 비밀번호 없을 때")
+    void t13() throws Exception {
+
+        Member member = memberService.getMember("test1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/members/mine")
+                                .header("Authorization", "Bearer " + member.getId())
+                                .content("""    
+                                        {
+                                            "password" : "",
+                                            "nickname" : "수정테스트",
+                                            "email" : "test@naver.com",
+                                            "gender" : "1",
+                                            "birth" : "1996-08-02"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.nickname").value("수정테스트"))
+                .andExpect(jsonPath("$.data.email").value("test@naver.com"))
+                .andExpect(jsonPath("$.data.gender").value(1))
+                .andExpect(jsonPath("$.data.birth").value("1996-08-02"));
+    }
+
+    /**
+     * 인증 정보가 없는 경우, 401 Unauthorized와 함께 "인증정보가 없습니다." 메시지가 반환되는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("내 정보 수정, 인증정보 없을 때")
+    void t14() throws Exception {
+
+        Member member = memberService.getMember("test1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/members/mine")
+                                .header("Authorization", "Bearer ")
+                                .content("""    
+                                        {
+                                            "password" : "",
+                                            "nickname" : "수정테스트",
+                                            "email" : "test@naver.com",
+                                            "gender" : "1",
+                                            "birth" : "1996-08-02"
                                         }
                                         """)
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -408,6 +486,76 @@ public class MemberControllerTest {
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("mine"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string("인증정보가 올바르지 않습니다."));
+                .andExpect(jsonPath("$.message").value("인증정보가 없습니다."));
+    }
+
+    /**
+     * 인증 정보가 잘못된 경우, 401 Unauthorized와 함께 "인증정보가 올바르지 않습니다." 메시지가 반환되는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.28
+     */
+    @Test
+    @DisplayName("내 정보 수정, 인증정보로 조회 안됨")
+    void t15() throws Exception {
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/members/mine")
+                                .header("Authorization", "Bearer test2")
+                                .content("""    
+                                        {
+                                            "password" : "",
+                                            "nickname" : "수정테스트",
+                                            "email" : "test@naver.com",
+                                            "gender" : "1",
+                                            "birth" : "1996-08-02"
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("인증정보가 올바르지 않습니다."));
+    }
+
+    /**
+     * 내 정보 수정 시 입력 값이 유효하지 않으면, 400 Bad Request가 반환되는지 검증
+     *
+     * @throws Exception
+     * @author 손진영
+     * @since 2025.01.31
+     */
+    @Test
+    @DisplayName("내 정보 수정, valid")
+    void t16() throws Exception {
+
+        Member member = memberService.getMember("test1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/members/mine")
+                                .header("Authorization", "Bearer ")
+                                .content("""    
+                                        {
+                                            "password" : "",
+                                            "nickname" : "",
+                                            "email" : "",
+                                            "gender" : "",
+                                            "birth" : ""
+                                        }
+                                        """)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                );
+
+        resultActions
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("mine"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("요청이 올바르지 않습니다."));
     }
 }
