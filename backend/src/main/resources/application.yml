@@ -1,11 +1,8 @@
 spring:
+  profiles:
+    include: secret
   application:
     name: backend
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/book
-    username: root
-    password: lldj123414
   jpa:
     hibernate:
       ddl-auto: create
