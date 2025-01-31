@@ -2,6 +2,7 @@ package com.project.backend.domain.follow.entity;
 
 import com.project.backend.domain.member.Member;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
  */
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 제한
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @IdClass(Follow.FollowId.class) // 복합 키를 정의하기 위해 IdClass 사용
