@@ -87,22 +87,22 @@ public class ReviewController {
     }
 
 
-//    /**
-//     *리뷰 추천/추천 취소
-//     * @param -- reviewId -- 리뷰 id
-//     * @param -- memberId -- 추천인 id
-//     * @return -- 성공 메시지(상태코드 200);
-//     *
-//     * @author -- 이광석
-//     * @since -- 25.01.17
-//     */
-//    @PutMapping("/{reviewId}/recommend/{memberId}")
-//    public ResponseEntity<String> recommendReview(@PathVariable("reviewId") Integer reviewId,
-//                                                  @PathVariable("memberId") String memberId){
-//        reviewService.recommend(reviewId,memberId);
-//        return ResponseEntity.ok("성공적으로 삭제하였습니다.");
-//    }
-//
+    /**
+     *리뷰 추천/추천 취소
+     * @param -- reviewId -- 리뷰 id
+     * @param -- memberId -- 추천인 id
+     * @return -- 성공 메시지(상태코드 200);
+     *
+     * @author -- 이광석
+     * @since -- 25.01.17
+     */
+    @PutMapping("/{reviewId}/recommend/{memberId}")
+    public ResponseEntity<String> recommendReview(@PathVariable("reviewId") Integer reviewId,
+                                                  @PathVariable("memberId") String memberId){
+        reviewService.recommend(reviewId,memberId);
+        return ResponseEntity.ok("성공적으로 추천/추천 취소 하였습니다.");
+    }
+
 
 
 }

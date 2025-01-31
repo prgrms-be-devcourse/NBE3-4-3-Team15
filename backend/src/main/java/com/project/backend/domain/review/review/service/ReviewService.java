@@ -1,6 +1,8 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-
+    private final MemberRepository memberRepository;
 
     /**
      * 리뮤 전체 조회
@@ -40,7 +42,7 @@ public class ReviewService {
                         .memberId(review.getMemberId())
                         .content(review.getContent())
                         .rating(review.getRating())
-//                        .recommendCount(review.getRecommendMember().size())
+                        .recommendCount(review.getRecommendMember().size())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -58,7 +60,7 @@ public class ReviewService {
                         .memberId(reviewsDTO.getMemberId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
-//                        .recommendMember(new ArrayList<>())
+                        .recommendMember(new ArrayList<>())
                     .build());
 
     }
@@ -91,30 +93,30 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-//    /**
-//     * 리뷰 추천/추천 취소
-//     * @param -- reviewId -- 리뷰 id
-//     * @param -- memberId -- 추천인 id
-//     *
-//     * @author 이광석
-//     * @since 25.01.27
-//     */
-//    public void recommend(Integer reviewId, String memberId) {
-//        Review review = reviewRepository.findById(reviewId).get();
-//
-//        //임시로 작성, 나중에 memberRepository 사용 예정
-//        Member member = new Member();
-//
-//        if(review.getRecommendMember().contains(member)){
-//            List<Member> list = review.getRecommendMember();
-//            list.remove(member);
-//            review.setRecommendMember(list);
-//        }
-//        else{
-//            List<Member> list = review.getRecommendMember();
-//            list.add(member);
-//            review.setRecommendMember(list);
-//        }
-//        reviewRepository.save(review);
-//    }
+    /**
+     * 리뷰 추천/추천 취소
+     * @param -- reviewId -- 리뷰 id
+     * @param -- memberId -- 추천인 id
+     *
+     * @author 이광석
+     * @since 25.01.27
+     */
+    public void recommend(Integer reviewId, String memberId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(()->new RuntimeException("해당 리뷰를 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+                        .orElseThrow(()->new RuntimeException("해당 맴버를 찾을 수 없습니다."));
+
+        List<Member> list = review.getRecommendMember();
+
+        if (list.contains(member)) {
+            list.remove(member);
+        }else{
+            list.add(member);
+        }
+
+        review.setRecommendMember(list);
+        reviewRepository.save(review);
+    }
 }

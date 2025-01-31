@@ -1,13 +1,17 @@
 package com.project.backend.domain.review.comment.service;
 
 
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
+import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,7 @@ public class ReviewCommentService {
 
     private final ReviewCommentRepository reviewCommentRepository;
     private final ReviewRepository reviewRepository;
+    private final MemberRepository memberRepository;
 
     /**
      *
@@ -40,7 +45,7 @@ public class ReviewCommentService {
                         .reviewId(comment.getReview().getId())
                         .userId(comment.getUserId())
                         .comment(comment.getComment())
-//                        .recommendCount(comment.getRecommend().size())
+                        .recommendCount(comment.getRecommend().size())
                         .build()
                 ).collect(Collectors.toList());
     }
@@ -54,13 +59,15 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public void write(Integer reviewId, ReviewCommentDto reviewCommentDto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없습니다"));
 
 
         reviewCommentRepository.save(ReviewComment.builder()
-                        .review(reviewRepository.findById(reviewId).get())
+                        .review(review)
                         .userId(reviewCommentDto.getUserId())
                         .comment(reviewCommentDto.getComment())
-//                        .recommend(new ArrayList<>())
+                        .recommend(new ArrayList<>())
                         .build());
     }
 
@@ -74,7 +81,9 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public void modify(Long reviewId, Integer commentId,ReviewCommentDto reviewCommentDto) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).get();
+
+        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(()->new RuntimeException("코멘트를 찾을 수 없습니다"));
         reviewComment.setComment(reviewCommentDto.getComment());
         reviewCommentRepository.save(reviewComment);
     }
@@ -87,29 +96,35 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public void delete(Integer commentId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).get();
-
+        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(()->new RuntimeException("코멘트를 찾을 수 없습니다."));
         reviewCommentRepository.delete(reviewComment);
     }
 
-//    /**
-//     * 댓글 추천
-//     * @param commentId
-//     * @param memberId
-//     *
-//     * @author -- 이광석
-//     * @since -- 25.01.17
-//     */
-//    public void recommend(Integer commentId,String memberId) {
-//        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).get();
-//
-//        //임시, memberRepository 생성시 수정
-//        Member member = new Member();
-////        List<Member> list = reviewComment.getRecommend();
-//        list.add(member);
-//
-//        reviewComment.setRecommend(list);
-//        reviewCommentRepository.save(reviewComment);
-//
-//    }
+    /**
+     * 댓글 추천
+     * @param commentId
+     * @param memberId
+     *
+     * @author -- 이광석
+     * @since -- 25.01.17
+     */
+    public void recommend(Integer commentId,String memberId) {
+        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(()->new RuntimeException("해당 코맨트를 찾을 수 없습니다."));
+        Member member = memberRepository.findById(memberId)
+                        .orElseThrow(()->new RuntimeException("해당 맴버를 찾을 수 없습니다."));
+
+        List<Member> members  = reviewComment.getRecommend();
+        if(members.contains(member)){
+            members.remove(member);
+        }else{
+            members.add(member);
+        }
+
+        reviewComment.setRecommend(members);
+
+        reviewCommentRepository.save(reviewComment);
+
+    }
 }
