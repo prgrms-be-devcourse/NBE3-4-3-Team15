@@ -6,8 +6,8 @@ package com.project.backend.domain.follow.dto;
  * date: 2025.01.31
  */
 public record FollowResponseDto(
-        Long memberId,
+        String memberId,
         String nickname,
-        int followerCount,
-        int followingCount
+        Long followerCount,
+        Long followingCount
 ) {}
