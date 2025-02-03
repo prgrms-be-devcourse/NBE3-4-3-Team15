@@ -2,7 +2,6 @@
   멤버 데이터 방식 1
   - 데이터가 있을 경우에는 수정 날짜 변경
   - 데이터가 없을 경우에는 데이터 저장
-  - 멤버의 비밀번호는 최소 8자리 이상이여야함
    */
 insert into member(`username`, `created_at`, `modified_at`, `birth`, `email`, `gender`, `nickname`, `password`)
     VALUES ('admin', now(), null, null, 'admin@admin.com', 0, '관리자', 'admin'),
