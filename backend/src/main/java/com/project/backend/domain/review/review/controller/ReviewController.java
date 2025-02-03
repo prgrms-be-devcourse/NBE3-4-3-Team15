@@ -25,7 +25,7 @@ public class ReviewController {
 
     /**
      * 리뷰 목록을 반환
-     * @return -- ResponseEntity<List<ReviewsDTO>> - 리뷰 목록
+     * @return -- GenericResponse<List<ReviewsDTO>> - 리뷰 목록
      *
      * @author -- 이광석
      * @since  -- 25.01.27
@@ -45,22 +45,18 @@ public class ReviewController {
      * 리뷰 추가
      *
      * @param -- ReviewsDTO(bookId,memberId,content,rating)
-     * @return -- 성공메시지(상태코드 200)
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since  -- 25.01.27
      */
     @PostMapping
     public GenericResponse<ReviewsDTO> postReview(@RequestBody ReviewsDTO reviewsDTO){
-//        try {
-//            reviewService.write(reviewsDTO);
-//        }catch (Exception e){
-//            return ResponseEntity.badRequest().body("잘못된 요청입니다");
-//        }
-//        return ResponseEntity.ok("성공적으로 저장되었습니다.");
+
         reviewService.write(reviewsDTO);
+        ReviewsDTO newReviewDto = reviewService.findById(reviewsDTO.getId());
         return GenericResponse.of(
-                reviewsDTO,
+                newReviewDto,
                 "리뷰 추가 성공"
         );
     }
@@ -69,8 +65,8 @@ public class ReviewController {
     /**
      *리뷰 수정
      * @param -- ReviewsDTO(content,rating)
-     * @param -- id
-     * @return -- 성공메시지(상태코드 200)
+     * @param -- id - 수정할 리뷰
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -88,8 +84,8 @@ public class ReviewController {
 
     /**
      *리뷰 삭제
-     * @param -- id
-     * @return -- 성공 메시지(상태코드 200)
+     * @param -- id - 삭제할 리뷰 id
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -109,7 +105,7 @@ public class ReviewController {
      *리뷰 추천/추천 취소
      * @param -- reviewId -- 리뷰 id
      * @param -- memberId -- 추천인 id
-     * @return -- 성공 메시지(상태코드 200);
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -120,17 +116,13 @@ public class ReviewController {
         boolean result = reviewService.recommend(reviewId,memberId);
         ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
 
-        if(result) {
-          return  GenericResponse.of(
-                    reviewsDTO,
-                    "리뷰 추천 성공"
-            );
-        }else{
-            return GenericResponse.of(
-                    reviewsDTO,
-                    "리뷰 추천 취소 성공"
-            );
-        }
+
+
+        String message = result ?"리뷰 추천 성공" : "리뷰 추천 취소 성공";
+        return GenericResponse.of(
+                reviewsDTO,
+                message
+        );
     }
 
 
