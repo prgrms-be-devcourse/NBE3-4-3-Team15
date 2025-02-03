@@ -29,7 +29,7 @@ public class ReviewCommentController {
     /**
      * 리뷰 코멘트 목록 조회
      * @param -- reviewId -- 리뷰 id
-     * @return -- reviewCommentDtoList
+     * @return -- GenericResponse<List<ReviewCommentDto>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -51,7 +51,7 @@ public class ReviewCommentController {
      *리뷰 코멘트 생성
      * @param reviewId
      * @param reviewCommentDto
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -73,13 +73,13 @@ public class ReviewCommentController {
      * @param reviewId
      * @param commentId
      * @param reviewCommentDto
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
-    public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
+    public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Integer reviewId,
                                              @PathVariable("id") Integer commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
             ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
@@ -94,13 +94,13 @@ public class ReviewCommentController {
      * 리뷰 코메트 삭제
      * @param reviewId
      * @param commentId
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
-    public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Long reviewId,
+    public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
                                          @PathVariable("id") Integer commentId){
         ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
         return GenericResponse.of(
@@ -114,13 +114,13 @@ public class ReviewCommentController {
      * @param reviewId
      * @param commentId
      * @param memberId
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>(추천/추천 취소 메시지 다름)
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PutMapping("/{id}/recommend/{memberId}")
-    public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Long reviewId,
+    public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Integer reviewId,
                                                    @PathVariable("id") Integer commentId,
                                                    @PathVariable("memberId") String memberId){
 
