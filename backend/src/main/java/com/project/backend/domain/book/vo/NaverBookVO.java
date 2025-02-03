@@ -1,7 +1,6 @@
 package com.project.backend.domain.book.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.project.backend.domain.book.entity.Book;
 import lombok.*;
 
 import java.util.List;
@@ -21,5 +20,27 @@ import java.util.List;
 public class NaverBookVO {
 
     @JsonProperty("items")
-    private List<Book> items;
+    private List<Item> items;
+
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class Item {
+        @JsonProperty("title")
+        private String title;
+
+        @JsonProperty("author")
+        private String author;
+
+        @JsonProperty("description")
+        private String description;
+
+        @JsonProperty("image")
+        private String image;
+
+        @JsonProperty("isbn")
+        private String isbn;
+    }
 }

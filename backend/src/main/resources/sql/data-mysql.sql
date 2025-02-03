@@ -23,19 +23,19 @@ INSERT INTO member(`username`, `created_at`, `modified_at`, `birth`, `email`, `g
   - 책 데이터가 있을 때는 넣고 없을 때는 아무일도 일어나지 않음
   - 데이터를 하나씩 추가하는 방식
  */
-INSERT INTO book(`id`, `title`, `author`, `description`, `image`, `favorite_count`)
+INSERT INTO book(`isbn`, `title`, `author`, `description`, `image`, `favorite_count`)
     SELECT 12345678, 'title1', 'author1', 'description1', 'image1', '3' FROM DUAL
     WHERE NOT EXISTS (SELECT `id` FROM book WHERE id = 12345678) LIMIT 1;
-INSERT INTO book(`id`, `title`, `author`, `description`, `image`, `favorite_count`)
+INSERT INTO book(`isbn`, `title`, `author`, `description`, `image`, `favorite_count`)
     SELECT 11111111, 'title2', 'author2', 'description2', 'image2', '2' FROM DUAL
     WHERE NOT EXISTS (SELECT `id` FROM book WHERE id = 11111111) LIMIT 1;
-INSERT INTO book(`id`, `title`, `author`, `description`, `image`, `favorite_count`)
+INSERT INTO book(`isbn`, `title`, `author`, `description`, `image`, `favorite_count`)
     SELECT 11111112, 'title3', 'author3', 'description3', 'image3', '1' FROM DUAL
     WHERE NOT EXISTS (SELECT `id` FROM book WHERE id = 11111112) LIMIT 1;
-INSERT INTO book(`id`, `title`, `author`, `description`, `image`, `favorite_count`)
+INSERT INTO book(`isbn`, `title`, `author`, `description`, `image`, `favorite_count`)
     SELECT 11111311, 'title4', 'author4', 'description4', 'image4', '0' FROM DUAL
     WHERE NOT EXISTS (SELECT `id` FROM book WHERE id = 11111311) LIMIT 1;
-INSERT INTO book(`id`, `title`, `author`, `description`, `image`, `favorite_count`)
+INSERT INTO book(`isbn`, `title`, `author`, `description`, `image`, `favorite_count`)
     SELECT 11141311, 'title5', 'author5', 'description5', 'image5', '0' FROM DUAL
     WHERE NOT EXISTS (SELECT `id` FROM book WHERE id = 11141311) LIMIT 1;
 
@@ -44,21 +44,21 @@ INSERT INTO book(`id`, `title`, `author`, `description`, `image`, `favorite_coun
   - 특정 유저가 특정 책을 찜한 데이터
   - 중복 데이터가 없을 경우에만 추가됨
  */
-INSERT INTO favorite(`book_id`, `member_id`)
-    SELECT 12345678, 'user1' FROM DUAL
-    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 12345678 AND member_id = 'user1') LIMIT 1;
-INSERT INTO favorite(`book_id`, `member_id`)
-    SELECT 12345678, 'user2' FROM DUAL
-    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 12345678 AND member_id = 'user2') LIMIT 1;
-INSERT INTO favorite(`book_id`, `member_id`)
-    SELECT 12345678, 'user3' FROM DUAL
-    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 12345678 AND member_id = 'user3') LIMIT 1;
-INSERT INTO favorite(`book_id`, `member_id`)
-    SELECT 11111111, 'user1' FROM DUAL
-    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111111 AND member_id = 'user1') LIMIT 1;
-INSERT INTO favorite(`book_id`, `member_id`)
-    SELECT 11111111, 'user2' FROM DUAL
-    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111111 AND member_id = 'user2') LIMIT 1;
-INSERT INTO favorite(`book_id`, `member_id`)
-    SELECT 11111112, 'user1' FROM DUAL
-    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111112 AND member_id = 'user1') LIMIT 1;
+INSERT INTO favorite(`book_id`, `member_username`)
+    SELECT 1, 'user1' FROM DUAL
+    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 12345678 AND member_username = 'user1') LIMIT 1;
+INSERT INTO favorite(`book_id`, `member_username`)
+    SELECT 1, 'user2' FROM DUAL
+    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 12345678 AND member_username = 'user2') LIMIT 1;
+INSERT INTO favorite(`book_id`, `member_username`)
+    SELECT 1, 'user3' FROM DUAL
+    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 12345678 AND member_username = 'user3') LIMIT 1;
+INSERT INTO favorite(`book_id`, `member_username`)
+    SELECT 2, 'user1' FROM DUAL
+    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111111 AND member_username = 'user1') LIMIT 1;
+INSERT INTO favorite(`book_id`, `member_username`)
+    SELECT 2, 'user2' FROM DUAL
+    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111111 AND member_username = 'user2') LIMIT 1;
+INSERT INTO favorite(`book_id`, `member_username`)
+    SELECT 3, 'user1' FROM DUAL
+    WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111112 AND member_username = 'user1') LIMIT 1;
