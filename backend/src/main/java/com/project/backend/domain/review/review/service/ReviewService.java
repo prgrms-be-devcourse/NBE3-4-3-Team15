@@ -69,6 +69,7 @@ public class ReviewService {
     /**
      * 리뷰 수정
      * @param -- reviewsDTO(content,rating)
+     * @param id - 리뷰 id
      *
      * @author 이광석
      * @since 25.01.27
@@ -84,6 +85,7 @@ public class ReviewService {
     /**
      * 리뷰 삭제
      * @param -- id
+     * @return ReviewDTO - id,content,memberId,bookId,rating
      *
      * @author 이광석
      * @since 25.01.27
@@ -106,6 +108,7 @@ public class ReviewService {
      * 리뷰 추천/추천 취소
      * @param -- reviewId -- 리뷰 id
      * @param -- memberId -- 추천인 id
+     * @return boolean - 추천(true)/추천 취소(false)
      *
      * @author 이광석
      * @since 25.01.27
@@ -135,6 +138,14 @@ public class ReviewService {
     }
 
 
+    /**
+     * 단일 리뷰 검색
+     * @param reviewId
+     * @return ReviewsDTO - id,bookId,content,memberDtos
+     *
+     * @author 이광석
+     * @since 25.02.03
+     */
     public ReviewsDTO findById(Integer reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new RuntimeException("해당 id의 회원이 없습니다."));
