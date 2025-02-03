@@ -149,7 +149,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public Boolean recommend(Integer commentId,String memberId) {
+    public Boolean recommend(Integer commentId,Long memberId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),

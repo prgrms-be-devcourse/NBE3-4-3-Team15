@@ -112,7 +112,7 @@ public class ReviewController {
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
     public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Integer reviewId,
-                                                  @PathVariable("memberId") String memberId){
+                                                  @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
         ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
 
