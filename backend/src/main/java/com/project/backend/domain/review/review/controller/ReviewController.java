@@ -1,9 +1,11 @@
 package com.project.backend.domain.review.review.controller;
 
 
+import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
+import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -23,67 +25,79 @@ public class ReviewController {
 
     /**
      * 리뷰 목록을 반환
-     * @return -- ResponseEntity<List<ReviewsDTO>> - 리뷰 목록
+     * @return -- GenericResponse<List<ReviewsDTO>> - 리뷰 목록
      *
      * @author -- 이광석
      * @since  -- 25.01.27
      */
     @GetMapping
-    public ResponseEntity<List<ReviewsDTO>> getReviews(){
+    public GenericResponse<List<ReviewsDTO>> getReviews(){
         List<ReviewsDTO> reviewsDTOS = reviewService.findAll();
-        return ResponseEntity.ok(reviewsDTOS);
+        return GenericResponse.of(
+                reviewsDTOS,
+                "리뷰 목록 반환 성공"
+        );
     }
+
+
 
     /**
      * 리뷰 추가
      *
      * @param -- ReviewsDTO(bookId,memberId,content,rating)
-     * @return -- 성공메시지(상태코드 200)
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since  -- 25.01.27
      */
     @PostMapping
-    public ResponseEntity<String> postReview(@RequestBody ReviewsDTO reviewsDTO){
-        try {
+    public GenericResponse<String> postReview(@RequestBody ReviewsDTO reviewsDTO){
 
-            reviewService.write(reviewsDTO);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("잘못된 요청입니다");
-        }
-        return ResponseEntity.ok("성공적으로 저장되었습니다.");
+        reviewService.write(reviewsDTO);
+
+
+        return GenericResponse.of(
+                "리뷰 추가 성공"
+        );
     }
 
 
     /**
      *리뷰 수정
      * @param -- ReviewsDTO(content,rating)
-     * @param -- id
-     * @return -- 성공메시지(상태코드 200)
+     * @param -- id - 수정할 리뷰
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
-    public ResponseEntity<String> putReviews(@RequestBody ReviewsDTO reviewsDTO,
+    public GenericResponse<ReviewsDTO> putReviews(@RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("id") Integer id){
         reviewService.modify(reviewsDTO,id);
-        return ResponseEntity.ok("성공적으로 수정하였습니다.");
+        return GenericResponse.of(
+                reviewsDTO,
+                "리뷰 수정 성공"
+        );
     }
 
 
     /**
      *리뷰 삭제
-     * @param -- id
-     * @return -- 성공 메시지(상태코드 200)
+     * @param -- id - 삭제할 리뷰 id
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteReviews(@PathVariable("id") Integer id){
-        reviewService.delete(id);
-        return ResponseEntity.ok("성공적으로 삭제하였습니다.");
+    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Integer id){
+        ReviewsDTO review=  reviewService.delete(id);
+
+        return GenericResponse.of(
+                review,
+                "리뷰 삭제 성공"
+        );
     }
 
 
@@ -91,17 +105,27 @@ public class ReviewController {
      *리뷰 추천/추천 취소
      * @param -- reviewId -- 리뷰 id
      * @param -- memberId -- 추천인 id
-     * @return -- 성공 메시지(상태코드 200);
+     * @return -- GenericResponse<ReviewsDTO>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
-    public ResponseEntity<String> recommendReview(@PathVariable("reviewId") Integer reviewId,
-                                                  @PathVariable("memberId") String memberId){
-        reviewService.recommend(reviewId,memberId);
-        return ResponseEntity.ok("성공적으로 추천/추천 취소 하였습니다.");
+    public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Integer reviewId,
+                                                  @PathVariable("memberId") Long memberId){
+        boolean result = reviewService.recommend(reviewId,memberId);
+        ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
+
+
+
+        String message = result ?"리뷰 추천 성공" : "리뷰 추천 취소 성공";
+        return GenericResponse.of(
+                reviewsDTO,
+                message
+        );
     }
+
+
 
 
 
