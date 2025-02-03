@@ -62,7 +62,7 @@ public class BookController {
      * -- 도서 상세 조회 --
      * DB에 있는 책의 상세정보를 조회
      *
-     * @param -- bookId(책 isbn) --
+     * @param -- bookId --
      * @return -- GenericResponse<BookDTO> --
      * @author -- 정재익 --
      * @since -- 1월 31일 --
