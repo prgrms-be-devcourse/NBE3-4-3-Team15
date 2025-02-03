@@ -41,13 +41,13 @@ public class MemberService {
             throw new MemberException(INVALID_PASSWORD);
         }
 
-        getMember(memberDto.getId())
+        getMember(memberDto.getUsername())
                 .ifPresent((member) -> {
                     throw new MemberException(EXISTING_ID);
                 });
 
         Member member = Member.builder()
-                .id(memberDto.getId())
+                .username(memberDto.getUsername())
                 .email(memberDto.getEmail())
                 .password(memberDto.getPassword1())
                 .nickname(memberDto.getNickname())
@@ -63,13 +63,13 @@ public class MemberService {
     /**
      * 회원 정보 조회
      *
-     * @param id
+     * @param username
      * @return Optional<Member>
      * @author 손진영
      * @since 25. 1. 27.
      */
-    public Optional<Member> getMember(String id) {
-        return memberRepository.findById(id);
+    public Optional<Member> getMember(String username) {
+        return memberRepository.findByUsername(username);
     }
 
     /**

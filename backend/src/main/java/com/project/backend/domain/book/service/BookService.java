@@ -240,7 +240,7 @@ public class BookService {
      * @since -- 1월 27일 --
      */
     public List<BookSimpleDTO> searchFavoriteBooks(MemberDto memberDto) {
-        String memberId = memberDto.getId();
+        String memberId = memberDto.getUsername();
 
         if (!memberRepository.existsById(memberId)) {
             throw new GlobalException(GlobalErrorCode.MEMBER_NOT_FOUND);

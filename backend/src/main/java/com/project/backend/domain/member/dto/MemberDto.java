@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.Length;
  *
  * 회원 DTO
  *
- * id, password1, password2, password, email, nickname, gender, birth
+ * id, username, password1, password2, password, email, nickname, gender, birth
  * @author 손진영
  * @since 25. 1. 27.
  */
@@ -21,10 +21,11 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberDto extends MineDto {
+    private long id;
 
     @NotBlank
     @Length(min = 2, max = 16)
-    private String id;
+    private String username;
 
     @NotBlank
     @Length(min = 8)
@@ -35,6 +36,7 @@ public class MemberDto extends MineDto {
 
     public MemberDto(Member member) {
         this.id = member.getId();
+        this.username = member.getUsername();
         this.email = member.getEmail();
         this.gender = member.getGender();
         this.nickname = member.getNickname();
