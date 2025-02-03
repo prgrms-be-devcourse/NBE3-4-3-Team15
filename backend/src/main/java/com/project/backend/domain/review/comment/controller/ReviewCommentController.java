@@ -1,7 +1,10 @@
 package com.project.backend.domain.review.comment.controller;
 
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
+import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
+import com.project.backend.domain.review.review.entity.Review;
+import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,41 +29,43 @@ public class ReviewCommentController {
     /**
      * 리뷰 코멘트 목록 조회
      * @param -- reviewId -- 리뷰 id
-     * @return -- reviewCommentDtoList
+     * @return -- GenericResponse<List<ReviewCommentDto>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @GetMapping
-    public ResponseEntity<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
-        try {
-            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
-            return ResponseEntity.ok(reviewCommentDtoList);
-        }catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
+    public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
 
+            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
+            return GenericResponse.of(
+                    reviewCommentDtoList
+                    ,"리뷰 코멘트 목록 조회 성공"
+            );
     }
+
+
+
 
     /**
      *리뷰 코멘트 생성
      * @param reviewId
      * @param reviewCommentDto
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PostMapping
-    public ResponseEntity<String> postComment(@PathVariable("reviewId") Integer reviewId,
+    public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Integer reviewId,
                                               @RequestBody ReviewCommentDto reviewCommentDto){
 
-        try {
-            reviewCommentService.write(reviewId, reviewCommentDto);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("댓글 작성에 실패 했습니다");
-        }
-        return ResponseEntity.ok("성공적으로 댓글을 작성했습니다.");
+       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto);
+
+       return GenericResponse.of(
+               newReviewCommentDto,
+               "리뷰 코맨트 생성 성공"
+       );
     }
 
     /**
@@ -68,42 +73,40 @@ public class ReviewCommentController {
      * @param reviewId
      * @param commentId
      * @param reviewCommentDto
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
-    public ResponseEntity<String> putComment(@PathVariable("reviewId") Long reviewId,
+    public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Integer reviewId,
                                              @PathVariable("id") Integer commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
-        try {
-            reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
-            return ResponseEntity.ok("성공적으로 댓글을 수정했습니다.");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("댓글 수정을 실패했습니다.");
-        }
+            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
+
+            return GenericResponse.of(
+                    newReviewCommentDto,
+                    "코멘트 수정 성공"
+            );
     }
 
     /**
      * 리뷰 코메트 삭제
      * @param reviewId
      * @param commentId
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("reviewId") Long reviewId,
+    public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
                                          @PathVariable("id") Integer commentId){
-        try {
-            reviewCommentService.delete(commentId);
-            return ResponseEntity.ok("성공적으로 댓글을 삭제했습니다.");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("댓글 삭제를 실패했습니다");
-        }
-
+        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
+        return GenericResponse.of(
+                newReviewCommentDto,
+                "리뷰 코멘트 삭제 성공"
+        );
     }
 
     /**
@@ -111,21 +114,28 @@ public class ReviewCommentController {
      * @param reviewId
      * @param commentId
      * @param memberId
-     * @return 성공 메시지(상태코드 200)
+     * @return GenericResponse<ReviewCommentDto>(추천/추천 취소 메시지 다름)
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PutMapping("/{id}/recommend/{memberId}")
-    public ResponseEntity<String> recommendComment(@PathVariable("reviewId") Long reviewId,
+    public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Integer reviewId,
                                                    @PathVariable("id") Integer commentId,
-                                                   @PathVariable("memberId") String memberId){
-        System.out.println(memberId);
-        try {
-            reviewCommentService.recommend(commentId, memberId);
-        }catch (RuntimeException re){
-            return ResponseEntity.badRequest().body("뭔가 잘못된");
+                                                   @PathVariable("memberId") Long memberId){
+
+       boolean result = reviewCommentService.recommend(commentId, memberId);
+       ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
+        if(result){
+            return GenericResponse.of(
+                    reviewCommentDto,
+                    "리뷰 코멘트 추천 성공"
+            );
+        }else{
+            return GenericResponse.of(
+                    reviewCommentDto,
+                    "리뷰 코멘츠 추천 취소 성공"
+            );
         }
-       return ResponseEntity.ok("성공적으로 작업을 완료했습니다.");
     }
 }
