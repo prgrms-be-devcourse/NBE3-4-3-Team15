@@ -1,5 +1,6 @@
 package com.project.backend.global.advice;
 
+import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.global.exception.GlobalErrorCode;
 import com.project.backend.global.response.ErrorDetail;
@@ -89,4 +90,25 @@ public class GlobalControllerAdvice {
                 );
     }
 
+    /**
+     * BookException 발생 시 처리하는 핸들러
+     * @param ex 발생한 예외
+     * @param request HttpServletRequest
+     * @return {@link HttpErrorInfo} 에러 정보
+     * @author 정재익
+     * @since 2025.01.31
+     */
+    @ExceptionHandler(BookException.class)
+    public ResponseEntity<HttpErrorInfo> handleGlobalException(
+            BookException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(HttpErrorInfo.of(
+                                ex.getCode(),
+                                request.getRequestURI(),
+                                ex.getMessage()
+                        )
+                );
+    }
 }
