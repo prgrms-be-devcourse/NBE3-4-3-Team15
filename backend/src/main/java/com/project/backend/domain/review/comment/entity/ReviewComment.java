@@ -10,6 +10,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -40,11 +41,7 @@ public class ReviewComment extends BaseEntity {
 
 
     @ManyToMany
-    private List<Member> recommend;
-    //차리리 셋이 좋을듯
-    /**
-     * 서류에 작성
-     *
-     */
+    private Set<Member> recommend;
+
 
 }

@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -68,7 +70,7 @@ public class ReviewService {
                         .memberId(reviewsDTO.getMemberId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
-                        .recommendMember(new ArrayList<>())
+                        .recommendMember(new HashSet<>())
                     .build());
 
     }
@@ -143,7 +145,7 @@ public class ReviewService {
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
                         ));
 
-        List<Member> list = review.getRecommendMember();
+        Set<Member> list = review.getRecommendMember();
 
         if (list.contains(member)) {
             list.remove(member);

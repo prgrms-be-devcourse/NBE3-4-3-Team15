@@ -9,7 +9,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Set;
 
 
 /**
@@ -38,7 +38,7 @@ public class Review extends BaseEntity {
     private List<ReviewComment> comments;
 
     @ManyToMany
-    private List<Member> recommendMember;
+    private Set<Member> recommendMember;
 
 
 }
