@@ -7,12 +7,12 @@ import lombok.Getter;
  *
  * 로그인 DTO
  *
- * username, password
+ * id, password
  * @author 손진영
  * @since 25. 1. 31.
  */
 @Getter
 public class LoginDto extends PasswordDto {
     @NotBlank
-    String username;
+    String id;
 }

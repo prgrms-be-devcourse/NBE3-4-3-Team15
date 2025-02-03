@@ -51,7 +51,7 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""
                                         {
-                                            "username": "test",
+                                            "id": "test",
                                             "password1": "12345678",
                                             "password2": "12345678",
                                             "nickname": "테스트",
@@ -92,7 +92,7 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""    
                                         {
-                                            "username": "user1",
+                                            "id": "user1",
                                             "password1": "12345678",
                                             "password2": "12345678",
                                             "nickname": "유저1",
@@ -124,7 +124,7 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""    
                                         {
-                                            "username": "",
+                                            "id": "",
                                             "password1": "",
                                             "password2": "",
                                             "nickname": "",
@@ -156,7 +156,7 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""    
                                         {
-                                            "username": "test2",
+                                            "id": "test2",
                                             "password1": "123456789",
                                             "password2": "12345678",
                                             "nickname": "테스트",
@@ -188,7 +188,7 @@ public class MemberControllerTest {
                         post("/members")
                                 .content("""    
                                         {
-                                            "username": "test2",
+                                            "id": "test2",
                                             "password1": "12345678",
                                             "password2": "12345678",
                                             "nickname": "테스트",
@@ -220,7 +220,7 @@ public class MemberControllerTest {
                         post("/members/login")
                                 .content("""
                                         {
-                                            "username" : "user1",
+                                            "id" : "user1",
                                             "password" : "1234"
                                         }
                                         """)
@@ -255,7 +255,7 @@ public class MemberControllerTest {
                         post("/members/login")
                                 .content("""
                                         {
-                                            "username" : "test3",
+                                            "id" : "test3",
                                             "password" : "12345678"
                                         }
                                         """)
@@ -284,7 +284,7 @@ public class MemberControllerTest {
                         post("/members/login")
                                 .content("""
                                         {
-                                            "username" : "user1",
+                                            "id" : "user1",
                                             "password" : "12345678999"
                                         }
                                         """)
@@ -314,14 +314,14 @@ public class MemberControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/members/mine")
-                                .header("Authorization", "Bearer " + member.getUsername())
+                                .header("Authorization", "Bearer " + member.getId())
                 );
 
         resultActions
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("mine"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.username").value(member.getUsername()))
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.data.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.data.gender").value(member.getGender()))
@@ -394,7 +394,7 @@ public class MemberControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         put("/members/mine")
-                                .header("Authorization", "Bearer " + member.getUsername())
+                                .header("Authorization", "Bearer " + member.getId())
                                 .content("""    
                                         {
                                             "password": "12345678",
@@ -433,7 +433,7 @@ public class MemberControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         put("/members/mine")
-                                .header("Authorization", "Bearer " + member.getUsername())
+                                .header("Authorization", "Bearer " + member.getId())
                                 .content("""    
                                         {
                                             "password" : "",
@@ -579,7 +579,7 @@ public class MemberControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         delete("/members/mine")
-                                .header("Authorization", "Bearer " + member.getUsername())
+                                .header("Authorization", "Bearer " + member.getId())
                                 .content("""    
                                         {
                                             "password" : "1234"

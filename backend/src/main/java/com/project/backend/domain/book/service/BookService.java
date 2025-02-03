@@ -224,7 +224,7 @@ public class BookService {
      * @since -- 1월 27일 --
      */
     public List<BookSimpleDTO> searchFavoriteBooks(MemberDto memberDto) {
-        String memberId = memberDto.getUsername();
+        String memberId = memberDto.getId();
 
         if (!memberRepository.existsById(memberId)) {
             throw new MemberException(MemberErrorCode.NON_EXISTING_ID);
