@@ -58,17 +58,22 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public void write(Integer reviewId, ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto write(Integer reviewId, ReviewCommentDto reviewCommentDto) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없습니다"));
 
 
-        reviewCommentRepository.save(ReviewComment.builder()
+        ReviewComment reviewComment= reviewCommentRepository.save(ReviewComment.builder()
                         .review(review)
                         .userId(reviewCommentDto.getUserId())
                         .comment(reviewCommentDto.getComment())
                         .recommend(new ArrayList<>())
                         .build());
+        return ReviewCommentDto.builder()
+                .id(reviewComment.getId())
+                .comment(reviewComment.getComment())
+                .userId(reviewComment.getUserId())
+                .build();
     }
 
     /**
@@ -80,12 +85,18 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public void modify(Long reviewId, Integer commentId,ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto modify(Long reviewId, Integer commentId,ReviewCommentDto reviewCommentDto) {
 
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new RuntimeException("코멘트를 찾을 수 없습니다"));
         reviewComment.setComment(reviewCommentDto.getComment());
+
+
         reviewCommentRepository.save(reviewComment);
+        return ReviewCommentDto.builder()
+                .id(reviewComment.getId())
+                .comment(reviewComment.getComment())
+                .build();
     }
 
     /**
@@ -95,10 +106,15 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public void delete(Integer commentId) {
+    public ReviewCommentDto delete(Integer commentId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new RuntimeException("코멘트를 찾을 수 없습니다."));
         reviewCommentRepository.delete(reviewComment);
+        return ReviewCommentDto.builder()
+                .id(reviewComment.getId())
+                .userId(reviewComment.getUserId())
+                .comment(reviewComment.getComment())
+                .build();
     }
 
     /**
@@ -109,7 +125,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public void recommend(Integer commentId,String memberId) {
+    public Boolean recommend(Integer commentId,String memberId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new RuntimeException("해당 코맨트를 찾을 수 없습니다."));
         Member member = memberRepository.findById(memberId)
@@ -118,13 +134,23 @@ public class ReviewCommentService {
         List<Member> members  = reviewComment.getRecommend();
         if(members.contains(member)){
             members.remove(member);
+            reviewComment.setRecommend(members);
+
+            reviewCommentRepository.save(reviewComment);
+            return false;
         }else{
             members.add(member);
+            return true;
         }
 
-        reviewComment.setRecommend(members);
+    }
 
-        reviewCommentRepository.save(reviewComment);
-
+    public ReviewCommentDto findById(Integer commentId) {
+        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).orElseThrow(()->new RuntimeException("해당 코메트를 찾을 수 없습니다."));
+        return ReviewCommentDto.builder()
+                .id(reviewComment.getId())
+                .userId(reviewComment.getUserId())
+                .comment(reviewComment.getComment())
+                .build();
     }
 }
