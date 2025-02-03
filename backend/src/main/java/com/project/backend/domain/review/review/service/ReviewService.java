@@ -4,6 +4,8 @@ package com.project.backend.domain.review.review.service;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.review.exception.ReviewErrorCode;
+import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
@@ -46,6 +48,8 @@ public class ReviewService {
                         .recommendCount(review.getRecommendMember().size())
                         .build())
                 .collect(Collectors.toList());
+
+        //리뷰 dto 안에 생성자를 만들어서 할 수 도 있다.
     }
 
     /**
@@ -76,7 +80,11 @@ public class ReviewService {
      */
     public void modify(ReviewsDTO reviewsDTO,Integer id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("리뷰를 찾을 수 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                ));
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
         reviewRepository.save(review);
@@ -92,7 +100,11 @@ public class ReviewService {
      */
     public ReviewsDTO delete(Integer id) {
         Review review = reviewRepository.findById(id)
-                        .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없다"));
+                        .orElseThrow(()-> new ReviewException(
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                        ));
         reviewRepository.delete(review);
          return ReviewsDTO.builder()
                 .id(review.getId())
@@ -115,10 +127,18 @@ public class ReviewService {
      */
     public boolean recommend(Integer reviewId, String memberId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()->new RuntimeException("해당 리뷰를 찾을 수 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                ));
 
         Member member = memberRepository.findById(memberId)
-                        .orElseThrow(()->new RuntimeException("해당 맴버를 찾을 수 없습니다."));
+                        .orElseThrow(()->new ReviewException(
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
+                        ));
 
         List<Member> list = review.getRecommendMember();
 
@@ -148,7 +168,10 @@ public class ReviewService {
      */
     public ReviewsDTO findById(Integer reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()->new RuntimeException("해당 id의 회원이 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()));
 
         List<MemberDto> memberDTOs = review.getRecommendMember().stream()
                 .map(MemberDto::new)
@@ -161,4 +184,7 @@ public class ReviewService {
                 .build();
         return reviewsDTO;
     }
+
+
+
 }

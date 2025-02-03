@@ -6,6 +6,8 @@ import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
+import com.project.backend.domain.review.exception.ReviewErrorCode;
+import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
@@ -65,7 +67,11 @@ public class ReviewCommentService {
      */
     public ReviewCommentDto write(Integer reviewId, ReviewCommentDto reviewCommentDto) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없습니다"));
+                .orElseThrow(()-> new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                ));
 
 
         ReviewComment reviewComment= reviewCommentRepository.save(ReviewComment.builder()
@@ -95,7 +101,11 @@ public class ReviewCommentService {
 
 
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new RuntimeException("코멘트를 찾을 수 없습니다"));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
+                ));
         reviewComment.setComment(reviewCommentDto.getComment());
 
 
@@ -117,7 +127,11 @@ public class ReviewCommentService {
      */
     public ReviewCommentDto delete(Integer commentId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new RuntimeException("코멘트를 찾을 수 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
+                ));
         reviewCommentRepository.delete(reviewComment);
         return ReviewCommentDto.builder()
                 .id(reviewComment.getId())
@@ -137,9 +151,17 @@ public class ReviewCommentService {
      */
     public Boolean recommend(Integer commentId,String memberId) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new RuntimeException("해당 코맨트를 찾을 수 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
+                ));
         Member member = memberRepository.findById(memberId)
-                        .orElseThrow(()->new RuntimeException("해당 맴버를 찾을 수 없습니다."));
+                        .orElseThrow(()->new ReviewException(
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
+                        ));
 
         List<Member> members  = reviewComment.getRecommend();
         if(members.contains(member)){
@@ -166,7 +188,12 @@ public class ReviewCommentService {
      * @since 25.02.03
      */
     public ReviewCommentDto findById(Integer commentId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId).orElseThrow(()->new RuntimeException("해당 코메트를 찾을 수 없습니다."));
+        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(()->new ReviewException(
+                ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
+                ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
+                ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
+        ));
         return ReviewCommentDto.builder()
                 .id(reviewComment.getId())
                 .comment(reviewComment.getComment())
