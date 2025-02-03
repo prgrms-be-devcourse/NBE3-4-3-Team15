@@ -63,13 +63,13 @@ public class MemberService {
     /**
      * 회원 정보 조회
      *
-     * @param id
+     * @param username
      * @return Optional<Member>
      * @author 손진영
      * @since 25. 1. 27.
      */
-    public Optional<Member> getMember(String id) {
-        return memberRepository.findById(id);
+    public Optional<Member> getMember(String username) {
+        return memberRepository.findByUsername(username);
     }
 
     /**
