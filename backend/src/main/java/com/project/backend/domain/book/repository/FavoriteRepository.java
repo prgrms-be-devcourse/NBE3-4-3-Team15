@@ -14,7 +14,6 @@ import java.util.List;
  */
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, FavoriteId> {
-    int countByIdBookId(int bookId);
 
-    List<Favorite> findByIdMemberId(String MemberId);
+    List<Favorite> findById_MemberUsername(String MemberUsername);
 }

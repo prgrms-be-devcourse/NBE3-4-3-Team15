@@ -13,6 +13,8 @@ import lombok.Setter;
 @Setter
 public class BookSimpleDTO {
 
+    private Long id;
+
     private String title;
 
     private String author;
