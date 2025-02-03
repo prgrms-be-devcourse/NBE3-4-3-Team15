@@ -46,6 +46,9 @@ public class ReviewService {
                         .content(review.getContent())
                         .rating(review.getRating())
                         .recommendCount(review.getRecommendMember().size())
+                        .memberDtos(review.getRecommendMember().stream()
+                                .map(MemberDto::new)
+                                .toList())
                         .build())
                 .collect(Collectors.toList());
 
@@ -167,6 +170,7 @@ public class ReviewService {
      * @since 25.02.03
      */
     public ReviewsDTO findById(Integer reviewId) {
+        System.out.println(reviewId);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -176,6 +180,7 @@ public class ReviewService {
         List<MemberDto> memberDTOs = review.getRecommendMember().stream()
                 .map(MemberDto::new)
                 .toList();
+
         ReviewsDTO reviewsDTO= ReviewsDTO.builder()
                 .id(review.getId())
                 .bookId(review.getBookId())

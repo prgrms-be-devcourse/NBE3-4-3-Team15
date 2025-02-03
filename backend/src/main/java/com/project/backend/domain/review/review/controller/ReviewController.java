@@ -51,12 +51,12 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @PostMapping
-    public GenericResponse<ReviewsDTO> postReview(@RequestBody ReviewsDTO reviewsDTO){
+    public GenericResponse<String> postReview(@RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
-        ReviewsDTO newReviewDto = reviewService.findById(reviewsDTO.getId());
+
+
         return GenericResponse.of(
-                newReviewDto,
                 "리뷰 추가 성공"
         );
     }
