@@ -30,7 +30,6 @@ public class ReviewComment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @ManyToOne
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
@@ -40,9 +39,12 @@ public class ReviewComment extends BaseEntity {
     private String comment;
 
 
- 
-
     @ManyToMany
     private List<Member> recommend;
+    //차리리 셋이 좋을듯
+    /**
+     * 서류에 작성
+     *
+     */
 
 }

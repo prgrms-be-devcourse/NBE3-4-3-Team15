@@ -1,5 +1,6 @@
 package com.project.backend.domain.review.review.reviewDTO;
 
+import com.project.backend.domain.member.dto.MemberDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,5 @@ public class ReviewsDTO {
     String content;
     Integer rating;
     Integer recommendCount;
+    List<MemberDto> memberDtos;
 }
