@@ -13,12 +13,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * 스프링 시큐리티 설정 (SecurityFilterChain)
- * CSRF 비활성화 (JWT 사용을 위한 설정)
- * Form 로그인 비활성화 (JWT 인증을 사용하기 위해)
- * 세션 사용 X -> STATELESS 모드 설정 (JWT 방식)
- * CORS 설정 적용 (corsConfig() 사용)
- * 엔드포인트별 접근 권한 설정
+ * -- Security 설정 클래스 --
  *
  * @author 이원재
  * @since 25. 2. 3.
@@ -27,6 +22,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /**
+     * 스프링 시큐리티 설정 (SecurityFilterChain)
+     * CSRF 비활성화 (JWT 사용을 위한 설정)
+     * Form 로그인 비활성화 (JWT 인증을 사용하기 위해)
+     * 세션 사용 X -> STATELESS 모드 설정 (JWT 방식)
+     * CORS 설정 적용 (corsConfig() 사용)
+     * 엔드포인트별 접근 권한 설정
+     *
+     * @author 이원재
+     * @since 25. 2. 3.
+     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -58,10 +64,10 @@ public class SecurityConfig {
      * 모든 헤더 허용
      * Authorization 헤더 노출 허용(JWT 인증 사용 시 필요)
      * @return CORS 설정이 적용된 CorsConfigurationSource 객체
+     *
      * @author 이원재
      * @since 25. 2. 3.
      */
-
     @Bean
     public CorsConfigurationSource corsConfig() {
         CorsConfiguration configuration = new CorsConfiguration();
