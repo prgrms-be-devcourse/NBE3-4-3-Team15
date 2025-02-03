@@ -18,5 +18,5 @@ public class FavoriteDTO {
     private String memberId;
 
     @NonNull
-    private int bookId;
+    private String bookId;
 }
