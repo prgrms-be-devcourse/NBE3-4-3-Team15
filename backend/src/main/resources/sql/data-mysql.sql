@@ -4,19 +4,19 @@
   - 데이터가 없을 경우에는 데이터 저장
   - 멤버의 비밀번호는 최소 8자리 이상이여야함
    */
-insert into member(`id`, `created_at`, `modified_at`, `birth`, `email`, `gender`, `nickname`, `password`)
-    VALUES ('admin', now(), null, null, 'admin@admin.com', 0, '관리자', 'admin1234'),
-           ('user1', now(), null, null, 'user1@users.com', 0, '유저1', '12345678'),
-           ('user2', now(), null, null, 'user2@users.com', 1, '유저2', '12345678'),
-           ('user3', now(), null, null, 'user3@users.com', 1, '유저3', '12345678')
+insert into member(`username`, `created_at`, `modified_at`, `birth`, `email`, `gender`, `nickname`, `password`)
+    VALUES ('admin', now(), null, null, 'admin@admin.com', 0, '관리자', 'admin'),
+           ('user1', now(), null, null, 'user1@users.com', 0, '유저1', '1234'),
+           ('user2', now(), null, null, 'user2@users.com', 1, '유저2', '1234'),
+           ('user3', now(), null, null, 'user3@users.com', 1, '유저3', '1234')
     ON DUPLICATE KEY UPDATE modified_at = now();
 /**
   멤버 데이터 방식 2
   - 데이터가 없는 경우에만 데이터 추가
  */
-INSERT INTO member(`id`, `created_at`, `modified_at`, `birth`, `email`, `gender`, `nickname`, `password`)
-    SELECT 'user4', now(), null, null, 'user4@users.com', 0, '유저4', '12345678' FROM DUAL
-    WHERE NOT EXISTS (SELECT `id` FROM member WHERE id = 'user4') LIMIT 1;
+INSERT INTO member(`username`, `created_at`, `modified_at`, `birth`, `email`, `gender`, `nickname`, `password`)
+    SELECT 'user4', now(), null, null, 'user4@users.com', 0, '유저4', '1234' FROM DUAL
+    WHERE NOT EXISTS (SELECT `username` FROM member WHERE username = 'user4') LIMIT 1;
 
 /**
   책 데이터
