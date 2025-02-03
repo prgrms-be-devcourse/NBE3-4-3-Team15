@@ -1,8 +1,11 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.review.exception.ReviewErrorCode;
+import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
@@ -43,8 +46,13 @@ public class ReviewService {
                         .content(review.getContent())
                         .rating(review.getRating())
                         .recommendCount(review.getRecommendMember().size())
+                        .memberDtos(review.getRecommendMember().stream()
+                                .map(MemberDto::new)
+                                .toList())
                         .build())
                 .collect(Collectors.toList());
+
+        //리뷰 dto 안에 생성자를 만들어서 할 수 도 있다.
     }
 
     /**
@@ -68,13 +76,18 @@ public class ReviewService {
     /**
      * 리뷰 수정
      * @param -- reviewsDTO(content,rating)
+     * @param id - 리뷰 id
      *
      * @author 이광석
      * @since 25.01.27
      */
     public void modify(ReviewsDTO reviewsDTO,Integer id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("리뷰를 찾을 수 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                ));
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
         reviewRepository.save(review);
@@ -83,40 +96,100 @@ public class ReviewService {
     /**
      * 리뷰 삭제
      * @param -- id
+     * @return ReviewDTO - id,content,memberId,bookId,rating
      *
      * @author 이광석
      * @since 25.01.27
      */
-    public void delete(Integer id) {
+    public ReviewsDTO delete(Integer id) {
         Review review = reviewRepository.findById(id)
-                        .orElseThrow(()-> new RuntimeException("리뷰를 찾을 수 없다"));
+                        .orElseThrow(()-> new ReviewException(
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                        ));
         reviewRepository.delete(review);
+         return ReviewsDTO.builder()
+                .id(review.getId())
+                .content(review.getContent())
+                .memberId(review.getMemberId())
+                .bookId(review.getBookId())
+                .rating(review.getRating())
+                .build();
+
     }
 
     /**
      * 리뷰 추천/추천 취소
      * @param -- reviewId -- 리뷰 id
      * @param -- memberId -- 추천인 id
+     * @return boolean - 추천(true)/추천 취소(false)
      *
      * @author 이광석
      * @since 25.01.27
      */
-    public void recommend(Integer reviewId, String memberId) {
+    public boolean recommend(Integer reviewId, String memberId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()->new RuntimeException("해당 리뷰를 찾을 수 없습니다."));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                ));
 
         Member member = memberRepository.findById(memberId)
-                        .orElseThrow(()->new RuntimeException("해당 맴버를 찾을 수 없습니다."));
+                        .orElseThrow(()->new ReviewException(
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
+                                ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
+                        ));
 
         List<Member> list = review.getRecommendMember();
 
         if (list.contains(member)) {
             list.remove(member);
+            review.setRecommendMember(list);
+            reviewRepository.save(review);
+            return false;
         }else{
             list.add(member);
+            review.setRecommendMember(list);
+            reviewRepository.save(review);
+            return true;
         }
 
-        review.setRecommendMember(list);
-        reviewRepository.save(review);
+
     }
+
+
+    /**
+     * 단일 리뷰 검색
+     * @param reviewId
+     * @return ReviewsDTO - id,bookId,content,memberDtos
+     *
+     * @author 이광석
+     * @since 25.02.03
+     */
+    public ReviewsDTO findById(Integer reviewId) {
+        System.out.println(reviewId);
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()));
+
+        List<MemberDto> memberDTOs = review.getRecommendMember().stream()
+                .map(MemberDto::new)
+                .toList();
+
+        ReviewsDTO reviewsDTO= ReviewsDTO.builder()
+                .id(review.getId())
+                .bookId(review.getBookId())
+                .content(review.getContent())
+                .memberDtos(memberDTOs)
+                .build();
+        return reviewsDTO;
+    }
+
+
+
 }
