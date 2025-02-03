@@ -40,8 +40,5 @@ public class Review extends BaseEntity {
     @ManyToMany
     private List<Member> recommendMember;
 
-    /**
-     * 상속 받은 CreateAt 초기화
-     */
 
 }
