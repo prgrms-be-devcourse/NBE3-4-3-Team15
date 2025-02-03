@@ -3,7 +3,10 @@ package com.project.backend.domain.member.entity;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -24,12 +27,7 @@ import java.util.List;
 @Builder
 public class Member extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.PRIVATE)
-    private Long id;
-
-    @Column(unique = true, length = 16)
-    private String username;
+    private String id;
 
     private String password;
 

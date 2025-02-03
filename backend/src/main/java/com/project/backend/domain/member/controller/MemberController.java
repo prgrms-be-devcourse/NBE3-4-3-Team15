@@ -58,7 +58,7 @@ public class MemberController {
      */
     @PostMapping("/login")
     public GenericResponse<MemberDto> login(@RequestBody @Valid LoginDto loginDto) {
-        Member member = memberService.getMember(loginDto.getUsername())
+        Member member = memberService.getMember(loginDto.getId())
                 .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
 
         if (!member.getPassword().equals(loginDto.getPassword()))
