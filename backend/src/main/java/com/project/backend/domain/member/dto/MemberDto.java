@@ -12,7 +12,6 @@ import org.hibernate.validator.constraints.Length;
  *
  * 회원 DTO
  *
- * id, password1, password2, password, email, nickname, gender, birth
  * @author 손진영
  * @since 25. 1. 27.
  */
@@ -24,7 +23,7 @@ public class MemberDto extends MineDto {
 
     @NotBlank
     @Length(min = 2, max = 16)
-    private String id;
+    private String username;
 
     @NotBlank
     @Length(min = 8)
