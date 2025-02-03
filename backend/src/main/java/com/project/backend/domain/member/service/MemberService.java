@@ -41,13 +41,13 @@ public class MemberService {
             throw new MemberException(INVALID_PASSWORD);
         }
 
-        getMember(memberDto.getId())
+        getMember(memberDto.getUsername())
                 .ifPresent((member) -> {
                     throw new MemberException(EXISTING_ID);
                 });
 
         Member member = Member.builder()
-                .id(memberDto.getId())
+                .username(memberDto.getUsername())
                 .email(memberDto.getEmail())
                 .password(memberDto.getPassword1())
                 .nickname(memberDto.getNickname())
