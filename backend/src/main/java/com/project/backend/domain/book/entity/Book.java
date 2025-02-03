@@ -1,9 +1,7 @@
 package com.project.backend.domain.book.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 /**
@@ -21,9 +19,8 @@ import lombok.*;
 public class Book {
 
     @Id
-    @Column(length = 50, unique = true, nullable = false)
-    @JsonProperty("isbn")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(columnDefinition = "TEXT")
     @JsonProperty("title")
@@ -40,6 +37,10 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     @JsonProperty("image")
     private String image;
+
+    @Column(length = 50, unique = true, nullable = false)
+    @JsonProperty("isbn")
+    private String isbn;
 
     private int favoriteCount;
 }
