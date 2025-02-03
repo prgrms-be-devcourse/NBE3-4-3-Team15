@@ -2,6 +2,7 @@ package com.project.backend.domain.review.comment.controller;
 
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
+import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,14 +33,13 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @GetMapping
-    public ResponseEntity<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
-        try {
-            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
-            return ResponseEntity.ok(reviewCommentDtoList);
-        }catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
+    public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
 
+            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
+            return GenericResponse.of(
+                    reviewCommentDtoList
+                    ,"리뷰 코멘트 목록 조회 성공"
+            );
     }
 
     /**
