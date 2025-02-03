@@ -92,7 +92,7 @@ public class FollowService {
     private FollowResponseDto toFollowResponseDto(Follow follow, boolean isFollowerList) {
         Member target = isFollowerList ? follow.getFollower() : follow.getFollowing();
         return new FollowResponseDto(
-                target.getId(),
+                target.getUsername(),
                 target.getNickname(),
                 followRepository.countFollowers(target),
                 followRepository.countFollowings(target)
