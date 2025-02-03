@@ -128,7 +128,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public boolean recommend(Integer reviewId, String memberId) {
+    public boolean recommend(Integer reviewId, Long memberId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
