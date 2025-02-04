@@ -1,11 +1,14 @@
 package com.project.backend.domain.member.service;
 
+import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.global.exception.GlobalException;
+import com.project.backend.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,7 +27,8 @@ import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
-
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     /**
      * 회원가입 처리
@@ -49,7 +53,7 @@ public class MemberService {
         Member member = Member.builder()
                 .username(memberDto.getUsername())
                 .email(memberDto.getEmail())
-                .password(memberDto.getPassword1())
+                .password(passwordEncoder.encode(memberDto.getPassword1())) // 비밀번호 암호화
                 .nickname(memberDto.getNickname())
                 .gender(memberDto.getGender())
                 .birth(memberDto.getBirth())
@@ -97,5 +101,16 @@ public class MemberService {
 
     public void delete(Member member) {
         memberRepository.delete(member);
+    }
+
+    public String login(LoginDto loginDto) throws GlobalException {
+        Member member = memberRepository.findByUsername(loginDto.getUsername())
+                .orElseThrow(()->new MemberException(NON_EXISTING_ID));
+
+        if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) { // 암호화된 비밀번호 비교
+            throw new MemberException(INCORRECT_PASSWORD);
+        }
+        
+        return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
     }
 }
