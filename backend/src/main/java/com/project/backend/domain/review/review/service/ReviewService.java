@@ -46,25 +46,7 @@ public class ReviewService {
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
         return reviewsDTOS;
-
-//        return reviewRepository.findAll().stream()
-//                .map(review -> ReviewsDTO.builder()
-//                        .id(review.getId())
-//                        .bookId(review.getBookId())
-//                        .memberId(review.getMemberId())
-//                        .content(review.getContent())
-//                        .rating(review.getRating())
-//                        .reviewCommentDtos(review.getComments().stream()
-//                                .map(ReviewCommentDto::new)
-//                                .toList())
-//                        .memberDtos(review.getRecommendMember().stream()
-//                                .map(MemberDto::new)
-//                                .toList())
-//                        .build())
-//                .collect(Collectors.toList());
-
-        //리뷰 dto 안에 생성자를 만들어서 할 수 도 있다.
-        //위 내용 벨로그에 정리하자
+        
     }
 
     /**
@@ -172,7 +154,6 @@ public class ReviewService {
 
 
     }
-
 
     /**
      * 단일 리뷰 검색

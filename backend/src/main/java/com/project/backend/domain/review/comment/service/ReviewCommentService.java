@@ -97,7 +97,7 @@ public class ReviewCommentService {
                     .build());
         }
 ;
-        return convertReviewCommentDTO(reviewComment);
+        return new ReviewCommentDto(reviewComment);
     }
 
     /**
@@ -123,13 +123,8 @@ public class ReviewCommentService {
 
 
         reviewCommentRepository.save(reviewComment);
-//
-//        return ReviewCommentDto.builder()
-//                .id(reviewComment.getId())
-//                .comment(reviewComment.getComment())
-//                .userId(reviewComment.getUserId())
-//                .build();
-        return convertReviewCommentDTO(reviewComment);
+
+        return new ReviewCommentDto(reviewComment);
     }
 
     /**
@@ -148,7 +143,7 @@ public class ReviewCommentService {
                         ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                 ));
 
-        ReviewCommentDto reviewCommentDto =convertReviewCommentDTO(reviewComment);
+        ReviewCommentDto reviewCommentDto =new ReviewCommentDto(reviewComment);
         reviewCommentRepository.delete(reviewComment);
 
         return reviewCommentDto;
@@ -208,19 +203,12 @@ public class ReviewCommentService {
                 ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
                 ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
         ));
-//        return ReviewCommentDto.builder()
-//                .id(reviewComment.getId())
-//                .comment(reviewComment.getComment())
-//                .userId(reviewComment.getUserId())
-//                .build();
 
-        return convertReviewCommentDTO(reviewComment);
-    }
-
-
-    private ReviewCommentDto convertReviewCommentDTO(ReviewComment reviewComment){
         return new ReviewCommentDto(reviewComment);
     }
+
+
+
 
     public List<ReviewCommentDto> findReplies(Long commentId) {
         ReviewComment parent = reviewCommentRepository.findById(commentId)
