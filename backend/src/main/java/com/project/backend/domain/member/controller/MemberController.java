@@ -8,6 +8,8 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import static com.project.backend.domain.member.exception.MemberErrorCode.*;
  * @author 손진영
  * @since 25. 1. 27.
  */
+@Tag(name = "MemberController", description = "회원 컨트롤러")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
@@ -39,6 +42,7 @@ public class MemberController {
      * @since 2025.01.27
      */
     @PostMapping
+    @Operation(summary = "회원가입")
     public GenericResponse<MemberDto> join(@RequestBody @Valid MemberDto memberDto) {
         Member member = memberService.join(memberDto);
 
@@ -57,6 +61,7 @@ public class MemberController {
      * @since 2025.01.27
      */
     @PostMapping("/login")
+    @Operation(summary = "로그인")
     public GenericResponse<MemberDto> login(@RequestBody @Valid LoginDto loginDto) {
         Member member = memberService.getMember(loginDto.getUsername())
                 .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
@@ -78,6 +83,7 @@ public class MemberController {
      * @since 2025.01.27
      */
     @GetMapping("/mine")
+    @Operation(summary = "회원 정보 조회")
     public GenericResponse<MemberDto> mine() {
 
         Member member = checkAuthMember();
@@ -99,6 +105,7 @@ public class MemberController {
      */
     @PutMapping("/mine")
     @Transactional
+    @Operation(summary = "회원 정보 수정")
     public GenericResponse<MemberDto> mine(@RequestBody @Valid MineDto mineDto) {
 
         Member member = checkAuthMember();
@@ -126,6 +133,7 @@ public class MemberController {
      * @since 2025.01.31
      */
     @DeleteMapping("/mine")
+    @Operation(summary = "회원 탈퇴")
     public GenericResponse mine(@RequestBody @Valid PasswordDto passwordDto) {
         Member member = checkAuthMember();
 

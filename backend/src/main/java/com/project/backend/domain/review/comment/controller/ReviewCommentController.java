@@ -1,14 +1,12 @@
 package com.project.backend.domain.review.comment.controller;
 
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
-import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
-import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import java.util.List;
 
@@ -18,6 +16,7 @@ import java.util.List;
  * @author shjung
  * @since 25. 1. 24.
  */
+@Tag(name = "ReviewCommentController", description = "리뷰 댓글 컨트롤러")
 @RestController
 @RequestMapping("/review/{reviewId}/comments")
 @RequiredArgsConstructor
@@ -35,6 +34,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @GetMapping
+    @Operation(summary = "리뷰 댓글 목록 조회")
     public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
 
             List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
@@ -57,6 +57,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PostMapping
+    @Operation(summary = "리뷰 댓글 생성")
     public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Integer reviewId,
                                               @RequestBody ReviewCommentDto reviewCommentDto){
 
@@ -79,6 +80,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
+    @Operation(summary = "리뷰 댓글 수정")
     public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Integer reviewId,
                                              @PathVariable("id") Integer commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
@@ -100,6 +102,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "리뷰 댓글 삭제")
     public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
                                          @PathVariable("id") Integer commentId){
         ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
@@ -120,6 +123,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}/recommend/{memberId}")
+    @Operation(summary = "리뷰 댓글 추천")
     public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Integer reviewId,
                                                    @PathVariable("id") Integer commentId,
                                                    @PathVariable("memberId") Long memberId){
