@@ -5,6 +5,7 @@ import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.response.GenericResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public class ReviewCommentController {
      */
     @PostMapping
     public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Integer reviewId,
-                                              @RequestBody ReviewCommentDto reviewCommentDto){
+                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto){
 
        ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto);
 
@@ -82,6 +83,7 @@ public class ReviewCommentController {
     public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Integer reviewId,
                                              @PathVariable("id") Integer commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
+
             ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
 
             return GenericResponse.of(
@@ -102,7 +104,7 @@ public class ReviewCommentController {
     @DeleteMapping("/{id}")
     public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
                                          @PathVariable("id") Integer commentId){
-        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
+       ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
         return GenericResponse.of(
                 newReviewCommentDto,
                 "리뷰 코멘트 삭제 성공"

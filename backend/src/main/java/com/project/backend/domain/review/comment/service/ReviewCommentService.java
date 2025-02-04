@@ -75,11 +75,12 @@ public class ReviewCommentService {
                         .comment(reviewCommentDto.getComment())
                         .recommend(new HashSet<>())
                         .build());
-        return ReviewCommentDto.builder()
-                .id(reviewComment.getId())
-                .comment(reviewComment.getComment())
-                .userId(reviewComment.getUserId())
-                .build();
+//        return ReviewCommentDto.builder()
+//                .id(reviewComment.getId())
+//                .comment(reviewComment.getComment())
+//                .userId(reviewComment.getUserId())
+//                .build();
+        return convertReviewCommentDTO(reviewComment);
     }
 
     /**
@@ -105,11 +106,13 @@ public class ReviewCommentService {
 
 
         reviewCommentRepository.save(reviewComment);
-        return ReviewCommentDto.builder()
-                .id(reviewComment.getId())
-                .comment(reviewComment.getComment())
-                .userId(reviewComment.getUserId())
-                .build();
+//
+//        return ReviewCommentDto.builder()
+//                .id(reviewComment.getId())
+//                .comment(reviewComment.getComment())
+//                .userId(reviewComment.getUserId())
+//                .build();
+        return convertReviewCommentDTO(reviewComment);
     }
 
     /**
@@ -127,12 +130,10 @@ public class ReviewCommentService {
                         ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
                         ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                 ));
+        ReviewCommentDto reviewCommentDto =convertReviewCommentDTO(reviewComment);
         reviewCommentRepository.delete(reviewComment);
-        return ReviewCommentDto.builder()
-                .id(reviewComment.getId())
-                .comment(reviewComment.getComment())
-                .userId(reviewComment.getUserId())
-                .build();
+
+        return reviewCommentDto;
     }
 
     /**
@@ -189,10 +190,16 @@ public class ReviewCommentService {
                 ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
                 ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
         ));
-        return ReviewCommentDto.builder()
-                .id(reviewComment.getId())
-                .comment(reviewComment.getComment())
-                .userId(reviewComment.getUserId())
-                .build();
+//        return ReviewCommentDto.builder()
+//                .id(reviewComment.getId())
+//                .comment(reviewComment.getComment())
+//                .userId(reviewComment.getUserId())
+//                .build();
+        return convertReviewCommentDTO(reviewComment);
+    }
+
+
+    private ReviewCommentDto convertReviewCommentDTO(ReviewComment reviewComment){
+        return new ReviewCommentDto(reviewComment);
     }
 }
