@@ -46,7 +46,7 @@ public class ReviewService {
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
         return reviewsDTOS;
-        
+
     }
 
     /**

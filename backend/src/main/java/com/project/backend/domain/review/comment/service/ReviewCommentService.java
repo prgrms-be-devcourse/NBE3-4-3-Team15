@@ -209,7 +209,6 @@ public class ReviewCommentService {
 
 
 
-
     public List<ReviewCommentDto> findReplies(Long commentId) {
         ReviewComment parent = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(
