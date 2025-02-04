@@ -74,7 +74,7 @@ public class ReviewController {
      */
     @PutMapping("/{id}")
     public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
-                                             @PathVariable("id") Integer id){
+                                             @PathVariable("id") Long id){
         reviewService.modify(reviewsDTO,id);
         return GenericResponse.of(
                 reviewsDTO,
@@ -92,7 +92,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
-    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Integer id){
+    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
         ReviewsDTO review=  reviewService.delete(id);
 
         return GenericResponse.of(
@@ -112,7 +112,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
-    public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Integer reviewId,
+    public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
         ReviewsDTO reviewsDTO = reviewService.findById(reviewId);

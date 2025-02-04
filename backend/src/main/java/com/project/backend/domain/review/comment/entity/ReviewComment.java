@@ -29,16 +29,21 @@ import java.util.Set;
 public class ReviewComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
-    private String userId;
+    private Long userId;
 
     private String comment;
 
+    @ManyToOne
+    private ReviewComment parent;
+
+
+    private Integer depth =0;
 
     @ManyToMany
     private Set<Member> recommend;

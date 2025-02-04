@@ -4,6 +4,7 @@ import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import com.project.backend.domain.review.review.entity.Review;
+import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.global.response.GenericResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @GetMapping
-    public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Integer reviewId){
+    public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Long reviewId){
 
             List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
             return GenericResponse.of(
@@ -45,6 +46,15 @@ public class ReviewCommentController {
             );
     }
 
+
+    @GetMapping("/{commentId}")
+    public GenericResponse<List<ReviewCommentDto>> getReplies(@PathVariable("commentId") Long commentId){
+        List<ReviewCommentDto> replies = reviewCommentService.findReplies(commentId);
+        return GenericResponse.of(
+                replies,
+                "대댓글 목록 조회 성공"
+        );
+    }
 
 
 
@@ -58,8 +68,9 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PostMapping
-    public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Integer reviewId,
+    public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Long reviewId,
                                             @Valid @RequestBody ReviewCommentDto reviewCommentDto){
+
 
        ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto);
 
@@ -80,8 +91,8 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
-    public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Integer reviewId,
-                                             @PathVariable("id") Integer commentId,
+    public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
+                                             @PathVariable("id") Long commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
 
             ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
@@ -103,7 +114,7 @@ public class ReviewCommentController {
      */
     @DeleteMapping("/{id}")
     public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
-                                         @PathVariable("id") Integer commentId){
+                                         @PathVariable("id") Long commentId){
        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
         return GenericResponse.of(
                 newReviewCommentDto,
@@ -122,8 +133,8 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}/recommend/{memberId}")
-    public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Integer reviewId,
-                                                   @PathVariable("id") Integer commentId,
+    public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Long reviewId,
+                                                   @PathVariable("id") Long commentId,
                                                    @PathVariable("memberId") Long memberId){
 
        boolean result = reviewCommentService.recommend(commentId, memberId);
@@ -140,4 +151,7 @@ public class ReviewCommentController {
             );
         }
     }
+
+
+
 }

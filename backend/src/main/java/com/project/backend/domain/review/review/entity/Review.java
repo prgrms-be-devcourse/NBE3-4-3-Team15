@@ -31,13 +31,13 @@ import java.util.Set;
 public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @NotBlank
-    private String bookId;
+    @NotNull
+    private Long bookId;
 
-    @NotBlank
-    private String memberId;
+    @NotNull
+    private Long userId;
 
     @NotBlank
     private String content;

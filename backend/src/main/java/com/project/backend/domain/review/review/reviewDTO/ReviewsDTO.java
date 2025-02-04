@@ -23,13 +23,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class ReviewsDTO {
-    Integer id;
+    Long id;
 
-    @NotBlank
-    String bookId;
+    @NotNull
+    Long bookId;
 
-    @NotBlank
-    String memberId;
+    @NotNull
+    Long userId;
 
     @NotBlank
     String content;
@@ -51,7 +51,7 @@ public class ReviewsDTO {
     public ReviewsDTO(Review review){
         this.id=review.getId();
         this.bookId = review.getBookId();
-        this.memberId= review.getMemberId();
+        this.userId= review.getUserId();
         this.content = review.getContent();
         this.rating = review.getRating();
         this.reviewCommentDtos = review.getComments().stream()

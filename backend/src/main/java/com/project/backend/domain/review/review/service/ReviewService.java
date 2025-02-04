@@ -77,7 +77,7 @@ public class ReviewService {
     public void write(ReviewsDTO reviewsDTO) {
         reviewRepository.save(Review.builder()
                         .bookId(reviewsDTO.getBookId())
-                        .memberId(reviewsDTO.getMemberId())
+                        .userId(reviewsDTO.getUserId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
@@ -93,7 +93,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void modify(ReviewsDTO reviewsDTO,Integer id) {
+    public void modify(ReviewsDTO reviewsDTO,Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -113,7 +113,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public ReviewsDTO delete(Integer id) {
+    public ReviewsDTO delete(Long id) {
         Review review = reviewRepository.findById(id)
                         .orElseThrow(()-> new ReviewException(
                                 ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -125,7 +125,7 @@ public class ReviewService {
          return ReviewsDTO.builder()
                 .id(review.getId())
                 .content(review.getContent())
-                .memberId(review.getMemberId())
+                .userId(review.getUserId())
                 .bookId(review.getBookId())
                 .rating(review.getRating())
                 .build();
@@ -141,7 +141,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public boolean recommend(Integer reviewId, Long memberId) {
+    public boolean recommend(Long reviewId, Long memberId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -182,7 +182,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.02.03
      */
-    public ReviewsDTO findById(Integer reviewId) {
+    public ReviewsDTO findById(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
