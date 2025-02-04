@@ -7,6 +7,7 @@ import com.project.backend.domain.member.dto.PasswordDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.service.MemberService;
+import com.project.backend.global.jwt.JwtUtil;
 import com.project.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 public class MemberController {
     private final MemberService memberService;
     private final HttpServletRequest request;
+    private final JwtUtil jwtUtil;
 
     /**
      * 회원가입 요청
@@ -42,10 +44,7 @@ public class MemberController {
     public GenericResponse<MemberDto> join(@RequestBody @Valid MemberDto memberDto) {
         Member member = memberService.join(memberDto);
 
-        return GenericResponse.of(
-                new MemberDto(member),
-                "회원가입 성공"
-        );
+        return GenericResponse.of("회원가입 성공");
     }
 
     /**
@@ -57,17 +56,11 @@ public class MemberController {
      * @since 2025.01.27
      */
     @PostMapping("/login")
-    public GenericResponse<MemberDto> login(@RequestBody @Valid LoginDto loginDto) {
-        Member member = memberService.getMember(loginDto.getUsername())
-                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
-
-        if (!member.getPassword().equals(loginDto.getPassword()))
-            throw new MemberException(INCORRECT_PASSWORD);
-
+    public GenericResponse<String> login(@RequestBody @Valid LoginDto loginDto) {
+        String token = memberService.login(loginDto); // JWT 토큰 발급
         return GenericResponse.of(
-                new MemberDto(member),
-                "로그인 성공"
-        );
+                token,
+                "로그인 성공");
     }
 
     /**
@@ -146,11 +139,13 @@ public class MemberController {
      */
     private Member checkAuthMember() {
         String authorization = request.getHeader("Authorization");
-        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
+        String token = authorization == null ? "" : authorization.substring("Bearer ".length());
 
-        if (apiKey.isEmpty()) throw new MemberException(NO_AUTHORIZED);
+        if (token.isEmpty()) throw new MemberException(NO_AUTHORIZED);
 
-        return memberService.getMember(apiKey)
+        String username = jwtUtil.getUsernameFromToken(token);
+
+        return memberService.getMember(username)
                 .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
     }
 }
