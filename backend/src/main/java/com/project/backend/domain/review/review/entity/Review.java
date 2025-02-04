@@ -5,6 +5,10 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,25 +17,34 @@ import java.util.Set;
 
 
 /**
- * 리뷰 dto
+ * 리뷰
+ *
+ * @author 이광석
+ * @since 25.02.04
  */
 @Entity
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)  // JPA가 사용할 수 있도록 기본 생성자 추가
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank
     private String bookId;
 
+    @NotBlank
     private String memberId;
 
+    @NotBlank
     private String content;
 
+    @Min(0)
+    @Max(10)
+    @NotNull
     private Integer rating;
 
     @OneToMany(mappedBy = "review",cascade =CascadeType.ALL,orphanRemoval = true)

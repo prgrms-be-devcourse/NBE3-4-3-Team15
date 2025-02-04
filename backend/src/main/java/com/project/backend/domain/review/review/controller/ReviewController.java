@@ -6,6 +6,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,7 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @PostMapping
-    public GenericResponse<String> postReview(@RequestBody ReviewsDTO reviewsDTO){
+    public GenericResponse<String> postReview(@Valid @RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
 
@@ -72,7 +73,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
-    public GenericResponse<ReviewsDTO> putReviews(@RequestBody ReviewsDTO reviewsDTO,
+    public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("id") Integer id){
         reviewService.modify(reviewsDTO,id);
         return GenericResponse.of(

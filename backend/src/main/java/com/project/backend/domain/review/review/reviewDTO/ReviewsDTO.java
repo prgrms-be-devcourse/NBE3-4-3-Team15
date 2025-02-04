@@ -3,11 +3,13 @@ package com.project.backend.domain.review.review.reviewDTO;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.review.entity.Review;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,12 +24,28 @@ import java.util.stream.Collectors;
 @Builder
 public class ReviewsDTO {
     Integer id;
+
+    @NotBlank
     String bookId;
+
+    @NotBlank
     String memberId;
+
+    @NotBlank
     String content;
+
+    @NotNull
+    @Min(0)
+    @Max(10)
     Integer rating;
+
     List<ReviewCommentDto>  reviewCommentDtos;
-    Set<MemberDto> memberDtos;
+
+    Set<MemberDto> recommendMemberDtos;
+
+    LocalDateTime createdAt;
+
+    LocalDateTime modifiedAt;
 
 
     public ReviewsDTO(Review review){
@@ -39,8 +57,10 @@ public class ReviewsDTO {
         this.reviewCommentDtos = review.getComments().stream()
                 .map(ReviewCommentDto::new)
                 .collect(Collectors.toList());
-        this.memberDtos = review.getRecommendMember().stream()
+        this.recommendMemberDtos = review.getRecommendMember().stream()
                 .map(MemberDto::new)
                 .collect(Collectors.toSet());
+        this.createdAt=review.getCreatedAt();
+        this.modifiedAt = review.getModifiedAt();
     }
 }
