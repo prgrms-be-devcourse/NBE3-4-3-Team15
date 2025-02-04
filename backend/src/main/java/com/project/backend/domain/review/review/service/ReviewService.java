@@ -4,6 +4,7 @@ package com.project.backend.domain.review.review.service;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -40,21 +41,30 @@ public class ReviewService {
      * @since 25.01.27
      */
     public List<ReviewsDTO> findAll() {
-        return reviewRepository.findAll().stream()
-                .map(review -> ReviewsDTO.builder()
-                        .id(review.getId())
-                        .bookId(review.getBookId())
-                        .memberId(review.getMemberId())
-                        .content(review.getContent())
-                        .rating(review.getRating())
-                        .recommendCount(review.getRecommendMember().size())
-                        .memberDtos(review.getRecommendMember().stream()
-                                .map(MemberDto::new)
-                                .toList())
-                        .build())
+        List<Review> reviews = reviewRepository.findAll();
+        List<ReviewsDTO> reviewsDTOS = reviews.stream()
+                .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
+        return reviewsDTOS;
+
+//        return reviewRepository.findAll().stream()
+//                .map(review -> ReviewsDTO.builder()
+//                        .id(review.getId())
+//                        .bookId(review.getBookId())
+//                        .memberId(review.getMemberId())
+//                        .content(review.getContent())
+//                        .rating(review.getRating())
+//                        .reviewCommentDtos(review.getComments().stream()
+//                                .map(ReviewCommentDto::new)
+//                                .toList())
+//                        .memberDtos(review.getRecommendMember().stream()
+//                                .map(MemberDto::new)
+//                                .toList())
+//                        .build())
+//                .collect(Collectors.toList());
 
         //리뷰 dto 안에 생성자를 만들어서 할 수 도 있다.
+        //위 내용 벨로그에 정리하자
     }
 
     /**
@@ -111,6 +121,7 @@ public class ReviewService {
                                 ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
                         ));
         reviewRepository.delete(review);
+
          return ReviewsDTO.builder()
                 .id(review.getId())
                 .content(review.getContent())
@@ -172,25 +183,17 @@ public class ReviewService {
      * @since 25.02.03
      */
     public ReviewsDTO findById(Integer reviewId) {
-        System.out.println(reviewId);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
                         ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
                         ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()));
 
-        List<MemberDto> memberDTOs = review.getRecommendMember().stream()
-                .map(MemberDto::new)
-                .toList();
-
-        ReviewsDTO reviewsDTO= ReviewsDTO.builder()
-                .id(review.getId())
-                .bookId(review.getBookId())
-                .content(review.getContent())
-                .memberDtos(memberDTOs)
-                .build();
+        ReviewsDTO reviewsDTO = new ReviewsDTO(review);
         return reviewsDTO;
     }
+
+
 
 
 

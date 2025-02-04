@@ -47,15 +47,8 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public List<ReviewCommentDto> findByReview(Integer reviewId) {
-        return reviewCommentRepository.findAllByReviewId(reviewId).stream()
-                .map(comment->ReviewCommentDto.builder()
-                        .id(comment.getId())
-                        .reviewId(comment.getReview().getId())
-                        .userId(comment.getUserId())
-                        .comment(comment.getComment())
-                        .recommendCount(comment.getRecommend().size())
-                        .build()
-                ).collect(Collectors.toList());
+        ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
+        return reviewsDTO.getReviewCommentDtos();
     }
 
     /**
