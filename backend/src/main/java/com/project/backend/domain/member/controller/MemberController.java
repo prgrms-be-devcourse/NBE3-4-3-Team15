@@ -5,6 +5,7 @@ import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.dto.MineDto;
 import com.project.backend.domain.member.dto.PasswordDto;
 import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.exception.MemberErrorCode;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.jwt.JwtUtil;
@@ -12,10 +13,12 @@ import com.project.backend.global.response.GenericResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import static com.project.backend.domain.member.exception.MemberErrorCode.*;
+import static com.project.backend.domain.member.exception.MemberErrorCode.INCORRECT_AUTHORIZED;
 
 /**
  * 회원 컨트롤러
@@ -73,7 +76,7 @@ public class MemberController {
     @GetMapping("/mine")
     public GenericResponse<MemberDto> mine() {
 
-        Member member = checkAuthMember();
+        Member member = getAuthenticatedMember();
 
         return GenericResponse.of(
                 new MemberDto(member),
@@ -94,7 +97,7 @@ public class MemberController {
     @Transactional
     public GenericResponse<MemberDto> mine(@RequestBody @Valid MineDto mineDto) {
 
-        Member member = checkAuthMember();
+        Member member = getAuthenticatedMember();
 
         memberService.modify(member,
                 mineDto.getPassword(),
@@ -120,32 +123,40 @@ public class MemberController {
      */
     @DeleteMapping("/mine")
     public GenericResponse mine(@RequestBody @Valid PasswordDto passwordDto) {
-        Member member = checkAuthMember();
+        Member member = getAuthenticatedMember();
 
         if (!passwordDto.getPassword().equals(member.getPassword()))
             throw new MemberException(INCORRECT_AUTHORIZED);
 
-        memberService.delete(member);
+        memberService.delete(member,passwordDto.getPassword());
 
         return GenericResponse.of("탈퇴 성공");
     }
 
+//    /**
+//     * Request Authorization Check
+//     *
+//     * @return Member
+//     * @author 손진영
+//     * @since 2025.01.31
+//     */
+//    private Member checkAuthMember() {
+//        String authorization = request.getHeader("Authorization");
+//        String token = authorization == null ? "" : authorization.substring("Bearer ".length());
+//
+//        if (token.isEmpty()) throw new MemberException(NO_AUTHORIZED);
+//
+//        String username = jwtUtil.getUsernameFromToken(token);
+//
+//        return memberService.getMember(username)
+//                .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
+//    }
     /**
-     * Request Authorization Check
-     *
-     * @return Member
-     * @author 손진영
-     * @since 2025.01.31
+     * 현재 로그인한 사용자 가져오기
      */
-    private Member checkAuthMember() {
-        String authorization = request.getHeader("Authorization");
-        String token = authorization == null ? "" : authorization.substring("Bearer ".length());
-
-        if (token.isEmpty()) throw new MemberException(NO_AUTHORIZED);
-
-        String username = jwtUtil.getUsernameFromToken(token);
-
-        return memberService.getMember(username)
-                .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
+    private Member getAuthenticatedMember() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return memberService.getMember(authentication.getName())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.INCORRECT_AUTHORIZED));
     }
 }
