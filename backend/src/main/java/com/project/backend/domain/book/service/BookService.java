@@ -11,8 +11,6 @@ import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.book.vo.BookVO;
-import com.project.backend.domain.book.vo.KakaoBookVO;
-import com.project.backend.domain.book.vo.NaverBookVO;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberErrorCode;
 import com.project.backend.domain.member.exception.MemberException;
@@ -178,23 +176,23 @@ public class BookService {
                 .toList();
     }
 
-    /**
-     * -- 책 리스트를 DB에 저장하는 메소드 --
-     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
-     *
-     * @param -- ㅣist<NaverBookVO.Item> items --
-     * @return -- List<Book>
-     * @author -- 정재익 --
-     * @since -- 2월 3일 --
-     */
-    private List<Book> saveBooks(List<NaverBookVO.Item> items) {
-        List<Book> newBooks = items.stream()
-                .map(item -> modelMapper.map(item, Book.class))
-                .filter(book -> !bookRepository.existsByIsbn(book.getIsbn()))
-                .toList();
-
-        return bookRepository.saveAll(newBooks);
-    }
+//    /**
+//     * -- 책 리스트를 DB에 저장하는 메소드 --
+//     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
+//     *
+//     * @param -- ㅣist<NaverBookVO.Item> items --
+//     * @return -- List<Book>
+//     * @author -- 정재익 --
+//     * @since -- 2월 3일 --
+//     */
+//    private List<Book> saveBooks(List<NaverBookVO.Item> items) {
+//        List<Book> newBooks = items.stream()
+//                .map(item -> modelMapper.map(item, Book.class))
+//                .filter(book -> !bookRepository.existsByIsbn(book.getIsbn()))
+//                .toList();
+//
+//        return bookRepository.saveAll(newBooks);
+//    }
 
     /**
      * -- DB에 있는 책을 컨트롤러에 전달하는 메소드 --
