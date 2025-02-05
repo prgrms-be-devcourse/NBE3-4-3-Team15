@@ -30,12 +30,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -75,7 +73,7 @@ public class BookService {
 
     /**
      * -- 도서 검색 메소드 --
-     * 1. 제목 검색일 경우 네이버와 카카오 Api에 요청
+     * 1. 제목 검색일 경우 네이버와 카카오 Api에 요청 (네이버와 카카오 사이에 중복책이 있는지 검사)
      * 2. 작가 검색일 경우 카카오 Api에 요청
      * 3. List<BookDto>로 변환하여 반환
      *
@@ -89,8 +87,8 @@ public class BookService {
      */
     public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId) {
 
-        if (query == null || query.isEmpty()) {
-            throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
+        if (!StringUtils.hasText(query)) {
+            throw new BookException(BookErrorCode.QUERY_EMPTY);
         }
 
         List<ApiBookVO> allBooks = new ArrayList<>();
@@ -103,10 +101,15 @@ public class BookService {
         }
 
         List<BookDTO> bookList = allBooks.stream()
-                .map(book -> modelMapper.map(book, BookDTO.class))
+                .map(book -> {
+                    BookDTO dto = modelMapper.map(book, BookDTO.class);
+                    dto.setIsbn(BookUtil.extractIsbn(dto.getIsbn()));
+                    return dto;
+                })
                 .toList();
+        List<BookDTO> uniqueBooks = removeDuplicateBooks(bookList);
 
-        bookCache.put(sessionId, bookList);
+        bookCache.put(sessionId, uniqueBooks);
 
         return bookList;
     }
@@ -173,10 +176,29 @@ public class BookService {
             throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
         }
 
+        String normalizedIsbn = BookUtil.extractIsbn(isbn);
+
         return books.stream()
-                .filter(book -> book.getIsbn().equalsIgnoreCase(isbn))
+                .filter(book -> book.getIsbn().equalsIgnoreCase(normalizedIsbn))
                 .findFirst()
                 .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+    }
+
+    /**
+     * -- 중복 도서 제거 메소드 --
+     * ISBN이 동일한 도서가 있을 경우 하나만 남긴다.
+     *
+     * @param books 중복이 포함된 도서 리스트
+     * @return 중복 제거된 도서 리스트
+     *
+     * @author 정재익
+     * @since 2월 5일
+     */
+    private List<BookDTO> removeDuplicateBooks(List<BookDTO> books) {
+        Set<String> Isbns = new HashSet<>();
+        return books.stream()
+                .filter(book -> Isbns.add(book.getIsbn()))
+                .toList();
     }
 
 //    /**
