@@ -3,6 +3,7 @@ package com.project.backend.domain.member;
 import com.project.backend.domain.member.controller.MemberController;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
+import com.project.backend.global.jwt.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class MemberControllerTest {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * 회원가입 테스트: 성공적인 회원가입을 검증
@@ -311,10 +315,12 @@ public class MemberControllerTest {
 
         Member member = memberService.getMember("user1").get();
 
+        String token = jwtUtil.generateToken(member.getUsername());
+
         ResultActions resultActions = mvc
                 .perform(
                         get("/members/mine")
-                                .header("Authorization", "Bearer " + member.getUsername())
+                                .header("Authorization", "Bearer " + token)
                 );
 
         resultActions

@@ -2,12 +2,14 @@ package com.project.backend.global.config;
 
 import com.project.backend.global.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,9 +59,15 @@ public class SecurityConfig {
                         // 로그인 및 회원가입은 인증 없이 허용
                         .requestMatchers("/members/login", "/members").permitAll()
 
+                        // h2-console, swagger 접근 허용
+                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+
                         // 그 외 요청은 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
                 )
+                //X-Frame-Options 설정 (h2-console iframe)
+                .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

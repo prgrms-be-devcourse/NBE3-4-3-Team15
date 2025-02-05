@@ -7,8 +7,10 @@ import com.project.backend.domain.member.dto.PasswordDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.service.MemberService;
+import com.project.backend.global.jwt.JwtUtil;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,9 +30,11 @@ import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
+@SecurityRequirement(name = "bearerAuth")
 public class MemberController {
     private final MemberService memberService;
     private final HttpServletRequest request;
+    private final JwtUtil jwtUtil;
 
     /**
      * 회원가입 요청
@@ -68,6 +72,8 @@ public class MemberController {
 
         if (!member.getPassword().equals(loginDto.getPassword()))
             throw new MemberException(INCORRECT_PASSWORD);
+
+        System.out.println("jwtUtil.generateToken = " + jwtUtil.generateToken(member.getUsername()));
 
         return GenericResponse.of(
                 new MemberDto(member),
@@ -156,9 +162,11 @@ public class MemberController {
         String authorization = request.getHeader("Authorization");
         String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
 
+        String username = jwtUtil.getUsernameFromToken(apiKey);
+
         if (apiKey.isEmpty()) throw new MemberException(NO_AUTHORIZED);
 
-        return memberService.getMember(apiKey)
+        return memberService.getMember(username)
                 .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
     }
 }
