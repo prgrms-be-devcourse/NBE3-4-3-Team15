@@ -29,26 +29,22 @@ public class KakaoBookVO {
     @Getter
     @Setter
     public static class Item {
-        @NonNull
+        @JsonProperty("title")
         private String title;
 
-        @NonNull
-        private String author;
-
-        @NonNull
+        @JsonProperty("authors")
+        private List<String> authors;
         @JsonProperty("contents")
         private String description;
 
-        @NonNull
         @JsonProperty("thumbnail")
         private String image;
 
-        @NonNull
+        @JsonProperty("isbn")
         private String isbn;
 
-        @JsonSetter("authors")
-        public void setAuthors(String[] authors) {
-            this.author = String.join(", ", authors);
+        public String getAuthor() {
+            return String.join(", ", authors); // ["작가1", "작가2"] → "작가1, 작가2"
         }
     }
 }

@@ -115,31 +115,31 @@ public class BookController {
      * @author 김남우
      * @since 2025-01-27
      */
-    @GetMapping("/kakaobook")
-    public GenericResponse<List<Book>> saveBookDataFromKakaoApi(@RequestParam String query) {
-        List<Book> savedBooks = bookService.saveKakaoBooks(query);
-        return GenericResponse.of(savedBooks, "도서 저장 완료");
-    }
-
-    /**
-     * -- 제목, 작가 검색 메소드 --
-     *
-     * @return 저장 성공 메시지와 검색된 응답 객체
-     *
-     * @author 김남우
-     * @since 2025-01-27
-     */
-    @GetMapping
-    public GenericResponse<List<BookSimpleDTO>> searchBooks(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String author) {
-
-        if (title != null) {
-            return GenericResponse.of(bookService.searchByTitle(title), "제목 검색 완료");
-        } else if (author != null) {
-            return GenericResponse.of(bookService.searchByAuthor(author), "작가 검색 완료");
-        } else {
-            return GenericResponse.of(Collections.emptyList(), "검색어를 입력해주세요.");
-        }
-    }
+//    @GetMapping("/kakaobook")
+//    public GenericResponse<List<Book>> saveBookDataFromKakaoApi(@RequestParam String query) {
+//        List<Book> savedBooks = bookService.saveKakaoBooks(query);
+//        return GenericResponse.of(savedBooks, "도서 저장 완료");
+//    }
+//
+//    /**
+//     * -- 제목, 작가 검색 메소드 --
+//     *
+//     * @return 저장 성공 메시지와 검색된 응답 객체
+//     *
+//     * @author 김남우
+//     * @since 2025-01-27
+//     */
+//    @GetMapping
+//    public GenericResponse<List<BookSimpleDTO>> searchBooks(
+//            @RequestParam(required = false) String title,
+//            @RequestParam(required = false) String author) {
+//
+//        if (title != null) {
+//            return GenericResponse.of(bookService.searchByTitle(title), "제목 검색 완료");
+//        } else if (author != null) {
+//            return GenericResponse.of(bookService.searchByAuthor(author), "작가 검색 완료");
+//        } else {
+//            return GenericResponse.of(Collections.emptyList(), "검색어를 입력해주세요.");
+//        }
+//    }
 }

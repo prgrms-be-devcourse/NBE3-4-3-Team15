@@ -86,15 +86,20 @@ public class BookService {
     public List<BookSimpleDTO> searchBooks(String query, boolean isAuthorSearch) {
 
         if (query == null || query.isEmpty()) {
-            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
+            throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
         }
 
-        List<Book> savedBooks = isAuthorSearch ? searchKakaoBooks(query) : searchNaverBooks(query);
+        if (isAuthorSearch) {
+            List<KakaoBookVO.Item> items = searchKakaoBooks(query);
+            return items.stream()
+                    .map(item -> modelMapper.map(item, BookSimpleDTO.class))
+                    .toList();
+        } else {
+            searchKakaoBooks(query);
+            searchNaverBooks(query);
 
-        return savedBooks.stream()
-                .map(book -> modelMapper.map(book, BookSimpleDTO.class))
-                .toList();
-
+            return null;
+        }
     }
 
     /**
@@ -286,46 +291,4 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-
-
-    /**
-     * -- 카카오 도서 API에서 받은 도서 정보를 DB에 저장하는 메소드 --
-     *
-     * @param query 검색어
-     *
-     * @author 김남우
-     * @since 2025년 1월 31일
-     */
-    public List<Book> saveKakaoBooks(String query) {
-        List<KakaoBookVO.Item> kakaoBooks = saveBookDataFromKakaoApi(query);
-
-        List<Book> newBooks = kakaoBooks.stream()
-                .map(kakaoBookDTO -> modelMapper.map(kakaoBookDTO, Book.class))
-                .filter(book -> !bookRepository.existsByIsbn(book.getIsbn()))
-                .toList();
-
-        bookRepository.saveAll(newBooks);
-
-        return newBooks;
-    }
-
-//    /**
-//     * -- 작가 검색 메소드 --
-//     *
-//     * @param
-//     * @return
-//     *
-//     * @author 김남우
-//     * @since 2025년 2월 4일
-//     */
-//    public List<BookSimpleDTO> searchByAuthor(String author) {
-//        return bookRepository.findByAuthor(author)
-//                .stream()
-//                .map(book -> new BookSimpleDTO(
-//                        book.getTitle(),
-//                        book.getAuthor(),
-//                        book.getImage()
-//                ))
-//                .toList();
-//    }
 }
