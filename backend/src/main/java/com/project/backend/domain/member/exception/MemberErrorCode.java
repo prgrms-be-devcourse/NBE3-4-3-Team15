@@ -16,7 +16,8 @@ public enum MemberErrorCode {
     NON_EXISTING_ID(HttpStatus.NOT_FOUND, "404-1", "존재하지 않는 사용자 입니다."),
     INCORRECT_PASSWORD(HttpStatus.UNAUTHORIZED, "401-1", "비밀번호가 맞지 않습니다."),
     NO_AUTHORIZED(HttpStatus.UNAUTHORIZED, "401-2", "인증정보가 없습니다."),
-    INCORRECT_AUTHORIZED(HttpStatus.UNAUTHORIZED, "401-3", "인증정보가 올바르지 않습니다.");
+    INCORRECT_AUTHORIZED(HttpStatus.UNAUTHORIZED, "401-3", "인증정보가 올바르지 않습니다."),
+    SAME_AS_OLD_PASSWORD(HttpStatus.BAD_REQUEST, "400-4", "새 비밀번호는 기존 비밀번호와 달라야 합니다.");
 
     final HttpStatus status;
     final String code;
