@@ -46,9 +46,12 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public List<ReviewCommentDto> findByReview(Long reviewId) {
+    public List<ReviewCommentDto> findComment(Long reviewId) {
         ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
-        return reviewsDTO.getReviewCommentDtos();
+        List<ReviewCommentDto> comments= reviewsDTO.getReviewCommentDtos().stream()
+                .filter(comment->comment.getParentId()==null)
+                .collect(Collectors.toList());
+        return comments;
     }
 
     /**
@@ -61,14 +64,12 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto) {
-        System.out.println(1);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
                         ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
                         ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
                 ));
-        System.out.println(2);
         ReviewComment reviewComment;
         if(reviewCommentDto.getParentId()!=null) {
             ReviewComment  parentsComment = reviewCommentRepository.findById(reviewCommentDto.getParentId())
@@ -77,17 +78,22 @@ public class ReviewCommentService {
                             ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
                             ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                     ));
-            System.out.println(3);
+            if(parentsComment.getDepth()+1>=2){
+               throw new ReviewException(
+                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getStatus(),
+                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getErrorCode(),
+                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getMessage()
+               );
+            }
              reviewComment= reviewCommentRepository.save(ReviewComment.builder()
                     .review(review)
                     .userId(reviewCommentDto.getUserId())
                     .comment(reviewCommentDto.getComment())
                     .recommend(new HashSet<>())
                     .parent(parentsComment)
-                     .depth(1)
+                     .depth(parentsComment.getDepth()+1)
                     .build());
-        }else {
-            System.out.println(3);
+        }else{
              reviewComment = reviewCommentRepository.save(ReviewComment.builder()
                     .review(review)
                     .userId(reviewCommentDto.getUserId())
@@ -189,7 +195,7 @@ public class ReviewCommentService {
     }
 
     /**
-     *
+     *단일 코멘트 찾기
      * @param commentId
      * @return ReviewCommentDto - id, comment, userId
      *
@@ -208,7 +214,14 @@ public class ReviewCommentService {
     }
 
 
-
+    /**
+     * 대댓글 출력
+     * @param commentId
+     * @return List<ReviewCommentDto>
+     *
+     * @since 25.02.05
+     * @author 이광석
+     */
     public List<ReviewCommentDto> findReplies(Long commentId) {
         ReviewComment parent = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(

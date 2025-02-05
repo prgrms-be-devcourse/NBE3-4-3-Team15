@@ -2,6 +2,8 @@ package com.project.backend.domain.review.comment.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
@@ -40,6 +42,8 @@ public class ReviewComment extends BaseEntity {
     private String comment;
 
     @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name="parent_id")
     private ReviewComment parent;
 
 

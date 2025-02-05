@@ -39,7 +39,7 @@ public class ReviewCommentController {
     @GetMapping
     public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Long reviewId){
 
-            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findByReview(reviewId);
+            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findComment(reviewId);
             return GenericResponse.of(
                     reviewCommentDtoList
                     ,"리뷰 코멘트 목록 조회 성공"
