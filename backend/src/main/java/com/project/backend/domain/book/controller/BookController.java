@@ -32,48 +32,29 @@ public class BookController {
      * 작가 검색, 제목 검색 기능
      *
      * @param -- title(검색어) --
-     * @return -- GenericResponse<List<BookSimpleDTO>> --
+     * @return -- GenericResponse<List<BookDTO>> --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
     @GetMapping
     public GenericResponse<List<BookDTO>> searchTitleBooks(@RequestParam(name = "query") String query,
-                                                                 @RequestParam(name = "searchBy", defaultValue = "title") String searchBy) {
-
+                                                           @RequestParam(name = "searchBy", defaultValue = "title") String searchBy) {
         boolean isAuthorSearch = searchBy.equalsIgnoreCase("author");
         return GenericResponse.of(bookService.searchBooks(query, isAuthorSearch));
     }
-
-//    /**
-//     * -- 도서 조회 --
-//     *
-//     * @param -- SortBy(정렬 기준) --
-//     * @param -- direction(정렬 방향) --
-//     * @return -- GenericResponse<List<BookSimpleDTO>> --
-//     * DB에 있는 책을 토대로 도서를 조회함
-//     * 많은 책을 간략하게 보여줄때는 BooksimpleDto를 사용하고 책 세부 내용을 보여줄 때는 BookDto를 사용
-//     * 기본정렬은 id의 내림차순이고 제목,작가,설명,추천순 내림차순 오름차순 가능함
-//     * @author -- 정재익 --
-//     * @since -- 2월 3일 --
-//     */
-//    @GetMapping("/list")
-//    public GenericResponse<List<BookSimpleDTO>> searchAllBooks(@RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
-//                                                               @RequestParam(name = "direction", defaultValue = "desc") String direction) {
-//        return GenericResponse.of(bookService.searchAllBooks(sortBy, direction));
-//    }
 
     /**
      * -- 도서 상세 조회 --
      * DB에 있는 책의 상세정보를 조회
      *
-     * @param -- bookId --
+     * @param -- isbn --
      * @return -- GenericResponse<BookDTO> --
      * @author -- 정재익 --
-     * @since -- 1월 31일 --
+     * @since -- 2월 5일 --
      */
-    @GetMapping("/{id}")
-    public GenericResponse<BookDTO> searchDetailBook(@PathVariable("id") Long bookId) {
-        return GenericResponse.of(bookService.searchDetailsBook(bookId));
+    @GetMapping("/{isbn}")
+    public GenericResponse<BookDTO> getBookDetails(@PathVariable String isbn) {
+        return GenericResponse.of(bookService.getBookByIsbn(isbn));
     }
 
     /**

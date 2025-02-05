@@ -53,6 +53,8 @@ public class BookService {
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
 
+    private List<BookDTO> bookCache = new ArrayList<>();
+
     @Value("${naver.client-id}")
     private String clientId;
 
@@ -96,9 +98,11 @@ public class BookService {
             allBooks.addAll(searchNaverBooks(query));
         }
 
-        return allBooks.stream()
+        bookCache = allBooks.stream()
                 .map(book -> modelMapper.map(book, BookDTO.class))
                 .toList();
+
+        return bookCache;
     }
 
     /**
@@ -173,6 +177,13 @@ public class BookService {
                 .toList();
     }
 
+    public BookDTO getBookByIsbn(String isbn) {
+        return bookCache.stream()
+                .filter(book -> book.getTitle().equalsIgnoreCase(isbn))
+                .findFirst()
+                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+    }
+
 //    /**
 //     * -- 책 리스트를 DB에 저장하는 메소드 --
 //     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
@@ -191,30 +202,6 @@ public class BookService {
 //        return bookRepository.saveAll(newBooks);
 //    }
 
-    /**
-     * -- DB에 있는 책을 컨트롤러에 전달하는 메소드 --
-     * 1. List<Book>형태로 있는 데이터를 List<BookSimpleDto>로 변환한 후 컨트롤러에 전달
-     * 2. 상세 조회가 아니기 때문에 설명 데이터는 전달되지 않음
-     * 3. 정렬조건과 오름차순,내림차순이 입력될시에 정렬기능 작동
-     *
-     * @return -- List<BookSimpleDto> --
-     * @author -- 정재익 --
-     * @since -- 1월 27일 --
-     */
-    public List<BookDTO> searchAllBooks(String sortBy, String direction) {
-        try {
-            Sort sort = Sort.by(direction.equalsIgnoreCase("desc") ? Sort.Order.desc(sortBy) : Sort.Order.asc(sortBy));
-            List<Book> books = bookRepository.findAll(sort);
-
-            if (books.isEmpty()) {
-                throw new BookException(BookErrorCode.BOOK_DB_EMPTY);
-            }
-
-            return books.stream().map(book -> modelMapper.map(book, BookDTO.class)).toList();
-        } catch (PropertyReferenceException e) {
-            throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
-        }
-    }
 
     /**
      * -- 책의 상세정보를 반환하는 메서드 --
