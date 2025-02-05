@@ -2,6 +2,7 @@ package com.project.backend.domain.member.service;
 
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
+import com.project.backend.domain.member.dto.PasswordChangeDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
@@ -80,7 +81,6 @@ public class MemberService {
      * 회원 정보 수정
      *
      * @param member
-     * @param password
      * @param email
      * @param gender
      * @param nickname
@@ -88,11 +88,7 @@ public class MemberService {
      * @author 손진영
      * @since 25. 1. 28.
      */
-    public void modify(Member member, String password, String email, int gender, String nickname, LocalDate birth) {
-        if (!password.isEmpty()) {
-            if (password.length() < 8) throw new MemberException(PASSWORD_LENGTH);
-            member.setPassword(password);
-        }
+    public void modify(Member member, String email, int gender, String nickname, LocalDate birth) {
         member.setEmail(email);
         member.setGender(gender);
         member.setNickname(nickname);
@@ -116,5 +112,22 @@ public class MemberService {
         }
         
         return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
+    }
+
+    /**
+     * 비밀번호 변경
+     *
+     * @param member
+     * @param passwordChangeDto
+     */
+    public void changePassword(Member member, PasswordChangeDto passwordChangeDto) {
+        if (!passwordEncoder.matches(passwordChangeDto.getCurrentPassword(), member.getPassword())) {
+            throw new MemberException(INCORRECT_PASSWORD); // 현재 비밀번호 틀림
+        }
+        if (passwordChangeDto.getNewPassword().length() < 8) {
+            throw new MemberException(PASSWORD_LENGTH); // 새 비밀번호 길이 검사
+        }
+        member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword())); // 비밀번호 암호화 후 저장
+        memberRepository.flush();
     }
 }

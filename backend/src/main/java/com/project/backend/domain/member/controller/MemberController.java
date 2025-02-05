@@ -1,9 +1,6 @@
 package com.project.backend.domain.member.controller;
 
-import com.project.backend.domain.member.dto.LoginDto;
-import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.dto.MineDto;
-import com.project.backend.domain.member.dto.PasswordDto;
+import com.project.backend.domain.member.dto.*;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberErrorCode;
 import com.project.backend.domain.member.exception.MemberException;
@@ -100,7 +97,6 @@ public class MemberController {
         Member member = getAuthenticatedMember();
 
         memberService.modify(member,
-                mineDto.getPassword(),
                 mineDto.getEmail(),
                 mineDto.getGender(),
                 mineDto.getNickname(),
@@ -158,5 +154,20 @@ public class MemberController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return memberService.getMember(authentication.getName())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.INCORRECT_AUTHORIZED));
+    }
+
+
+    /**
+     * 비밀번호 변경
+     *
+     * @param passwordChangeDto
+     * @return GenericResponse
+     * @Valid
+     */
+    @PutMapping("/mine/password")
+    public GenericResponse changePassword(@RequestBody @Valid PasswordChangeDto passwordChangeDto) {
+        Member member = getAuthenticatedMember();
+        memberService.changePassword(member, passwordChangeDto);
+        return GenericResponse.of("비밀번호 변경 성공");
     }
 }
