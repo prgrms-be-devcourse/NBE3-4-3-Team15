@@ -15,6 +15,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +96,7 @@ public class MemberController {
     @Operation(summary = "회원 정보 조회")
     public GenericResponse<MemberDto> mine() {
 
-        Member member = checkAuthMember();
+        Member member = getUser();
 
         return GenericResponse.of(
                 new MemberDto(member),
@@ -114,7 +118,7 @@ public class MemberController {
     @Operation(summary = "회원 정보 수정")
     public GenericResponse<MemberDto> mine(@RequestBody @Valid MineDto mineDto) {
 
-        Member member = checkAuthMember();
+        Member member = getUser();
 
         memberService.modify(member,
                 mineDto.getPassword(),
@@ -141,7 +145,7 @@ public class MemberController {
     @DeleteMapping("/mine")
     @Operation(summary = "회원 탈퇴")
     public GenericResponse mine(@RequestBody @Valid PasswordDto passwordDto) {
-        Member member = checkAuthMember();
+        Member member = getUser();
 
         if (!passwordDto.getPassword().equals(member.getPassword()))
             throw new MemberException(INCORRECT_AUTHORIZED);
@@ -158,15 +162,13 @@ public class MemberController {
      * @author 손진영
      * @since 2025.01.31
      */
-    private Member checkAuthMember() {
-        String authorization = request.getHeader("Authorization");
-        String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
+    private Member getUser() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
 
-        if (apiKey.isEmpty()) throw new MemberException(NO_AUTHORIZED);
+        UserDetails user = (UserDetails) authentication.getPrincipal();
 
-        String username = jwtUtil.getUsernameFromToken(apiKey);
-
-        return memberService.getMember(username)
+        return memberService.getMember(user.getUsername())
                 .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
     }
 }
