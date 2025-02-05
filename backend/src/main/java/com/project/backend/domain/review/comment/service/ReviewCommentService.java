@@ -76,6 +76,7 @@ public class ReviewCommentService {
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
+                .isDelete(false)
                 .build();
         if(reviewCommentDto.getParentId()!=null){
             ReviewComment parentComment = reviewCommentRepository.findById(reviewCommentDto.getParentId())
@@ -143,10 +144,28 @@ public class ReviewCommentService {
                         ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                 ));
 
-        ReviewCommentDto reviewCommentDto =new ReviewCommentDto(reviewComment);
-        reviewCommentRepository.delete(reviewComment);
+        if(reviewComment.getParent()!=null){
+            ReviewComment parent = reviewComment.getParent();
 
-        return reviewCommentDto;
+            reviewCommentRepository.delete(reviewComment);
+
+            if(parent.isDelete()){
+                reviewCommentRepository.delete(parent);
+            }
+        }else{
+            if(reviewComment.getReplies().size()==0|| reviewComment.getReplies()==null){
+                reviewCommentRepository.delete(reviewComment);
+            }else{
+                reviewComment.setComment("해당 코멘트는 삭제되었습니다. ");
+                reviewComment.setUserId(null);
+                reviewComment.setDelete(true);
+                reviewCommentRepository.save(reviewComment);
+            }
+        }
+
+        return new ReviewCommentDto(reviewComment);
+
+
     }
 
     /**

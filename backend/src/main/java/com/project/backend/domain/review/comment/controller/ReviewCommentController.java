@@ -6,6 +6,7 @@ import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.global.response.GenericResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -113,6 +114,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
+    @Transactional
     public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
                                          @PathVariable("id") Long commentId){
        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
