@@ -37,7 +37,7 @@ public class BookController {
      * @since -- 2월 5일 --
      */
     @GetMapping
-    public GenericResponse<List<BookSimpleDTO>> searchTitleBooks(@RequestParam(name = "query") String query,
+    public GenericResponse<List<BookDTO>> searchTitleBooks(@RequestParam(name = "query") String query,
                                                                  @RequestParam(name = "searchBy", defaultValue = "title") String searchBy) {
 
         boolean isAuthorSearch = searchBy.equalsIgnoreCase("author");
@@ -102,7 +102,7 @@ public class BookController {
      * @since -- 2월 3일 --
      */
     @GetMapping("/favorite")
-    public GenericResponse<List<BookSimpleDTO>> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
+    public GenericResponse<List<BookDTO>> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
         return GenericResponse.of(bookService.searchFavoriteBooks(userDetails));
     }
 

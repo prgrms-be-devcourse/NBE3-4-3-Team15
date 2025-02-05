@@ -81,7 +81,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
-    public List<BookSimpleDTO> searchBooks(String query, boolean isAuthorSearch) {
+    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch) {
 
         if (query == null || query.isEmpty()) {
             throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
@@ -90,14 +90,14 @@ public class BookService {
         List<BookVO> allBooks = new ArrayList<>();
 
         if (isAuthorSearch) {
-            allBooks.addAll(searchKakaoBooks(query));
+            allBooks.addAll(searchKakaoBooks(query, "person"));
         } else {
-            allBooks.addAll(searchKakaoBooks(query));
+            allBooks.addAll(searchKakaoBooks(query, "title"));
             allBooks.addAll(searchNaverBooks(query));
         }
 
         return allBooks.stream()
-                .map(book -> modelMapper.map(book, BookSimpleDTO.class))
+                .map(book -> modelMapper.map(book, BookDTO.class))
                 .toList();
     }
 
@@ -121,7 +121,7 @@ public class BookService {
         headers.set("X-Naver-Client-Id", clientId);
         headers.set("X-Naver-Client-Secret", clientSecret);
 
-        String url = apiUrl + "?query=" + title + "&display=30";
+        String url = apiUrl + "?query=" + title + "&display=10";
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
@@ -148,12 +148,12 @@ public class BookService {
      * @author 김남우
      * @since 2025년 1월 27일
      */
-    private List<BookVO> searchKakaoBooks(String query) {
+    private List<BookVO> searchKakaoBooks(String query, String target) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoKey);
 
-        String url = kakaoUrl + "?query=" + query + "&size=10";
+        String url = kakaoUrl + "?query=" + query + "&size=10" + "&target=" + target;
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -201,7 +201,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 1월 27일 --
      */
-    public List<BookSimpleDTO> searchAllBooks(String sortBy, String direction) {
+    public List<BookDTO> searchAllBooks(String sortBy, String direction) {
         try {
             Sort sort = Sort.by(direction.equalsIgnoreCase("desc") ? Sort.Order.desc(sortBy) : Sort.Order.asc(sortBy));
             List<Book> books = bookRepository.findAll(sort);
@@ -210,7 +210,7 @@ public class BookService {
                 throw new BookException(BookErrorCode.BOOK_DB_EMPTY);
             }
 
-            return books.stream().map(book -> modelMapper.map(book, BookSimpleDTO.class)).toList();
+            return books.stream().map(book -> modelMapper.map(book, BookDTO.class)).toList();
         } catch (PropertyReferenceException e) {
             throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
         }
@@ -284,7 +284,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
-    public List<BookSimpleDTO> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
+    public List<BookDTO> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
         CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
         Long memberId = customUserDetails.getId();
         String memberUsername = userDetails.getUsername();
@@ -300,7 +300,7 @@ public class BookService {
         }
 
         return favorites.stream()
-                .map(favorite -> modelMapper.map(favorite.getBook(), BookSimpleDTO.class))
+                .map(favorite -> modelMapper.map(favorite.getBook(), BookDTO.class))
                 .collect(Collectors.toList());
     }
 
