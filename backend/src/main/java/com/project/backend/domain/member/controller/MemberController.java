@@ -126,6 +126,8 @@ public class MemberController {
 
         memberService.delete(member,passwordDto.getPassword());
 
+        SecurityContextHolder.clearContext();
+
         return GenericResponse.of("탈퇴 성공");
     }
 
