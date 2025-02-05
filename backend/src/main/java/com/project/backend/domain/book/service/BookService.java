@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -52,8 +53,8 @@ public class BookService {
     private final FavoriteRepository favoriteRepository;
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
+    private final ConcurrentHashMap<String, List<BookDTO>> bookCache = new ConcurrentHashMap<>();
 
-    private List<BookDTO> bookCache = new ArrayList<>();
 
     @Value("${naver.client-id}")
     private String clientId;
@@ -83,7 +84,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
-    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch) {
+    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId) {
 
         if (query == null || query.isEmpty()) {
             throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
@@ -98,11 +99,13 @@ public class BookService {
             allBooks.addAll(searchNaverBooks(query));
         }
 
-        bookCache = allBooks.stream()
+        List<BookDTO> bookList = allBooks.stream()
                 .map(book -> modelMapper.map(book, BookDTO.class))
                 .toList();
 
-        return bookCache;
+        bookCache.put(sessionId, bookList);
+
+        return bookList;
     }
 
     /**
@@ -177,9 +180,15 @@ public class BookService {
                 .toList();
     }
 
-    public BookDTO getBookByIsbn(String isbn) {
-        return bookCache.stream()
-                .filter(book -> book.getTitle().equalsIgnoreCase(isbn))
+    public BookDTO getBookByIsbn(String isbn, String sessionId) {
+        List<BookDTO> books = bookCache.get(sessionId);
+
+        if (books == null) {
+            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
+        }
+
+        return books.stream()
+                .filter(book -> book.getIsbn().equalsIgnoreCase(isbn))
                 .findFirst()
                 .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
     }
