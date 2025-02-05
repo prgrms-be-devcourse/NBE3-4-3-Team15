@@ -10,6 +10,7 @@ import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.book.vo.KakaoBookVO;
 import com.project.backend.domain.book.vo.NaverBookVO;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberErrorCode;
@@ -32,6 +33,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,34 +68,7 @@ public class BookService {
     @Value("${kakao.url}")
     private String kakaoUrl;
 
-    /**
-     * -- 네이버api를 통해 검색어에 대한 도서데이터를 가져오는 메소드 --
-     * 책은 한번에 30권 조회되도록 설정했다.
-     * <p>
-     *
-     * @param -- title (컨트롤러에서 입력한 검색어) --
-     * @return -- List<NaverBookVO.Item> --
-     * @author -- 정재익 --
-     * @since -- 2월 3일 --
-     */
-//    private List<NaverBookVO.Item> BookDataFromApi(String title) {
-//        if (title == null || title.isEmpty()) {
-//            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
-//        }
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("X-Naver-Client-Id", clientId);
-//        headers.set("X-Naver-Client-Secret", clientSecret);
-//
-//        String url = apiUrl + "?query=" + title + "&display=30";
-//        HttpEntity<String> entity = new HttpEntity<>(headers);
-//        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
-//
-//        return Optional.ofNullable(response.getBody())
-//                .map(NaverBookVO::getItems)
-//                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
-//    }
+
 
     /**
      * -- 네이버api를 통해 받아온 검색 결과를 List<BookSimpleDto>로 변환하여 컨트롤러에 반환하는 메소드 --
@@ -114,24 +89,70 @@ public class BookService {
             throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
         }
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Naver-Client-Id", clientId);
-        headers.set("X-Naver-Client-Secret", clientSecret);
-
-        String url = apiUrl + "?query=" + query + "&display=30";
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
-
-        List<NaverBookVO.Item> items =  Optional.ofNullable(response.getBody())
-                .map(NaverBookVO::getItems)
-                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
-        List<Book> savedBooks = saveBooks(items);
+        List<Book> savedBooks = isAuthorSearch ? searchKakaoBooks(query) : searchNaverBooks(query);
 
         return savedBooks.stream()
                 .map(book -> modelMapper.map(book, BookSimpleDTO.class))
                 .toList();
 
+    }
+
+    /**
+     * -- 네이버api를 통해 검색어에 대한 도서데이터를 가져오는 메소드 --
+     * 책은 한번에 30권 조회되도록 설정했다.
+     * <p>
+     *
+     * @param -- title (컨트롤러에서 입력한 검색어) --
+     * @return -- List<NaverBookVO.Item> --
+     * @author -- 정재익 --
+     * @since -- 2월 3일 --
+     */
+    private List<NaverBookVO.Item> searchNaverBooks(String title) {
+        if (title == null || title.isEmpty()) {
+            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", clientId);
+        headers.set("X-Naver-Client-Secret", clientSecret);
+
+        String url = apiUrl + "?query=" + title + "&display=30";
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
+
+        return Optional.ofNullable(response.getBody())
+                .map(NaverBookVO::getItems)
+                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+    }
+
+    /**
+     * -- 카카오 도서 검색 API를 호출하여 도서 목록을 조회하는 메소드 --
+     *
+     * @param query 검색어
+     * @return 카카오 API로부터 받은 도서 목록을 담은 allKakaoBooks 리스트
+     *
+     * @author 김남우
+     * @since 2025년 1월 27일
+     */
+    private List<KakaoBookVO.Item> searchKakaoBooks(String query) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoKey);
+
+        List<KakaoBookVO.Item> allKakaoBooks = new ArrayList<>();
+
+        for (int page = 1; page <= 1; page++) {
+            String url = kakaoUrl + "?query=" + query + "&page=" + page + "&size=10";
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<KakaoBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, KakaoBookVO.class);
+
+            List<KakaoBookVO.Item> kakaoBooks = response.getBody().getItems();
+            allKakaoBooks.addAll(kakaoBooks);
+        }
+
+        return allKakaoBooks;
     }
 
     /**
@@ -265,34 +286,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * -- 카카오 도서 검색 API를 호출하여 도서 목록을 조회하는 메소드 --
-     *
-     * @param query 검색어
-     * @return 카카오 API로부터 받은 도서 목록을 담은 allKakaoBooks 리스트
-     *
-     * @author 김남우
-     * @since 2025년 1월 27일
-     */
-    private List<KakaoBookVO.Item> saveBookDataFromKakaoApi(String query) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK " + kakaoKey);
 
-        List<KakaoBookVO.Item> allKakaoBooks = new ArrayList<>();
-
-        for (int page = 1; page <= 1; page++) {
-            String url = kakaoUrl + "?query=" + query + "&page=" + page + "&size=10";
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<KakaoBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, KakaoBookVO.class);
-
-            List<KakaoBookVO.Item> kakaoBooks = response.getBody().getItems();
-            allKakaoBooks.addAll(kakaoBooks);
-        }
-
-        return allKakaoBooks;
-    }
 
     /**
      * -- 카카오 도서 API에서 받은 도서 정보를 DB에 저장하는 메소드 --
@@ -315,23 +309,23 @@ public class BookService {
         return newBooks;
     }
 
-    /**
-     * -- 작가 검색 메소드 --
-     *
-     * @param
-     * @return
-     *
-     * @author 김남우
-     * @since 2025년 2월 4일
-     */
-    public List<BookSimpleDTO> searchByAuthor(String author) {
-        return bookRepository.findByAuthor(author)
-                .stream()
-                .map(book -> new BookSimpleDTO(
-                        book.getTitle(),
-                        book.getAuthor(),
-                        book.getImage()
-                ))
-                .toList();
-    }
+//    /**
+//     * -- 작가 검색 메소드 --
+//     *
+//     * @param
+//     * @return
+//     *
+//     * @author 김남우
+//     * @since 2025년 2월 4일
+//     */
+//    public List<BookSimpleDTO> searchByAuthor(String author) {
+//        return bookRepository.findByAuthor(author)
+//                .stream()
+//                .map(book -> new BookSimpleDTO(
+//                        book.getTitle(),
+//                        book.getAuthor(),
+//                        book.getImage()
+//                ))
+//                .toList();
+//    }
 }
