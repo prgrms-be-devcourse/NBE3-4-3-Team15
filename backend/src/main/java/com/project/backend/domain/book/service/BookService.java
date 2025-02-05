@@ -211,21 +211,6 @@ public class BookService {
 //        return bookRepository.saveAll(newBooks);
 //    }
 
-
-    /**
-     * -- 책의 상세정보를 반환하는 메서드 --
-     *
-     * @param -- id --
-     * @return -- BookDto --
-     * @author -- 정재익 --
-     * @since -- 2월 3일 --
-     */
-    public BookDTO searchDetailsBook(Long id) {
-        Optional<Book> book = bookRepository.findById(id);
-
-        return book.map(b -> modelMapper.map(b, BookDTO.class)).orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
-    }
-
     /**
      * -- 책을 찜하거나 찜취소하는 메소드 --
      * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
