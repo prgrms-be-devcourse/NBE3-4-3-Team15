@@ -97,9 +97,13 @@ public class MemberService {
         member.setGender(gender);
         member.setNickname(nickname);
         member.setBirth(birth);
+        memberRepository.flush();
     }
 
-    public void delete(Member member) {
+    public void delete(Member member, String password) {
+        if(!passwordEncoder.matches(password, member.getPassword())) {
+            throw new MemberException(INCORRECT_PASSWORD);
+        }
         memberRepository.delete(member);
     }
 
