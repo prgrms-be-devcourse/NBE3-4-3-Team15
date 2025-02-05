@@ -10,6 +10,7 @@ import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.book.vo.BookVO;
 import com.project.backend.domain.book.vo.KakaoBookVO;
 import com.project.backend.domain.book.vo.NaverBookVO;
 import com.project.backend.domain.member.entity.Member;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpEntity;
@@ -35,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -89,17 +92,18 @@ public class BookService {
             throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
         }
 
-        if (isAuthorSearch) {
-            List<KakaoBookVO.Item> items = searchKakaoBooks(query);
-            return items.stream()
-                    .map(item -> modelMapper.map(item, BookSimpleDTO.class))
-                    .toList();
-        } else {
-            searchKakaoBooks(query);
-            searchNaverBooks(query);
+        List<BookVO> allBooks = new ArrayList<>();
 
-            return null;
+        if (isAuthorSearch) {
+            allBooks.addAll(searchKakaoBooks(query));
+        } else {
+            allBooks.addAll(searchKakaoBooks(query));
+            allBooks.addAll(searchNaverBooks(query));
         }
+
+        return allBooks.stream()
+                .map(book -> modelMapper.map(book, BookSimpleDTO.class))
+                .toList();
     }
 
     /**
@@ -112,7 +116,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
-    private List<NaverBookVO.Item> searchNaverBooks(String title) {
+    private List<BookVO> searchNaverBooks(String title) {
         if (title == null || title.isEmpty()) {
             throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
         }
@@ -124,11 +128,20 @@ public class BookService {
 
         String url = apiUrl + "?query=" + title + "&display=30";
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
 
-        return Optional.ofNullable(response.getBody())
-                .map(NaverBookVO::getItems)
-                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+        List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get("items");
+
+        return items.stream()
+                .map(item -> new BookVO(
+                        (String) item.get("title"),
+                        (String) item.get("author"),
+                        (String) item.get("description"),
+                        (String) item.get("image"),
+                        (String) item.get("isbn")
+                ))
+                .toList();
     }
 
     /**
@@ -140,24 +153,29 @@ public class BookService {
      * @author 김남우
      * @since 2025년 1월 27일
      */
-    private List<KakaoBookVO.Item> searchKakaoBooks(String query) {
+    private List<BookVO> searchKakaoBooks(String query) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoKey);
 
-        List<KakaoBookVO.Item> allKakaoBooks = new ArrayList<>();
+        String url = kakaoUrl + "?query=" + query + "&size=10";
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        for (int page = 1; page <= 1; page++) {
-            String url = kakaoUrl + "?query=" + query + "&page=" + page + "&size=10";
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
+                });
 
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<KakaoBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, KakaoBookVO.class);
+        List<Map<String, Object>> documents = (List<Map<String, Object>>) response.getBody().get("documents");
 
-            List<KakaoBookVO.Item> kakaoBooks = response.getBody().getItems();
-            allKakaoBooks.addAll(kakaoBooks);
-        }
-
-        return allKakaoBooks;
+        return documents.stream()
+                .map(doc -> new BookVO(
+                        (String) doc.get("title"),
+                        (List<String>) doc.get("authors"),
+                        (String) doc.get("contents"),
+                        (String) doc.get("thumbnail"),
+                        (String) doc.get("isbn")
+                ))
+                .toList();
     }
 
     /**
