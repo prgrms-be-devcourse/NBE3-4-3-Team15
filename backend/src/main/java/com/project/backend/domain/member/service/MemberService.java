@@ -11,6 +11,7 @@ import com.project.backend.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -88,12 +89,12 @@ public class MemberService {
      * @author 손진영
      * @since 25. 1. 28.
      */
+    @Transactional
     public void modify(Member member, String email, int gender, String nickname, LocalDate birth) {
         member.setEmail(email);
         member.setGender(gender);
         member.setNickname(nickname);
         member.setBirth(birth);
-        memberRepository.flush();
     }
 
     public void delete(Member member, String password) {
