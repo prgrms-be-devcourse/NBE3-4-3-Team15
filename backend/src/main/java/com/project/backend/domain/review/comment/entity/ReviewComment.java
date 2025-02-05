@@ -2,14 +2,19 @@ package com.project.backend.domain.review.comment.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -28,23 +33,29 @@ import java.util.List;
 public class ReviewComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
-    private String userId;
+    private Long userId;
 
     private String comment;
 
+    @ManyToOne
+
+    @JoinColumn(name="parent_id")
+    private ReviewComment parent;
+
+
+    private Integer depth =0;
 
     @ManyToMany
-    private List<Member> recommend;
-    //차리리 셋이 좋을듯
-    /**
-     * 서류에 작성
-     *
-     */
+    private Set<Member> recommend;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewComment> replies = new ArrayList<>();  // 자식 댓글 (대댓글)
+
 
 }

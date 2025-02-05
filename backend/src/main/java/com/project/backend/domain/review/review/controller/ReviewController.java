@@ -6,6 +6,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,7 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @PostMapping
-    public GenericResponse<String> postReview(@RequestBody ReviewsDTO reviewsDTO){
+    public GenericResponse<String> postReview(@Valid @RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
 
@@ -72,8 +73,8 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
-    public GenericResponse<ReviewsDTO> putReviews(@RequestBody ReviewsDTO reviewsDTO,
-                                             @PathVariable("id") Integer id){
+    public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
+                                             @PathVariable("id") Long id){
         reviewService.modify(reviewsDTO,id);
         return GenericResponse.of(
                 reviewsDTO,
@@ -91,7 +92,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
-    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Integer id){
+    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
         ReviewsDTO review=  reviewService.delete(id);
 
         return GenericResponse.of(
@@ -111,7 +112,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
-    public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Integer reviewId,
+    public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
         ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
