@@ -41,8 +41,7 @@ public class BookController {
     public GenericResponse<List<BookDTO>> searchBooks(@RequestParam(name = "query") String query,
                                                       @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
                                                       @RequestHeader(name = "X-Session-Id") String sessionId) {
-        boolean isAuthorSearch = searchBy.equalsIgnoreCase("author");
-        return GenericResponse.of(bookService.searchBooks(query, isAuthorSearch, sessionId));
+        return GenericResponse.of(bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), sessionId));
     }
 
     /**
