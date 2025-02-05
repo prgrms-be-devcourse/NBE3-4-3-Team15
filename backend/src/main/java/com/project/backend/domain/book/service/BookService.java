@@ -73,9 +73,8 @@ public class BookService {
 
     /**
      * -- 도서 검색 메소드 --
-     * 1. 제목 검색일 경우 네이버와 카카오 Api에 요청 (네이버와 카카오 사이에 중복책이 있는지 검사)
-     * 2. 작가 검색일 경우 카카오 Api에 요청
-     * 3. List<BookDto>로 변환하여 반환
+     * 1. 카카오와 네이버 두 Api에 요청
+     * 2. List<BookDto>로 변환하여 반환
      *
      * @param -- title (검색어) --
      * @param -- isAuthorSearch (작가검색, 도서검색 판단) --
@@ -93,12 +92,8 @@ public class BookService {
 
         List<ApiBookVO> allBooks = new ArrayList<>();
 
-        if (isAuthorSearch) {
-            allBooks.addAll(requestApi(query, "person", "kakao"));
-        } else {
-            allBooks.addAll(requestApi(query, "title", "kakao"));
-            allBooks.addAll(requestApi(query, "", "naver"));
-        }
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao"));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver"));
 
         List<BookDTO> bookList = allBooks.stream()
                 .map(book -> {
