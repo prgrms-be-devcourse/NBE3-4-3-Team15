@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * -- 도서 관련 작업을 처리하는 컨트롤러 --
+ * -- 도서 컨트롤러 --
  *
  * @author -- 정재익 --
- * @since -- 1월 27일 --
+ * @since -- 2월 5일 --
  */
 @RequiredArgsConstructor
 @RestController
@@ -31,32 +31,34 @@ public class BookController {
      * api의 정보를 바탕으로 도서를 검색
      * 작가 검색, 제목 검색 기능
      *
-     * @param -- title(검색어) --
+     * @param -- query(검색어), searchBy(title = 제목검색, author = 작가검색) --
+     * @header -- X-Session-Id (개인별 세션 ID) --
      * @return -- GenericResponse<List<BookDTO>> --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
     @GetMapping
-    public GenericResponse<List<BookDTO>> searchTitleBooks( @RequestParam(name = "query") String query,
-                                                            @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
-                                                            @RequestHeader(name = "X-Session-Id") String sessionId) {
+    public GenericResponse<List<BookDTO>> searchBooks(@RequestParam(name = "query") String query,
+                                                      @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
+                                                      @RequestHeader(name = "X-Session-Id") String sessionId) {
         boolean isAuthorSearch = searchBy.equalsIgnoreCase("author");
         return GenericResponse.of(bookService.searchBooks(query, isAuthorSearch, sessionId));
     }
 
     /**
-     * -- 도서 상세 조회 --
-     * DB에 있는 책의 상세정보를 조회
+     * -- 도서 상세 검색 --
+     * 책의 상세 정보 조회
      *
      * @param -- isbn --
+     * @header -- X-Session-Id (개인별 세션 ID) --
      * @return -- GenericResponse<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
     @GetMapping("/{isbn}")
-    public GenericResponse<BookDTO> getBookDetails(@PathVariable(name = "isbn") String isbn,
-                                                   @RequestHeader(name = "X-Session-Id") String sessionId) {
-        return GenericResponse.of(bookService.getBookByIsbn(isbn, sessionId));
+    public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn,
+                                                     @RequestHeader(name = "X-Session-Id") String sessionId) {
+        return GenericResponse.of(bookService.searchBookDetail(isbn, sessionId));
     }
 
     /**

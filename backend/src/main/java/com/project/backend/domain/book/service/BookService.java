@@ -9,7 +9,7 @@ import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
-import com.project.backend.domain.book.vo.BookVO;
+import com.project.backend.domain.book.vo.ApiBookVO;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberErrorCode;
 import com.project.backend.domain.member.exception.MemberException;
@@ -21,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,15 +33,15 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * -- 도서 관련 작업을 처리하는 서비스클래스 --
+ * -- 도서 서비스 클래스 --
  *
  * @author -- 정재익 --
- * @since -- 1월 27일 --
+ * @since -- 2월 5일 --
  */
 @RequiredArgsConstructor
 @Service
@@ -72,17 +70,18 @@ public class BookService {
     private String kakaoUrl;
 
     /**
-     * -- 네이버api를 통해 받아온 검색 결과를 List<BookSimpleDto>로 변환하여 컨트롤러에 반환하는 메소드 --
-     * -- 동시에 아래 saveBooks 메소드를 통해 검색 결과를 DB에 저장
-     * <p>
-     * 1. 검색 결과를 BookDataFromApi에 전달
-     * 2. 검색 결과를 DB에 저장
-     * 3. DB에 저장된 값을 List<BookSimpleDto>로 변환하여 컨트롤러에 전달
+     * -- 도서 검색 메소드 --
+     * 1. 제목 검색일 경우 네이버와 카카오 Api에 요청
+     * 2. 작가 검색일 경우 카카오 Api에 요청
+     * 3. List<BookDto>로 변환하여 반환
      *
-     * @param -- title (컨트롤러에서 입력한 검색어) --
-     * @return -- List<BookSimpleDTO> --
+     * @param -- title (검색어) --
+     * @param -- isAuthorSearch (작가검색, 도서검색 판단) --
+     * @param -- sessionId (개인별 세션 ID)
+     *
+     * @return -- List<BookDTO> --
      * @author -- 정재익 --
-     * @since -- 2월 3일 --
+     * @since -- 2월 5일 --
      */
     public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId) {
 
@@ -90,13 +89,13 @@ public class BookService {
             throw new BookException(BookErrorCode.INVALID_SORT_PROPERTY);
         }
 
-        List<BookVO> allBooks = new ArrayList<>();
+        List<ApiBookVO> allBooks = new ArrayList<>();
 
         if (isAuthorSearch) {
-            allBooks.addAll(searchKakaoBooks(query, "person"));
+            allBooks.addAll(requestKakaoApi(query, "person"));
         } else {
-            allBooks.addAll(searchKakaoBooks(query, "title"));
-            allBooks.addAll(searchNaverBooks(query));
+            allBooks.addAll(requestKakaoApi(query, "title"));
+            allBooks.addAll(requestNaverApi(query));
         }
 
         List<BookDTO> bookList = allBooks.stream()
@@ -109,16 +108,15 @@ public class BookService {
     }
 
     /**
-     * -- 네이버api를 통해 검색어에 대한 도서데이터를 가져오는 메소드 --
-     * 책은 한번에 30권 조회되도록 설정했다.
-     * <p>
+     * -- 네이버 Api 요청 메소드 --
+     * 책은 한번에 10권 조회하도록 설정했다.
      *
      * @param -- title (컨트롤러에서 입력한 검색어) --
-     * @return -- List<NaverBookVO.Item> --
+     * @return -- List<ApiBookVo> --
      * @author -- 정재익 --
-     * @since -- 2월 3일 --
+     * @since -- 2월 5일 --
      */
-    private List<BookVO> searchNaverBooks(String title) {
+    private List<ApiBookVO> requestNaverApi(String title) {
         if (title == null || title.isEmpty()) {
             throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
         }
@@ -130,32 +128,29 @@ public class BookService {
 
         String url = apiUrl + "?query=" + title + "&display=10";
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
 
-        List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get("items");
+        ResponseEntity<Map<String, List<Map<String, Object>>>> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {});
+
+        List<Map<String, Object>> items = Objects.requireNonNull(response.getBody()).getOrDefault("items", new ArrayList<>());
 
         return items.stream()
-                .map(item -> new BookVO(
-                        (String) item.get("title"),
-                        (String) item.get("author"),
-                        (String) item.get("description"),
-                        (String) item.get("image"),
-                        (String) item.get("isbn")
-                ))
+                .map(item -> modelMapper.map(item, ApiBookVO.class))
                 .toList();
+
     }
 
     /**
-     * -- 카카오 도서 검색 API를 호출하여 도서 목록을 조회하는 메소드 --
+     * -- 카카오 Api 요청 메소드 --
      *
      * @param query 검색어
-     * @return 카카오 API로부터 받은 도서 목록을 담은 allKakaoBooks 리스트
+     * @param target 도서 검색 필터'
+     * @return List<ApiBookVo>
      *
-     * @author 김남우
-     * @since 2025년 1월 27일
+     * @author 정재익
+     * @since 2월 5일
      */
-    private List<BookVO> searchKakaoBooks(String query, String target) {
+    private List<ApiBookVO> requestKakaoApi(String query, String target) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoKey);
@@ -163,24 +158,27 @@ public class BookService {
         String url = kakaoUrl + "?query=" + query + "&size=10" + "&target=" + target;
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {
-                });
+        ResponseEntity<Map<String, List<Map<String, Object>>>> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {});
 
-        List<Map<String, Object>> documents = (List<Map<String, Object>>) response.getBody().get("documents");
+        List<Map<String, Object>> documents = Objects.requireNonNull(response.getBody()).getOrDefault("documents", new ArrayList<>());
 
         return documents.stream()
-                .map(doc -> new BookVO(
-                        (String) doc.get("title"),
-                        (List<String>) doc.get("authors"),
-                        (String) doc.get("contents"),
-                        (String) doc.get("thumbnail"),
-                        (String) doc.get("isbn")
-                ))
+                .map(doc -> modelMapper.map(doc, ApiBookVO.class))
                 .toList();
     }
 
-    public BookDTO getBookByIsbn(String isbn, String sessionId) {
+    /**
+     * -- 도서 상세 검색 메소드 --
+     *
+     * @param isbn isbn
+     * @param sessionId 개인별 session Id
+     * @return BookDTO
+     *
+     * @author 정재익
+     * @since 2월 5일
+     */
+    public BookDTO searchBookDetail(String isbn, String sessionId) {
         List<BookDTO> books = bookCache.get(sessionId);
 
         if (books == null) {
