@@ -61,3 +61,4 @@ INSERT INTO favorite(`book_id`, `member_username`)
 INSERT INTO favorite(`book_id`, `member_username`)
     SELECT 3, 'user1' FROM DUAL
     WHERE NOT EXISTS (SELECT 1 FROM favorite WHERE book_id = 11111112 AND member_username = 'user1') LIMIT 1;
+
