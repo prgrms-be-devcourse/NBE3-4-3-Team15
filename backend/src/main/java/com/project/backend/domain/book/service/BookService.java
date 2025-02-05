@@ -70,24 +70,24 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
-    private List<NaverBookVO.Item> BookDataFromNaverApi(String title) {
-        if (title == null || title.isEmpty()) {
-            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
-        }
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Naver-Client-Id", clientId);
-        headers.set("X-Naver-Client-Secret", clientSecret);
-
-        String url = apiUrl + "?query=" + title + "&display=30";
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
-
-        return Optional.ofNullable(response.getBody())
-                .map(NaverBookVO::getItems)
-                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
-    }
+//    private List<NaverBookVO.Item> BookDataFromApi(String title) {
+//        if (title == null || title.isEmpty()) {
+//            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
+//        }
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("X-Naver-Client-Id", clientId);
+//        headers.set("X-Naver-Client-Secret", clientSecret);
+//
+//        String url = apiUrl + "?query=" + title + "&display=30";
+//        HttpEntity<String> entity = new HttpEntity<>(headers);
+//        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
+//
+//        return Optional.ofNullable(response.getBody())
+//                .map(NaverBookVO::getItems)
+//                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+//    }
 
     /**
      * -- 네이버api를 통해 받아온 검색 결과를 List<BookSimpleDto>로 변환하여 컨트롤러에 반환하는 메소드 --
@@ -102,8 +102,24 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
-    public List<BookSimpleDTO> searchTitleBooks(String title) {
-        List<NaverBookVO.Item> items = BookDataFromNaverApi(title);
+    public List<BookSimpleDTO> searchBooks(String query, boolean isAuthorSearch) {
+
+        if (query == null || query.isEmpty()) {
+            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", clientId);
+        headers.set("X-Naver-Client-Secret", clientSecret);
+
+        String url = apiUrl + "?query=" + query + "&display=30";
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<NaverBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, NaverBookVO.class);
+
+        List<NaverBookVO.Item> items =  Optional.ofNullable(response.getBody())
+                .map(NaverBookVO::getItems)
+                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
         List<Book> savedBooks = saveBooks(items);
 
         return savedBooks.stream()
