@@ -1,7 +1,6 @@
 package com.project.backend.domain.book.service;
 
 import com.project.backend.domain.book.dto.BookDTO;
-import com.project.backend.domain.book.dto.BookSimpleDTO;
 import com.project.backend.domain.book.dto.FavoriteDTO;
 import com.project.backend.domain.book.entity.Book;
 import com.project.backend.domain.book.entity.Favorite;
@@ -68,8 +67,6 @@ public class BookService {
 
     @Value("${kakao.url}")
     private String kakaoUrl;
-
-
 
     /**
      * -- 네이버api를 통해 받아온 검색 결과를 List<BookSimpleDto>로 변환하여 컨트롤러에 반환하는 메소드 --

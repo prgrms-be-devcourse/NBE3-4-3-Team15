@@ -1,7 +1,6 @@
 package com.project.backend.domain.book.controller;
 
 import com.project.backend.domain.book.dto.BookDTO;
-import com.project.backend.domain.book.dto.BookSimpleDTO;
 import com.project.backend.domain.book.dto.FavoriteDTO;
 import com.project.backend.domain.book.service.BookService;
 import com.project.backend.global.response.GenericResponse;
