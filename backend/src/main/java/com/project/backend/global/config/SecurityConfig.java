@@ -1,6 +1,6 @@
 package com.project.backend.global.config;
 
-import com.project.backend.global.jwt.JwtAuthenticationFilter;
+import com.project.backend.global.jwt.JwtAuthentizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +27,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtAuthenticationFilter authenticationFilter;
+    private final JwtAuthentizationFilter authenticationFilter;
 
     /**
      * 스프링 시큐리티 설정 (SecurityFilterChain)
@@ -41,7 +41,7 @@ public class SecurityConfig {
      * @since 25. 2. 3.
      */
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthentizationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
