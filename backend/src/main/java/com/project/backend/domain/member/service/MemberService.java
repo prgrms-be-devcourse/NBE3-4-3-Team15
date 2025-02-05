@@ -2,19 +2,16 @@ package com.project.backend.domain.member.service;
 
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
+import com.project.backend.domain.member.dto.MineDto;
 import com.project.backend.domain.member.dto.PasswordChangeDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
-import com.project.backend.global.exception.GlobalException;
 import com.project.backend.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
@@ -35,23 +32,20 @@ public class MemberService {
     /**
      * 회원가입 처리
      *
-     * @param memberDto
-     * @return Member
-     * @throws GlobalException INVALID_PASSWORD: 입력된 두 비밀번호가 일치하지 않는 경우.
+     * @param memberDto 회원가입 요청 DTO
+     * @throws MemberException INVALID_PASSWORD: 입력된 두 비밀번호가 일치하지 않는 경우.
      *                         EXISTING_ID: 이미 존재하는 아이디로 회원가입을 시도한 경우.
      * @author 손진영
      * @since 25. 1. 27.
      */
-    public Member join(MemberDto memberDto) throws GlobalException {
+    public void join(MemberDto memberDto) {
         if (!memberDto.getPassword1().equals(memberDto.getPassword2())) {
             throw new MemberException(INVALID_PASSWORD);
         }
 
-        getMember(memberDto.getUsername())
-                .ifPresent((member) -> {
-                    throw new MemberException(EXISTING_ID);
-                });
-
+        if (memberRepository.findByUsername(memberDto.getUsername()).isPresent()) {
+            throw new MemberException(EXISTING_ID);
+        }
         Member member = Member.builder()
                 .username(memberDto.getUsername())
                 .email(memberDto.getEmail())
@@ -62,49 +56,79 @@ public class MemberService {
                 .build();
 
         memberRepository.save(member);
-
-        return member;
     }
 
     /**
-     * 회원 정보 조회
+     * 내 정보 조회
      *
-     * @param username
-     * @return Optional<Member>
+     * @param username 현재 로그인한 사용자의 아이디
+     * @return MemberDto 회원 정보 DTO
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 화원이 존재하지 않은 경우.
      * @author 손진영
      * @since 25. 1. 27.
      */
-    public Optional<Member> getMember(String username) {
-        return memberRepository.findByUsername(username);
+    public MemberDto getMyProfile(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
+        
+        return new MemberDto(member);
     }
 
     /**
      * 회원 정보 수정
      *
-     * @param member
-     * @param email
-     * @param gender
-     * @param nickname
-     * @param birth
+     * @param username 현재 로그인한 사용자의 아이디
+     * @param mineDto 변경할 회원 정보 DTO
+     * @return MemberDto 수정된 회원 정보 DTO
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않은 경우.
+     *
      * @author 손진영
      * @since 25. 1. 28.
      */
     @Transactional
-    public void modify(Member member, String email, int gender, String nickname, LocalDate birth) {
-        member.setEmail(email);
-        member.setGender(gender);
-        member.setNickname(nickname);
-        member.setBirth(birth);
+    public MemberDto modify(String username, MineDto mineDto) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
+
+        member.setEmail(mineDto.getEmail());
+        member.setGender(mineDto.getGender());
+        member.setNickname(mineDto.getNickname());
+        member.setBirth(mineDto.getBirth());
+
+        return new MemberDto(member);
     }
 
-    public void delete(Member member, String password) {
+    /**
+     * 회원 탈퇴
+     * @param username 현재 로그인한 사용자 아이디
+     * @param password 입력된 비밀번호
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
+     *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
+     * @author 이원재
+     * @since 25. 2. 6.
+     */
+    @Transactional
+    public void delete(String username, String password) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
+
         if(!passwordEncoder.matches(password, member.getPassword())) {
             throw new MemberException(INCORRECT_PASSWORD);
         }
+
         memberRepository.delete(member);
     }
 
-    public String login(LoginDto loginDto) throws GlobalException {
+    /**
+     * 로그인 (JWT 발급)
+     * @param loginDto 로그인 요청 DTO(아이디, 비밀번호 포함)
+     * @return JWT 토큰 (로그인 성공 시 반환)
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
+     *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
+     * @author 이원재
+     * @since 25. 2. 6.
+     */
+    public String login(LoginDto loginDto) {
         Member member = memberRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(()->new MemberException(NON_EXISTING_ID));
 
@@ -117,18 +141,26 @@ public class MemberService {
 
     /**
      * 비밀번호 변경
-     *
-     * @param member
-     * @param passwordChangeDto
+     * @param username 현재 로그인한 사용자의 아이디
+     * @param passwordChangeDto 비밀번호 변경 요청 DTO (현재 비밀번호, 새 비밀번호 포함)
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
+     *                         INCORRECT_PASSWORD: 현재 비밀번호가 올바르지 않은 경우
+     *                         SAME_AS_OLD_PASSWORD: 새 비밀번호가 현재 비밀번호와 동일한 경우
+     * @author 이원재
+     * @since 25. 2. 6.
      */
-    public void changePassword(Member member, PasswordChangeDto passwordChangeDto) {
-        if (!passwordEncoder.matches(passwordChangeDto.getCurrentPassword(), member.getPassword())) {
-            throw new MemberException(INCORRECT_PASSWORD); // 현재 비밀번호 틀림
-        }
-        if (passwordChangeDto.getNewPassword().length() < 8) {
-            throw new MemberException(PASSWORD_LENGTH); // 새 비밀번호 길이 검사
-        }
-        member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword())); // 비밀번호 암호화 후 저장
-        memberRepository.flush();
-    }
+    @Transactional
+    public void changePassword(String username, PasswordChangeDto passwordChangeDto) {
+        memberRepository.findByUsername(username)
+                .map(member -> {
+                    if (!passwordEncoder.matches(passwordChangeDto.getCurrentPassword(), member.getPassword())) {
+                        throw new MemberException(INCORRECT_PASSWORD);
+                    }
+                    if (passwordChangeDto.getNewPassword().equals(passwordChangeDto.getCurrentPassword())) {
+                        throw new MemberException(SAME_AS_OLD_PASSWORD);
+                    }
+                    member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+                    return member;
+                })
+                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));}
 }
