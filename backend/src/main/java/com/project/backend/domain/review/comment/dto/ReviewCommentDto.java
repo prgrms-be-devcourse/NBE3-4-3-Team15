@@ -45,9 +45,15 @@ public class ReviewCommentDto {
 
     private Set<MemberDto> recommend;
 
+
+
     private LocalDateTime createdAt;
 
     private LocalDateTime modifiedAt;
+    private List<ReviewCommentDto> replies;
+
+
+
     public ReviewCommentDto(ReviewComment reviewComment) {
         this.id = reviewComment.getId();
         this.reviewId = reviewComment.getReview().getId();
@@ -56,10 +62,15 @@ public class ReviewCommentDto {
         this.parentId = (reviewComment.getParent() == null)?null: reviewComment.getParent().getId();
         this.depth = reviewComment.getDepth();
         this.recommend = reviewComment.getRecommend().stream()
-                .map(MemberDto::new)  // Set<Member>를 Set<MemberDto>로 변환
+                .map(MemberDto::new)
                 .collect(Collectors.toSet());
         this.createdAt= reviewComment.getCreatedAt();
         this.modifiedAt=reviewComment.getModifiedAt();
+        this.replies = (reviewComment.getReplies() != null)? reviewComment.getReplies().stream()
+                .map(ReviewCommentDto::new)
+                .collect(Collectors.toList()):null;
 
     }
+
+
 }

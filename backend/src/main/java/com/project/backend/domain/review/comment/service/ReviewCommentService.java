@@ -64,6 +64,7 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto) {
+        System.out.println(1);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -71,7 +72,9 @@ public class ReviewCommentService {
                         ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
                 ));
         ReviewComment reviewComment;
+        //자식 댓글일때
         if(reviewCommentDto.getParentId()!=null) {
+            System.out.println(2);
             ReviewComment  parentsComment = reviewCommentRepository.findById(reviewCommentDto.getParentId())
                     .orElseThrow(() -> new ReviewException(
                             ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
@@ -93,7 +96,9 @@ public class ReviewCommentService {
                     .parent(parentsComment)
                      .depth(parentsComment.getDepth()+1)
                     .build());
-        }else{
+
+        }else{ // 부모댓글 일때
+            System.out.println(3);
              reviewComment = reviewCommentRepository.save(ReviewComment.builder()
                     .review(review)
                     .userId(reviewCommentDto.getUserId())
@@ -102,7 +107,7 @@ public class ReviewCommentService {
                              .depth(0)
                     .build());
         }
-;
+;System.out.println(4);
         return new ReviewCommentDto(reviewComment);
     }
 

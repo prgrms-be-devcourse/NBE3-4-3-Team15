@@ -55,6 +55,7 @@ public class ReviewsDTO {
         this.content = review.getContent();
         this.rating = review.getRating();
         this.reviewCommentDtos = review.getComments().stream()
+                .filter(comment->comment.getParent()==null)
                 .map(ReviewCommentDto::new)
                 .collect(Collectors.toList());
         this.recommendMemberDtos = review.getRecommendMember().stream()
