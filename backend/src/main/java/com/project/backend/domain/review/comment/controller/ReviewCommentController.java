@@ -4,6 +4,7 @@ import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/review/{reviewId}/comments")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class ReviewCommentController {
 
     private final ReviewCommentService reviewCommentService;

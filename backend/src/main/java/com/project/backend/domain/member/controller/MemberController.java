@@ -162,9 +162,9 @@ public class MemberController {
         String authorization = request.getHeader("Authorization");
         String apiKey = authorization == null ? "" : authorization.substring("Bearer ".length());
 
-        String username = jwtUtil.getUsernameFromToken(apiKey);
-
         if (apiKey.isEmpty()) throw new MemberException(NO_AUTHORIZED);
+
+        String username = jwtUtil.getUsernameFromToken(apiKey);
 
         return memberService.getMember(username)
                 .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));

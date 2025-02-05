@@ -6,6 +6,7 @@ import com.project.backend.domain.book.dto.FavoriteDTO;
 import com.project.backend.domain.book.service.BookService;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/book")
+@SecurityRequirement(name = "bearerAuth")
 public class BookController {
 
     private final BookService bookService;
