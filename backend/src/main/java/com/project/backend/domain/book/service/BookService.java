@@ -60,6 +60,12 @@ public class BookService {
     @Value("${naver.book-search-url}")
     private String apiUrl;
 
+    @Value("${kakao.key}")
+    private String kakaoKey;
+
+    @Value("${kakao.url}")
+    private String kakaoUrl;
+
     /**
      * -- 네이버api를 통해 검색어에 대한 도서데이터를 가져오는 메소드 --
      * 책은 한번에 30권 조회되도록 설정했다.
@@ -257,5 +263,75 @@ public class BookService {
         return favorites.stream()
                 .map(favorite -> modelMapper.map(favorite.getBook(), BookSimpleDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * -- 카카오 도서 검색 API를 호출하여 도서 목록을 조회하는 메소드 --
+     *
+     * @param query 검색어
+     * @return 카카오 API로부터 받은 도서 목록을 담은 allKakaoBooks 리스트
+     *
+     * @author 김남우
+     * @since 2025년 1월 27일
+     */
+    private List<KakaoBookVO.Item> saveBookDataFromKakaoApi(String query) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoKey);
+
+        List<KakaoBookVO.Item> allKakaoBooks = new ArrayList<>();
+
+        for (int page = 1; page <= 1; page++) {
+            String url = kakaoUrl + "?query=" + query + "&page=" + page + "&size=10";
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<KakaoBookVO> response = restTemplate.exchange(url, HttpMethod.GET, entity, KakaoBookVO.class);
+
+            List<KakaoBookVO.Item> kakaoBooks = response.getBody().getItems();
+            allKakaoBooks.addAll(kakaoBooks);
+        }
+
+        return allKakaoBooks;
+    }
+
+    /**
+     * -- 카카오 도서 API에서 받은 도서 정보를 DB에 저장하는 메소드 --
+     *
+     * @param query 검색어
+     *
+     * @author 김남우
+     * @since 2025년 1월 31일
+     */
+    public List<Book> saveKakaoBooks(String query) {
+        List<KakaoBookVO.Item> kakaoBooks = saveBookDataFromKakaoApi(query);
+
+        List<Book> newBooks = kakaoBooks.stream()
+                .map(kakaoBookDTO -> modelMapper.map(kakaoBookDTO, Book.class))
+                .filter(book -> !bookRepository.existsByIsbn(book.getIsbn()))
+                .toList();
+
+        bookRepository.saveAll(newBooks);
+
+        return newBooks;
+    }
+
+    /**
+     * -- 작가 검색 메소드 --
+     *
+     * @param
+     * @return
+     *
+     * @author 김남우
+     * @since 2025년 2월 4일
+     */
+    public List<BookSimpleDTO> searchByAuthor(String author) {
+        return bookRepository.findByAuthor(author)
+                .stream()
+                .map(book -> new BookSimpleDTO(
+                        book.getTitle(),
+                        book.getAuthor(),
+                        book.getImage()
+                ))
+                .toList();
     }
 }
