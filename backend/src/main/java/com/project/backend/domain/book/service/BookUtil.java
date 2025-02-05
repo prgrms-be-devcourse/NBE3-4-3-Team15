@@ -12,8 +12,8 @@ public class BookUtil {
      * 카카오 API에서 제공하는 ISBN은 "10자리ISBN 13자리ISBN" 형식이므로
      * 13자리 ISBN만 추출하여 반환한다.
      *
-     * @param isbn 원본 ISBN 문자열
-     * @return 정제된 13자리 ISBN
+     * @param String isbn 
+     * @return String 정제된 13자리 ISBN
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
