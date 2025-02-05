@@ -5,9 +5,7 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberErrorCode;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.service.MemberService;
-import com.project.backend.global.jwt.JwtUtil;
 import com.project.backend.global.response.GenericResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -28,8 +26,6 @@ import static com.project.backend.domain.member.exception.MemberErrorCode.INCORR
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
-    private final HttpServletRequest request;
-    private final JwtUtil jwtUtil;
 
     /**
      * 회원가입 요청
@@ -131,24 +127,6 @@ public class MemberController {
         return GenericResponse.of("탈퇴 성공");
     }
 
-//    /**
-//     * Request Authorization Check
-//     *
-//     * @return Member
-//     * @author 손진영
-//     * @since 2025.01.31
-//     */
-//    private Member checkAuthMember() {
-//        String authorization = request.getHeader("Authorization");
-//        String token = authorization == null ? "" : authorization.substring("Bearer ".length());
-//
-//        if (token.isEmpty()) throw new MemberException(NO_AUTHORIZED);
-//
-//        String username = jwtUtil.getUsernameFromToken(token);
-//
-//        return memberService.getMember(username)
-//                .orElseThrow(() -> new MemberException(INCORRECT_AUTHORIZED));
-//    }
     /**
      * 현재 로그인한 사용자 가져오기
      */
