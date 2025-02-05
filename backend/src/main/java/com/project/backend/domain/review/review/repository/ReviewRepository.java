@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * 리뷰 레파지토리
  */
-public interface ReviewRepository extends JpaRepository<Review,Integer> {
+public interface ReviewRepository extends JpaRepository<Review,Long> {
 }
