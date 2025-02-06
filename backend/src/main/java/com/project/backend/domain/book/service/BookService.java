@@ -79,13 +79,13 @@ public class BookService {
      *
      * @param -- title (검색어) --
      * @param -- isAuthorSearch (작가검색, 도서검색 판단) --
-     * @param -- sessionId (개인별 세션 ID)
+     * @param -- token
      *
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
-    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId) {
+    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String token) {
 
         if (!StringUtils.hasText(query)) {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
@@ -93,8 +93,8 @@ public class BookService {
 
         List<ApiBookVO> allBooks = new ArrayList<>();
 
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver"));
         allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao"));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver"));
 
         List<BookDTO> bookList = allBooks.stream()
                 .map(book -> {
@@ -103,9 +103,9 @@ public class BookService {
                     return dto;
                 })
                 .toList();
-        List<BookDTO> uniqueBooks = removeDuplicateBooks(bookList);
 
-        bookCache.put(sessionId, uniqueBooks);
+        List<BookDTO> uniqueBooks = removeDuplicateBooks(bookList);
+        bookCache.put(token, uniqueBooks);
 
         return bookList;
     }
@@ -159,14 +159,14 @@ public class BookService {
      * -- 도서 상세 검색 메소드 --
      *
      * @param isbn isbn
-     * @param sessionId 개인별 session Id
+     * @param token
      * @return BookDTO
      *
      * @author 정재익
      * @since 2월 5일
      */
-    public BookDTO searchBookDetail(String isbn, String sessionId) {
-        List<BookDTO> books = bookCache.get(sessionId);
+    public BookDTO searchBookDetail(String isbn, String token) {
+        List<BookDTO> books = bookCache.get(token);
 
         if (books == null) {
             throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
@@ -213,6 +213,80 @@ public class BookService {
 //                .toList();
 //
 //        return bookRepository.saveAll(newBooks);
+//    }
+//
+//    /**
+//     * -- 책을 찜하거나 찜취소하는 메소드 --
+//     * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
+//     * Favorite DB에 저장
+//     * 책이 받은 찜한 수를 Book DB에 최신화
+//     *
+//     * @param -- favoriteDTO --
+//     * @param -- userDetail --
+//     * @return --GenericResponse<String>--
+//     * @author -- 정재익 --
+//     * @since -- 2월 3일 --
+//     */
+//    @Transactional
+//    public GenericResponse<String> favoriteBook(FavoriteDTO favoriteDTO, @AuthenticationPrincipal UserDetails userDetails) {
+//        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+//        Long memberId = customUserDetails.getId();
+//
+//        FavoriteId favoriteId = new FavoriteId(userDetails.getUsername(), favoriteDTO.getBookId());
+//
+//        Book book = bookRepository.findById(favoriteDTO.getBookId())
+//                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+//
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
+//
+//        if (favoriteRepository.existsById(favoriteId)) {
+//            favoriteRepository.deleteById(favoriteId);
+//            book.setFavoriteCount(book.getFavoriteCount() - 1);
+//            bookRepository.save(book);
+//            return GenericResponse.of("찜이 취소되었습니다.");
+//        } else {
+//            Favorite favorite = modelMapper.map(favoriteDTO, Favorite.class);
+//            favorite.setId(favoriteId);
+//            favorite.setBook(book);
+//            favorite.setMember(member);
+//            favoriteRepository.save(favorite);
+//            book.setFavoriteCount(book.getFavoriteCount() + 1);
+//            bookRepository.save(book);
+//
+//            return GenericResponse.of("해당 도서를 찜 목록에 추가하였습니다.");
+//        }
+//    }
+//
+//    /**
+//     * -- 찜한 책 목록을 확인하는 메소드 --
+//     * 1. 현재 접속 정보를 바탕으로 멤버ID 추출
+//     * 2. favoriteRepository에서 해당 멤버가 찜한 책 목록을 반환받는다
+//     * 3. favorite 리스트를 BookSimpleDto로 변환한 뒤 반환한다.
+//     *
+//     * @param -- userDetail --
+//     * @return -- List<BookSimpleDTO> --
+//     * @author -- 정재익 --
+//     * @since -- 2월 3일 --
+//     */
+//    public List<BookDTO> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
+//        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+//        Long memberId = customUserDetails.getId();
+//        String memberUsername = userDetails.getUsername();
+//
+//        if (!memberRepository.existsById(memberId)) {
+//            throw new MemberException(MemberErrorCode.NON_EXISTING_USERNAME);
+//        }
+//
+//        List<Favorite> favorites = favoriteRepository.findById_MemberUsername(memberUsername);
+//
+//        if (favorites.isEmpty()) {
+//            throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS);
+//        }
+//
+//        return favorites.stream()
+//                .map(favorite -> modelMapper.map(favorite.getBook(), BookDTO.class))
+//                .collect(Collectors.toList());
 //    }
 
     /**
