@@ -58,6 +58,21 @@ public class MemberController {
     }
 
     /**
+     * 로그아웃
+     * @param token 요청 헤더에 포함된 JWT 토큰
+     * @return 로그아웃 성공 메시지
+     *
+     * @author 이원재
+     * @since 2025.02.06
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<GenericResponse<String>> logout(
+            @RequestHeader("Authorization") String token) {
+        // 클라이언트가 JWT를 삭제하도록 응답
+        return ResponseEntity.ok(GenericResponse.of("로그아웃 성공"));
+    }
+
+    /**
      * 내 정보 조회
      * @param userDetails 현재 로그인한 사용자 정보
      * @return 회원 정보
