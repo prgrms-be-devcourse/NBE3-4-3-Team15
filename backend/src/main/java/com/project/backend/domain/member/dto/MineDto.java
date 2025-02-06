@@ -20,7 +20,6 @@ public class MineDto {
     String password;
 
     @NotBlank
-    @Length(max = 25)
     @Email
     String email;
 

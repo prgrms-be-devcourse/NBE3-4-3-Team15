@@ -12,6 +12,8 @@ import java.util.Optional;
  * @author 손진영
  * @since 25. 1. 27.
  */
-public interface MemberRepository extends JpaRepository<Member, String> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByUsername(String username);
+
+    Optional<Member> findByEmail(String email);
 }
