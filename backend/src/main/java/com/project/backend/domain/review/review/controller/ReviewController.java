@@ -6,6 +6,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -70,6 +71,7 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @PostMapping
+    @Transactional
     public GenericResponse<String> postReview(@Valid @RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
@@ -91,6 +93,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
+    @Transactional
     public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("id") Long id){
         reviewService.modify(reviewsDTO,id);
@@ -110,6 +113,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
+    @Transactional
     public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
         ReviewsDTO review=  reviewService.delete(id);
 
@@ -130,6 +134,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
+    @Transactional
     public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
@@ -143,11 +148,6 @@ public class ReviewController {
                 message
         );
     }
-
-
-
-
-
 
 
 

@@ -116,6 +116,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
+    @Transactional
     public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
                                              @PathVariable("id") Long commentId,
                                              @RequestBody ReviewCommentDto reviewCommentDto){
