@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
  * since 2025.01.27
  */
 public enum FollowErrorCode {
-    NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "404-1", "존재하지 않는 회원입니다."),
-    CAN_NOT_FOLLOW_MYSELF(HttpStatus.BAD_REQUEST, "400-1", "자기 자신을 팔로우할 수 없습니다.");
+    NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "NOT_FOUND_MEMBER", "존재하지 않는 회원입니다."),
+    CAN_NOT_FOLLOW_MYSELF(HttpStatus.BAD_REQUEST, "CAN_NOT_FOLLOW_MYSELF", "자기 자신을 팔로우할 수 없습니다.");
 
     final HttpStatus status;
     final String code;
