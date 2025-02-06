@@ -1,7 +1,7 @@
 package com.project.backend.domain.member;
 
 import com.project.backend.domain.member.controller.MemberController;
-import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,7 +64,7 @@ public class MemberControllerTest {
                 )
                 .andDo(print());
 
-        Member member = memberService.getMember("test").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         resultActions
                 .andExpect(handler().handlerType(MemberController.class))
@@ -227,7 +227,7 @@ public class MemberControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 );
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         resultActions
                 .andExpect(handler().handlerType(MemberController.class))
@@ -309,7 +309,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 조회")
     void t9() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -339,7 +339,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 조회, 인증정보 없을 때")
     void t10() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -389,7 +389,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정")
     void t12() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -428,7 +428,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정, 비밀번호 없을 때")
     void t13() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -467,7 +467,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정, 인증정보 없을 때")
     void t14() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -537,7 +537,7 @@ public class MemberControllerTest {
     @DisplayName("내 정보 수정, valid")
     void t16() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -574,7 +574,7 @@ public class MemberControllerTest {
     @DisplayName("회원 탈퇴")
     void t17() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(
@@ -594,7 +594,7 @@ public class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("탈퇴 성공"));
 
-        Optional<Member> user1 = memberService.getMember("user1");
+        Optional<MemberDto> user1 = Optional.ofNullable(memberService.getMyProfile("user1"));
         assertTrue(user1.isEmpty());
     }
 
@@ -609,7 +609,7 @@ public class MemberControllerTest {
     @DisplayName("회원 탈퇴, 비밀번호 맞지 않음")
     void t18() throws Exception {
 
-        Member member = memberService.getMember("user1").get();
+        MemberDto member = memberService.getMyProfile("test");
 
         ResultActions resultActions = mvc
                 .perform(

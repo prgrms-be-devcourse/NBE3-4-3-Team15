@@ -33,6 +33,7 @@ public class Member extends BaseEntity {
 
     private String password;
 
+    @Column(unique = true)
     private String email;
 
     private int gender;
