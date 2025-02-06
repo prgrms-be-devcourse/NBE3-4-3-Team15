@@ -18,5 +18,5 @@ public class FavoriteDTO {
     private String memberUsername;
 
     @NonNull
-    private Long bookId;
+    private String bookIsbn;
 }
