@@ -40,20 +40,44 @@ public class ReviewCommentController {
     @GetMapping
     public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Long reviewId){
 
-            List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findComment(reviewId);
-            return GenericResponse.of(
-                    reviewCommentDtoList
-                    ,"리뷰 코멘트 목록 조회 성공"
-            );
+        List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findComment(reviewId);
+        return GenericResponse.of(
+                reviewCommentDtoList
+                ,"리뷰 코멘트 목록 조회 성공"
+        );
     }
 
-
+    /**
+     * 대댓글 조회
+     * @param commentId
+     * @return GenericResponse<List<ReviewCommentDto>>
+     *
+     * @author 이광석
+     * @since 25.02.05
+     */
     @GetMapping("/{commentId}")
     public GenericResponse<List<ReviewCommentDto>> getReplies(@PathVariable("commentId") Long commentId){
         List<ReviewCommentDto> replies = reviewCommentService.findReplies(commentId);
         return GenericResponse.of(
                 replies,
                 "대댓글 목록 조회 성공"
+        );
+    }
+
+    /**
+     * userId 기반 댓글 검색
+     * @param userId
+     * @return GenericResponse<List<ReviewCommentDto>>
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
+    @GetMapping("/review/comments/{userId}")
+    public GenericResponse<List<ReviewCommentDto>> getUserComment(@PathVariable("userId")Long userId){
+        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
+        return GenericResponse.of(
+                commentDtos,
+                "User 댓글 조회 성공"
         );
     }
 

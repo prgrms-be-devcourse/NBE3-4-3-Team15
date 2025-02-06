@@ -54,6 +54,20 @@ public class ReviewCommentService {
         return comments;
     }
 
+
+    /**
+     * userId기반 코멘트 검색
+     * @param userId
+     * @return List<ReviewCommentDto>
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
+    public List<ReviewCommentDto> findUserComment(Long userId) {
+        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(userId);
+        return reviewCommentDtos;
+    }
+
     /**
      * 댓글 생성
      * @param reviewId
@@ -245,4 +259,6 @@ public class ReviewCommentService {
         List<ReviewCommentDto> sons = reviewCommentRepository.findByParent(parent);
         return sons;
     }
+
+
 }
