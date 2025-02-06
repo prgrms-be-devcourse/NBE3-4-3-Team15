@@ -1,17 +1,15 @@
 package com.project.backend.domain.review.comment.controller;
 
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
-import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
-import com.project.backend.domain.review.review.entity.Review;
-import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import java.util.List;
 
@@ -21,9 +19,11 @@ import java.util.List;
  * @author shjung
  * @since 25. 1. 24.
  */
+@Tag(name = "ReviewCommentController", description = "리뷰 댓글 컨트롤러")
 @RestController
 @RequestMapping("/review/{reviewId}/comments")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class ReviewCommentController {
 
     private final ReviewCommentService reviewCommentService;
@@ -38,6 +38,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @GetMapping
+    @Operation(summary = "리뷰 댓글 목록 조회")
     public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Long reviewId){
 
         List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findComment(reviewId);
@@ -56,6 +57,7 @@ public class ReviewCommentController {
      * @since 25.02.05
      */
     @GetMapping("/{commentId}")
+    @Operation(summary = "대댓글 조회")
     public GenericResponse<List<ReviewCommentDto>> getReplies(@PathVariable("commentId") Long commentId){
         List<ReviewCommentDto> replies = reviewCommentService.findReplies(commentId);
         return GenericResponse.of(
@@ -73,6 +75,7 @@ public class ReviewCommentController {
      * @since 25.02.06
      */
     @GetMapping("/review/comments/{userId}")
+    @Operation(summary = "댓글 검색")
     public GenericResponse<List<ReviewCommentDto>> getUserComment(@PathVariable("userId")Long userId){
         List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
         return GenericResponse.of(
@@ -93,6 +96,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PostMapping
+    @Operation(summary = "리뷰 댓글 생성")
     public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Long reviewId,
                                             @Valid @RequestBody ReviewCommentDto reviewCommentDto){
 
@@ -116,6 +120,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
+    @Operation(summary = "리뷰 댓글 수정")
     @Transactional
     public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
                                              @PathVariable("id") Long commentId,
@@ -140,6 +145,7 @@ public class ReviewCommentController {
      */
     @DeleteMapping("/{id}")
     @Transactional
+    @Operation(summary = "리뷰 댓글 삭제")
     public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
                                          @PathVariable("id") Long commentId){
        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
@@ -160,6 +166,7 @@ public class ReviewCommentController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}/recommend/{memberId}")
+    @Operation(summary = "리뷰 댓글 추천")
     public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Long reviewId,
                                                    @PathVariable("id") Long commentId,
                                                    @PathVariable("memberId") Long memberId){
@@ -178,7 +185,4 @@ public class ReviewCommentController {
             );
         }
     }
-
-
-
 }

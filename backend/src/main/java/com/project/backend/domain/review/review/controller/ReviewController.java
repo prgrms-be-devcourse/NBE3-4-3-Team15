@@ -1,16 +1,15 @@
 package com.project.backend.domain.review.review.controller;
 
 
-import com.project.backend.domain.member.entity.Member;
-import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +17,11 @@ import java.util.List;
 /**
  * 리뷰 컨트롤러
  */
+@Tag(name = "ReviewController", description = "리뷰 컨트롤러")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/review")
-
+@SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
     private final ReviewService reviewService;
 
@@ -33,6 +33,7 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @GetMapping
+    @Operation(summary = "리뷰 목록")
     public GenericResponse<List<ReviewsDTO>> getReviews(){
         List<ReviewsDTO> reviewsDTOS = reviewService.findAll();
         return GenericResponse.of(
@@ -50,6 +51,7 @@ public class ReviewController {
      * @since 25.02.06
      */
     @GetMapping("/{userId}")
+    @Operation(summary = "특정 유저의 리뷰 목록 조회")
     public GenericResponse<List<ReviewsDTO>> getUserReviews(@PathVariable("userId") Long userId){
         List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userId);
         return GenericResponse.of(
@@ -71,6 +73,7 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @PostMapping
+    @Operation(summary = "리뷰 추가")
     @Transactional
     public GenericResponse<String> postReview(@Valid @RequestBody ReviewsDTO reviewsDTO){
 
@@ -93,6 +96,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
+    @Operation(summary = "리뷰 수정")
     @Transactional
     public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("id") Long id){
@@ -113,6 +117,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "리뷰 삭제")
     @Transactional
     public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
         ReviewsDTO review=  reviewService.delete(id);
@@ -134,6 +139,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
+    @Operation(summary = "리뷰 추천")
     @Transactional
     public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
@@ -148,7 +154,4 @@ public class ReviewController {
                 message
         );
     }
-
-
-
 }
