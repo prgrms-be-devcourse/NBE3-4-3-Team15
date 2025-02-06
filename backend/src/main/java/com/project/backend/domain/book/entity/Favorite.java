@@ -23,8 +23,8 @@ public class Favorite {
     private FavoriteId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("bookId")
-    @JoinColumn(name = "book_id", nullable = false)
+    @MapsId("bookIsbn")
+    @JoinColumn(name = "book_isbn", nullable = false)
     private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)
