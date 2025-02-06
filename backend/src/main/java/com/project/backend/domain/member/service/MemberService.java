@@ -43,6 +43,10 @@ public class MemberService {
             throw new MemberException(INVALID_PASSWORD);
         }
 
+        if (memberRepository.findByEmail(memberDto.getEmail()).isPresent()) {
+            throw new MemberException(EXISTING_EMAIL);  // 이메일이 존재하는 경우 예외 처리
+        }
+
         if (memberRepository.findByUsername(memberDto.getUsername()).isPresent()) {
             throw new MemberException(EXISTING_ID);
         }
