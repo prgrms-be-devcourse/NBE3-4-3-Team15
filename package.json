@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "bootstrap": "^5.3.3",
-    "openapi-fetch": "^0.13.4"
-  }
-}
