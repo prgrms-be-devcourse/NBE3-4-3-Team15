@@ -1,6 +1,5 @@
 package com.project.backend.domain.member.dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -21,7 +20,6 @@ public class MineDto {
     String password;
 
     @NotBlank
-    @Column(unique = true)
     @Email
     String email;
 

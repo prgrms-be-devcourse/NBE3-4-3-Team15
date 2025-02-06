@@ -48,7 +48,7 @@ public class MemberService {
         }
 
         if (memberRepository.findByUsername(memberDto.getUsername()).isPresent()) {
-            throw new MemberException(EXISTING_ID);
+            throw new MemberException(EXISTING_USERNAME);
         }
         Member member = Member.builder()
                 .username(memberDto.getUsername())
@@ -73,7 +73,7 @@ public class MemberService {
      */
     public MemberDto getMyProfile(String username) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
         
         return new MemberDto(member);
     }
@@ -92,7 +92,7 @@ public class MemberService {
     @Transactional
     public MemberDto modify(String username, MineDto mineDto) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
 
         member.setEmail(mineDto.getEmail());
         member.setGender(mineDto.getGender());
@@ -114,7 +114,7 @@ public class MemberService {
     @Transactional
     public void delete(String username, String password) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
 
         if(!passwordEncoder.matches(password, member.getPassword())) {
             throw new MemberException(INCORRECT_PASSWORD);
@@ -134,7 +134,7 @@ public class MemberService {
      */
     public String login(LoginDto loginDto) {
         Member member = memberRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(()->new MemberException(NON_EXISTING_ID));
+                .orElseThrow(()->new MemberException(NON_EXISTING_USERNAME));
 
         if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) { // 암호화된 비밀번호 비교
             throw new MemberException(INCORRECT_PASSWORD);
@@ -166,5 +166,5 @@ public class MemberService {
                     member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
                     return member;
                 })
-                .orElseThrow(() -> new MemberException(NON_EXISTING_ID));}
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));}
 }
