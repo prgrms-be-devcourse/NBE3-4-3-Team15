@@ -6,6 +6,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -25,7 +26,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     /**
-     * 리뷰 목록을 반환
+     * 리뷰 목록을 조회
      * @return -- GenericResponse<List<ReviewsDTO>> - 리뷰 목록
      *
      * @author -- 이광석
@@ -40,6 +41,24 @@ public class ReviewController {
         );
     }
 
+    /**
+     * 특정 유저의 리뷰 목록 조회
+     * @param userId
+     * @return GenericResponse<List<ReviewsDTO>>
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
+    @GetMapping("/{userId}")
+    public GenericResponse<List<ReviewsDTO>> getUserReviews(@PathVariable("userId") Long userId){
+        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userId);
+        return GenericResponse.of(
+            reviewsDTOS,
+                "리뷰 목록 반환 성공"
+        );
+    }
+
+
 
 
     /**
@@ -52,6 +71,7 @@ public class ReviewController {
      * @since  -- 25.01.27
      */
     @PostMapping
+    @Transactional
     public GenericResponse<String> postReview(@Valid @RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
@@ -73,6 +93,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{id}")
+    @Transactional
     public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("id") Long id){
         reviewService.modify(reviewsDTO,id);
@@ -92,6 +113,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @DeleteMapping("/{id}")
+    @Transactional
     public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
         ReviewsDTO review=  reviewService.delete(id);
 
@@ -112,6 +134,7 @@ public class ReviewController {
      * @since -- 25.01.17
      */
     @PutMapping("/{reviewId}/recommend/{memberId}")
+    @Transactional
     public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
@@ -125,8 +148,6 @@ public class ReviewController {
                 message
         );
     }
-
-
 
 
 

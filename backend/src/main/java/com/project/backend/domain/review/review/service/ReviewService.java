@@ -50,6 +50,17 @@ public class ReviewService {
     }
 
     /**
+     * userid 기반 리뷰 찾기
+     * @param userId
+     * @return  List<ReviewsDTO>
+     */
+    public List<ReviewsDTO> getUserReviews(Long userId) {
+        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(userId);
+        return reviewsDTOS;
+    }
+
+
+    /**
      * 리뷰 생성
      * @param -- ReviewsDTO(rating,content,bookId,memberId)
      *

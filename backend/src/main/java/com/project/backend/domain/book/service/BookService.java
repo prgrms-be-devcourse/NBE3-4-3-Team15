@@ -192,7 +192,7 @@ public class BookService {
                 .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_ID));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
 
         if (favoriteRepository.existsById(favoriteId)) {
             favoriteRepository.deleteById(favoriteId);
@@ -229,7 +229,7 @@ public class BookService {
         String memberUsername = userDetails.getUsername();
 
         if (!memberRepository.existsById(memberId)) {
-            throw new MemberException(MemberErrorCode.NON_EXISTING_ID);
+            throw new MemberException(MemberErrorCode.NON_EXISTING_USERNAME);
         }
 
         List<Favorite> favorites = favoriteRepository.findById_MemberUsername(memberUsername);

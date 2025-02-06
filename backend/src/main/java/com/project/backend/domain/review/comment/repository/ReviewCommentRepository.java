@@ -19,4 +19,6 @@ public interface ReviewCommentRepository extends JpaRepository<ReviewComment, Lo
     List<ReviewComment> findAllByReviewId(Integer reviewId);
 
     List<ReviewCommentDto> findByParent(ReviewComment parent);
+
+    List<ReviewCommentDto> findAllByUserId(Long userId);
 }
