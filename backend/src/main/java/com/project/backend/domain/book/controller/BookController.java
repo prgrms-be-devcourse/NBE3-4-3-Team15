@@ -4,6 +4,9 @@ import com.project.backend.domain.book.dto.BookDTO;
 import com.project.backend.domain.book.dto.FavoriteDTO;
 import com.project.backend.domain.book.service.BookService;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -19,9 +22,11 @@ import java.util.List;
  * @author -- 정재익 --
  * @since -- 2월 5일 --
  */
+@Tag(name = "BookController", description = "도서 컨트롤러")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/book")
+@SecurityRequirement(name = "bearerAuth")
 public class BookController {
 
     private final BookService bookService;
@@ -38,6 +43,7 @@ public class BookController {
      * @since -- 2월 5일 --
      */
     @GetMapping
+    @Operation(summary = "도서 검색")
     public GenericResponse<List<BookDTO>> searchBooks(@RequestParam(name = "query") String query,
                                                       @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
                                                       @RequestHeader(name = "X-Session-Id") String sessionId) {
@@ -55,6 +61,7 @@ public class BookController {
      * @since -- 2월 5일 --
      */
     @GetMapping("/{isbn}")
+    @Operation(summary = "도서 상세 검색")
     public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn,
                                                      @RequestHeader(name = "X-Session-Id") String sessionId) {
         return GenericResponse.of(bookService.searchBookDetail(isbn, sessionId));
@@ -72,6 +79,7 @@ public class BookController {
      * @since -- 2월 3일 --
      */
     @PostMapping("/{id}/favorite")
+    @Operation(summary = "도서 찜 하기")
     public GenericResponse<String> favoriteBook(@Valid @RequestBody FavoriteDTO favoriteDto, @AuthenticationPrincipal UserDetails userDetails) {
         return bookService.favoriteBook(favoriteDto, userDetails);
     }
@@ -86,6 +94,7 @@ public class BookController {
      * @since -- 2월 3일 --
      */
     @GetMapping("/favorite")
+    @Operation(summary = "도서 찜 목록")
     public GenericResponse<List<BookDTO>> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
         return GenericResponse.of(bookService.searchFavoriteBooks(userDetails));
     }

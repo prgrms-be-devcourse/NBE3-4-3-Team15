@@ -1,11 +1,15 @@
 package com.project.backend.domain.review.review.repository;
 
 import com.project.backend.domain.review.review.entity.Review;
+import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 
 /**
  * 리뷰 레파지토리
  */
 public interface ReviewRepository extends JpaRepository<Review,Long> {
+    List<ReviewsDTO> findAllByUserId(Long userId);
 }
