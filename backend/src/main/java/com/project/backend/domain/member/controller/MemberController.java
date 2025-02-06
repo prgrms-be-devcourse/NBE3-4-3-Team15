@@ -54,7 +54,9 @@ public class MemberController {
             @RequestBody @Valid LoginDto loginDto) {
         String token = memberService.login(loginDto); // JWT 토큰 발급
 
-        return ResponseEntity.ok(GenericResponse.of(token, "로그인 성공"));
+        return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + token) // 헤더에 JWT 추가
+                .body(GenericResponse.of("로그인 성공")); // body에는 성공 메시지만 반환
     }
 
     /**
