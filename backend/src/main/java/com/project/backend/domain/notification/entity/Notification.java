@@ -1,6 +1,9 @@
 package com.project.backend.domain.notification.entity;
 
 
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.review.comment.entity.ReviewComment;
+import com.project.backend.domain.review.review.entity.Review;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,7 +23,6 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @NotNull
     Long memberId;
 
     Long reviewId;
