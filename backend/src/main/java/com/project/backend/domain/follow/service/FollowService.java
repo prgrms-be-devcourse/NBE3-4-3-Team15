@@ -80,7 +80,7 @@ public class FollowService {
      * @return Member 엔티티
      */
     private Member findMemberById(String memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByUsername(memberId)
                 .orElseThrow(() -> new FollowException(FollowErrorCode.NOT_FOUND_MEMBER));
     }
 
