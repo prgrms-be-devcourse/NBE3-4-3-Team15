@@ -2,7 +2,8 @@ package com.project.backend.domain.book.vo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.project.backend.domain.book.service.BookUtil;
+import com.project.backend.domain.book.util.BookUtil;
+import io.micrometer.common.util.StringUtils;
 import lombok.*;
 
 import java.util.List;
@@ -37,9 +38,9 @@ public class ApiBookVO {
             @JsonProperty("isbn") String isbn
     ) {
         this.title = title;
-        this.author = kakaoAuthors != null ? String.join(", ", kakaoAuthors) : (naverAuthor != null ? naverAuthor : "");
-        this.description = kakaoDescription != null ? kakaoDescription : naverDescription;
-        this.image = kakaoImage != null ? kakaoImage : naverImage;
+        this.author = StringUtils.isBlank(naverAuthor) ? String.join(", ", kakaoAuthors) : naverAuthor;
+        this.description = StringUtils.isBlank(naverDescription) ? kakaoDescription : naverDescription;
+        this.image = StringUtils.isBlank(naverImage) ? kakaoImage : naverImage;
         this.isbn = BookUtil.extractIsbn(isbn);
     }
 }

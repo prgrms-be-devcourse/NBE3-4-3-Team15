@@ -10,6 +10,7 @@ import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.book.util.BookUtil;
 import com.project.backend.domain.book.vo.ApiBookVO;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberErrorCode;
@@ -92,8 +93,8 @@ public class BookService {
 
         List<ApiBookVO> allBooks = new ArrayList<>();
 
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao"));
         allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver"));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao"));
 
         List<BookDTO> bookList = allBooks.stream()
                 .map(book -> {
@@ -287,5 +288,4 @@ public class BookService {
                 .map(favorite -> modelMapper.map(favorite.getBook(), BookDTO.class))
                 .collect(Collectors.toList());
     }
-
 }
