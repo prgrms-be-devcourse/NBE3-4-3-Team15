@@ -4,10 +4,14 @@ import com.project.backend.domain.member.dto.*;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
  * @author 손진영
  * @since 25. 1. 27.
  */
+@Tag(name = "MemberController", description = "회원 컨트롤러")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
+@SecurityRequirement(name = "bearerAuth")
 public class MemberController {
 
     private final MemberService memberService;
@@ -34,6 +40,7 @@ public class MemberController {
      * @since 2025.01.27
      */
     @PostMapping
+    @Operation(summary = "회원가입")
     public ResponseEntity<GenericResponse<String>> join(
             @RequestBody @Valid MemberDto memberDto) {
         memberService.join(memberDto);
@@ -50,6 +57,7 @@ public class MemberController {
      * @since 2025.01.27
      */
     @PostMapping("/login")
+    @Operation(summary = "로그인")
     public ResponseEntity<GenericResponse<String>> login(
             @RequestBody @Valid LoginDto loginDto) {
         String token = memberService.login(loginDto); // JWT 토큰 발급
@@ -58,7 +66,6 @@ public class MemberController {
                 .header("Authorization", "Bearer " + token) // 헤더에 JWT 추가
                 .body(GenericResponse.of("로그인 성공")); // body에는 성공 메시지만 반환
     }
-
     /**
      * 로그아웃
      * @param token 요청 헤더에 포함된 JWT 토큰
@@ -68,6 +75,7 @@ public class MemberController {
      * @since 2025.02.06
      */
     @PostMapping("/logout")
+    @Operation(summary = "로그아웃")
     public ResponseEntity<GenericResponse<String>> logout(
             @RequestHeader("Authorization") String token) {
         // 클라이언트가 JWT를 삭제하도록 응답
@@ -83,6 +91,7 @@ public class MemberController {
      * @since 2025.01.27
      */
     @GetMapping("/mine")
+    @Operation(summary = "회원 정보 조회")
     public ResponseEntity<GenericResponse<MemberDto>> getMyProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         MemberDto myProfile = memberService.getMyProfile(userDetails.getUsername());
@@ -101,6 +110,8 @@ public class MemberController {
      * @since 2025.01.28
      */
     @PutMapping("/mine")
+    @Transactional
+    @Operation(summary = "회원 정보 수정")
     public ResponseEntity<GenericResponse<MemberDto>> updateMyProfile(
             @RequestBody @Valid MineDto mineDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -120,6 +131,7 @@ public class MemberController {
      * @since 2025.01.31
      */
     @DeleteMapping("/mine")
+    @Operation(summary = "회원 탈퇴")
     public ResponseEntity<GenericResponse<String>> delete(
             @RequestBody @Valid PasswordDto passwordDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -139,6 +151,7 @@ public class MemberController {
      * @since 2025.02.06
      */
     @PutMapping("/mine/password")
+    @Operation(summary = "비밀번호 변경")
     public ResponseEntity<GenericResponse<String>> changePassword(
             @RequestBody @Valid PasswordChangeDto passwordChangeDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
