@@ -18,14 +18,14 @@ import java.util.Objects;
 public class FavoriteId implements Serializable {
 
     private String memberUsername;
-    private Long bookId;
+    private String bookIsbn;
 
     /**
      * -- 복합키의 고유성을 판별하는 메소드 --
      * <p>
      * 여러명의 유저가 하나의 책을 추천할 수도 있고
      * 하나의 유저가 여러개의 책을 추천할 수도 있으므로
-     * bookId, memberId 모두 두개다 유일성을 만족하지 못함
+     * bookIsbn, memberId 모두 두개다 유일성을 만족하지 못함
      * 다만 bookId와 memberId의 조합이 고유성을 가지고 있기 때문에 복합키로 설정
      *
      * @param -- Object o --
@@ -38,7 +38,7 @@ public class FavoriteId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FavoriteId that = (FavoriteId) o;
-        return Objects.equals(bookId, that.bookId) && Objects.equals(memberUsername, that.memberUsername);
+        return Objects.equals(bookIsbn, that.bookIsbn) && Objects.equals(memberUsername, that.memberUsername);
     }
 
     /**
@@ -53,6 +53,6 @@ public class FavoriteId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(bookId, memberUsername);
+        return Objects.hash(bookIsbn, memberUsername);
     }
 }
