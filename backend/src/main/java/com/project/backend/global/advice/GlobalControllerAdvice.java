@@ -1,6 +1,7 @@
 package com.project.backend.global.advice;
 
 import com.project.backend.domain.book.exception.BookException;
+import com.project.backend.domain.follow.exception.FollowException;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.global.exception.GlobalErrorCode;
 import com.project.backend.global.response.ErrorDetail;
@@ -101,6 +102,28 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(BookException.class)
     public ResponseEntity<HttpErrorInfo> handleGlobalException(
             BookException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(HttpErrorInfo.of(
+                                ex.getCode(),
+                                request.getRequestURI(),
+                                ex.getMessage()
+                        )
+                );
+    }
+
+    /**
+     * FollowException 발생 시 처리하는 핸들러
+     * @param ex 발생한 예외
+     * @param request HttpServletRequest
+     * @return {@link HttpErrorInfo} 에러 정보
+     * @author 이원재
+     * @since 2025.02.07
+     */
+    @ExceptionHandler(FollowException.class)
+    public ResponseEntity<HttpErrorInfo> handleGlobalException(
+            FollowException ex,
             HttpServletRequest request
     ) {
         return ResponseEntity.status(ex.getStatus())
