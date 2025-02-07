@@ -71,7 +71,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
-    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String token) {
+    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch) {
 
         if (!StringUtils.hasText(query)) {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
@@ -82,10 +82,7 @@ public class BookService {
         allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver"));
         allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao"));
 
-
         List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
-
-        bookCache.put(token, uniqueBooks);
 
         return uniqueBooks;
     }
@@ -144,14 +141,13 @@ public class BookService {
      * @author 정재익
      * @since 2월 5일
      */
-    public BookDTO searchBookDetail(String isbn, String token) {
-        List<BookDTO> books = bookCache.get(token);
-
-        if (books == null) {
-            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
-        }
-
+    public BookDTO searchBookDetail(String isbn) {
         String normalizedIsbn = BookUtil.extractIsbn(isbn);
+        List<BookDTO> books = requestApi(normalizedIsbn, "isbn", "naver");
+
+        if (books.isEmpty()) {
+            books = requestApi(normalizedIsbn, "isbn", "kakao");
+        }
 
         return books.stream()
                 .filter(book -> book.getIsbn().equalsIgnoreCase(normalizedIsbn))
