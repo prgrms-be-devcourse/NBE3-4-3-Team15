@@ -9,10 +9,22 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 알람 서비스
+ */
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+
+    /**
+     * 알람 생성
+     * @param notificationDTO
+     * @return NotificationDTO
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
     public NotificationDTO create(NotificationDTO notificationDTO) {
         Notification notification = Notification.builder()
                 .memberId(notificationDTO.getMemberId())
@@ -28,10 +40,25 @@ public class NotificationService {
         return new NotificationDTO(notificationRepository.save(notification));
     }
 
+    /**
+     * 알람 조회
+     * @param memberId
+     * @return List<NotificationDTO>
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
     public List<NotificationDTO> findByUser(Long memberId) {
         return notificationRepository.findALLByMemberId(memberId);
     }
 
+    /**
+     * 알람 읽음 상태 변경
+     * @param notificationId
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
     public void notificationCheck(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(()->new RuntimeException("해당 알림 없음"));
