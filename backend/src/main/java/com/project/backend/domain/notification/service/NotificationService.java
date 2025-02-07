@@ -25,6 +25,7 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
+    
     public NotificationDTO create(NotificationDTO notificationDTO) {
         Notification notification = Notification.builder()
                 .memberId(notificationDTO.getMemberId())
