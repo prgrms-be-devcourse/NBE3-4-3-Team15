@@ -28,7 +28,7 @@ public class Favorite {
     private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("memberUsername")
-    @JoinColumn(name = "member_username", referencedColumnName = "username")
+    @MapsId("memberId")
+    @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 }
