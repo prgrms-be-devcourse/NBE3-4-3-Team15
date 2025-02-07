@@ -1,0 +1,10 @@
+.nav-class {
+    text-align: end;
+}
+
+.nav-class > ul > li {
+    cursor: pointer;
+    display: inline-block;
+    margin-right: 10px;
+
+}

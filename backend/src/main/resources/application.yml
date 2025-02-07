@@ -3,6 +3,7 @@ spring:
     include: secret
   application:
     name: backend
+
   jpa:
     hibernate:
       ddl-auto: create
@@ -12,7 +13,8 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
         hbm2ddl:
-          auto: update
+          #auto: create  # 실행 시 테이블 삭제했다가 다시 생성
+          auto: update   # 기존의 테이블에 컬럼 추가/삭제 작업 진행. 기존 테이블 유지
     defer-datasource-initialization: true
   sql:
     init:
