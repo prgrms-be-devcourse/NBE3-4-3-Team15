@@ -71,7 +71,7 @@ public class BookService {
      * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
-     * @since -- 2월 5일 --
+     * @since -- 2월 7일 --
      */
     public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId, int page, int size) {
 
