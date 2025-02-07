@@ -17,7 +17,7 @@ import java.util.Objects;
 @Embeddable
 public class FavoriteId implements Serializable {
 
-    private String memberUsername;
+    private Long memberId;
     private String bookIsbn;
 
     /**
@@ -38,7 +38,7 @@ public class FavoriteId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FavoriteId that = (FavoriteId) o;
-        return Objects.equals(bookIsbn, that.bookIsbn) && Objects.equals(memberUsername, that.memberUsername);
+        return Objects.equals(bookIsbn, that.bookIsbn) && Objects.equals(memberId, that.memberId);
     }
 
     /**
@@ -53,6 +53,6 @@ public class FavoriteId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(bookIsbn, memberUsername);
+        return Objects.hash(bookIsbn, memberId);
     }
 }
