@@ -54,6 +54,18 @@ public class ReviewService {
 
     }
 
+    public List<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
+
+        Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"createdAt"));
+
+        Page<Review> reviewPage = reviewRepository.findAllByBookId(bookId,pageable);
+        List<ReviewsDTO> reviewsDTOS = reviewPage.stream()
+                .map(ReviewsDTO::new)
+                .collect(Collectors.toList());
+        return reviewsDTOS;
+
+    }
+
     /**
      * userid 기반 리뷰 찾기
      * @param userId
@@ -93,12 +105,7 @@ public class ReviewService {
      * @since 25.01.27
      */
     public void modify(ReviewsDTO reviewsDTO,Long id) {
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
-                ));
+        Review review = findById(id);
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
         reviewRepository.save(review);
@@ -113,12 +120,8 @@ public class ReviewService {
      * @since 25.01.27
      */
     public ReviewsDTO delete(Long id) {
-        Review review = reviewRepository.findById(id)
-                        .orElseThrow(()-> new ReviewException(
-                                ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
-                                ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
-                                ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
-                        ));
+        Review review = findById(id);
+
         reviewRepository.delete(review);
 
          return ReviewsDTO.builder()
@@ -141,12 +144,7 @@ public class ReviewService {
      * @since 25.01.27
      */
     public boolean recommend(Long reviewId, Long memberId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
-                ));
+        Review review = findById(reviewId);
 
         Member member = memberRepository.findById(memberId)
                         .orElseThrow(()->new ReviewException(
@@ -180,16 +178,26 @@ public class ReviewService {
      * @author 이광석
      * @since 25.02.03
      */
-    public ReviewsDTO findById(Long reviewId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()));
+    public ReviewsDTO getReview(Long reviewId) {
+        Review review = findById(reviewId);
 
         ReviewsDTO reviewsDTO = new ReviewsDTO(review);
         return reviewsDTO;
     }
 
+
+    /**
+     * db에서 review 꺼내고 에러처리
+     * @param reviewId
+     * @return
+     */
+    private Review findById(Long reviewId){
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.REVIEW_NOT_FOUND.getMessage())
+                );
+    }
 
 }
