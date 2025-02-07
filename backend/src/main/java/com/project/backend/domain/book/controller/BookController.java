@@ -38,7 +38,7 @@ public class BookController {
      * @return -- GenericResponse<List<BookDTO>> --
      * @header -- X-Session-Id (개인별 세션 ID) --
      * @author -- 정재익 --
-     * @since -- 2월 5일 --
+     * @since -- 2월 7일 --
      */
     @GetMapping
     @Operation(summary = "도서 검색")
