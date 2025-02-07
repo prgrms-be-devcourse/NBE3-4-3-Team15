@@ -26,7 +26,6 @@ public class NotificationService {
      * @since 25.02.06
      */
     public NotificationDTO create(NotificationDTO notificationDTO) {
-        System.out.println(1234);
         Notification notification = Notification.builder()
                 .memberId(notificationDTO.getMemberId())
                 .isCheck(notificationDTO.isCheck())
@@ -69,6 +68,13 @@ public class NotificationService {
 
     }
 
+    /**
+     * 알람 삭제
+     * @param notificationId
+     *
+     * @author 이광석
+     * @since 25.02.06
+     */
     public void notificationDelete(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(()->new RuntimeException("해당 알림 없음"));
