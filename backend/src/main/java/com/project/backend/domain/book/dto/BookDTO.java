@@ -1,8 +1,6 @@
 package com.project.backend.domain.book.dto;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * -- Book엔티티의 DTO --
@@ -12,10 +10,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class BookDTO {
-
-    @NonNull
-    private Long id;
 
     @NonNull
     private String title;
@@ -30,5 +28,6 @@ public class BookDTO {
     private String image;
 
     @NonNull
-    private int favoriteCount;
+    private String isbn;
+
 }
