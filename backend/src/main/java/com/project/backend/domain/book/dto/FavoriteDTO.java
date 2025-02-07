@@ -15,7 +15,7 @@ import lombok.Setter;
 public class FavoriteDTO {
 
     @NonNull
-    private String memberUsername;
+    private Long memberId;
 
     @NonNull
     private String bookIsbn;
