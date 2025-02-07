@@ -34,5 +34,13 @@ public class NotificationDTO {
         this.content = notification.getContent();
     }
 
-
+    public void setContent(String username, String type){
+        String content= username + "님이 ";
+        if(type.equals("COMMENT")) {
+            content += "댓글을 작성하였습니다";
+        }else if(type.equals("REPLY")){
+            content+= "대댓글을 작성하였습니다";
+        }
+        this.content = content;
+    }
 }

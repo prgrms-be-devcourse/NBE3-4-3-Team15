@@ -95,6 +95,7 @@ public class ReviewCommentService {
                 .depth(0)
                 .isDelete(false)
                 .build();
+
         if(reviewCommentDto.getParentId()!=null){
             ReviewComment parentComment = reviewCommentRepository.findById(reviewCommentDto.getParentId())
                     .orElseThrow(()->new ReviewException(
@@ -115,12 +116,22 @@ public class ReviewCommentService {
 
         ReviewComment newReviewComment = reviewCommentRepository.save(reviewComment);
 
+
+
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .memberId(review.getUserId())
                 .reviewComment(newReviewComment.getId())
                 .isCheck(false)
-                .content("리뷰에 댓글이 생성되었습니다")
                 .build();
+
+
+        if(reviewCommentDto.getParentId()==null) {
+
+            notificationDTO.setContent("nick", "COMMENT");
+        }else{
+            notificationDTO.setContent("nick", "REPLY");
+        }
+
         notificationService.create(notificationDTO);
 
         return new ReviewCommentDto(reviewComment);
