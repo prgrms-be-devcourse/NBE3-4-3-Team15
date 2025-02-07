@@ -47,7 +47,7 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public List<ReviewCommentDto> findComment(Long reviewId) {
-        ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
+        ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
         List<ReviewCommentDto> comments= reviewsDTO.getReviewCommentDtos().stream()
                 .filter(comment->comment.getParentId()==null)
                 .collect(Collectors.toList());
@@ -93,12 +93,8 @@ public class ReviewCommentService {
                 .isDelete(false)
                 .build();
         if(reviewCommentDto.getParentId()!=null){
-            ReviewComment parentComment = reviewCommentRepository.findById(reviewCommentDto.getParentId())
-                    .orElseThrow(()->new ReviewException(
-                            ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                            ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                            ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                    ));
+            ReviewComment parentComment = findCommentById(reviewCommentDto.getParentId());
+
             if(parentComment.getDepth()+1>=2){
                throw new ReviewException(
                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getStatus(),
@@ -258,6 +254,15 @@ public class ReviewCommentService {
                 ));
         List<ReviewCommentDto> sons = reviewCommentRepository.findByParent(parent);
         return sons;
+    }
+
+    private ReviewComment findCommentById (Long commentId){
+        return reviewCommentRepository.findById(commentId)
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
+                ));
     }
 
 
