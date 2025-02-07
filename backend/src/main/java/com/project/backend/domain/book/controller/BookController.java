@@ -91,4 +91,14 @@ public class BookController {
 //    public GenericResponse<List<BookDTO>> searchFavoriteBooks(@AuthenticationPrincipal UserDetails userDetails) {
 //        return GenericResponse.of(bookService.searchFavoriteBooks(userDetails));
 //    }
+
+    @PostMapping("/{isbn}/{memberId}")
+    @Operation(summary = "도서 찜하기 / 취소")
+    public GenericResponse<String> favoriteBook(@PathVariable(name = "isbn") String isbn,
+                                                @PathVariable(name = "memberId") Long memberId) {
+        boolean isFavorited = bookService.favoriteBook(isbn, memberId);
+
+        return isFavorited ? GenericResponse.of("찜한 도서가 추가되었습니다.")
+                : GenericResponse.of("찜한 도서가 취소되었습니다.");
+    }
 }
