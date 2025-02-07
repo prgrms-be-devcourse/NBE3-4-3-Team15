@@ -7,6 +7,8 @@ import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/notification")
 @RequiredArgsConstructor
@@ -20,5 +22,22 @@ public class NotificationController {
                 "알람 생성 성공"
         );
 
+    }
+
+    @GetMapping("/{memberId}")
+    public GenericResponse<List<NotificationDTO>> getUserIdNotification(@PathVariable("memberId") Long memberId ){
+        List<NotificationDTO> notificationDTOS = notificationService.findByUser(memberId);
+        return GenericResponse.of(
+                notificationDTOS,
+                "알림 조회 성공"
+        );
+    }
+
+    @PutMapping("/{notificationId}")
+    public GenericResponse<String> notificationCheck(@PathVariable("notificationId") Long notificationId ){
+        notificationService.notificationCheck(notificationId);
+        return GenericResponse.of(
+                "변경 성공"
+        );
     }
 }

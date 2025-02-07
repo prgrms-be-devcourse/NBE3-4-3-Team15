@@ -34,8 +34,9 @@ public class ReviewController {
      */
     @GetMapping
     @Operation(summary = "리뷰 목록")
-    public GenericResponse<List<ReviewsDTO>> getReviews(){
-        List<ReviewsDTO> reviewsDTOS = reviewService.findAll();
+    public GenericResponse<List<ReviewsDTO>> getReviews(@RequestParam(value="page",defaultValue = "0")int page,
+                                                        @RequestParam(value="size",defaultValue="10")int size){
+        List<ReviewsDTO> reviewsDTOS = reviewService.findAll(page,size);
         return GenericResponse.of(
                 reviewsDTOS,
                 "리뷰 목록 반환 성공"
@@ -75,7 +76,7 @@ public class ReviewController {
     @PostMapping
     @Operation(summary = "리뷰 추가")
     @Transactional
-    public GenericResponse<String> postReview(@Valid @RequestBody ReviewsDTO reviewsDTO){
+    public GenericResponse<String> postReview( @RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
 

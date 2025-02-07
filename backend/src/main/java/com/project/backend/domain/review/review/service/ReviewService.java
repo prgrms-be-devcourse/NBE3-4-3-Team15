@@ -1,19 +1,21 @@
 package com.project.backend.domain.review.review.service;
 
 
-import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
-import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,9 +42,12 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public List<ReviewsDTO> findAll() {
-        List<Review> reviews = reviewRepository.findAll();
-        List<ReviewsDTO> reviewsDTOS = reviews.stream()
+    public List<ReviewsDTO> findAll(int page,int size) {
+        Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC,"createdAt"));
+
+        Page<Review> ReviewPage = reviewRepository.findAll(pageable);
+
+        List<ReviewsDTO> reviewsDTOS = ReviewPage.getContent().stream()
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
         return reviewsDTOS;
@@ -69,6 +74,7 @@ public class ReviewService {
      */
     public void write(ReviewsDTO reviewsDTO) {
         reviewRepository.save(Review.builder()
+                        .userId(reviewsDTO.getUserId())
                         .bookId(reviewsDTO.getBookId())
                         .userId(reviewsDTO.getUserId())
                         .content(reviewsDTO.getContent())
@@ -184,7 +190,6 @@ public class ReviewService {
         ReviewsDTO reviewsDTO = new ReviewsDTO(review);
         return reviewsDTO;
     }
-
 
 
 }

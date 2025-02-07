@@ -7,6 +7,8 @@ import com.project.backend.domain.notification.repository.NotificationRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -24,5 +26,17 @@ public class NotificationService {
 
 
         return new NotificationDTO(notificationRepository.save(notification));
+    }
+
+    public List<NotificationDTO> findByUser(Long memberId) {
+        return notificationRepository.findALLByMemberId(memberId);
+    }
+
+    public void notificationCheck(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(()->new RuntimeException("해당 알림 없음"));
+        notification.setCheck(true);
+        notificationRepository.save(notification);
+
     }
 }
