@@ -226,7 +226,7 @@ public class BookService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BookException(BookErrorCode.MEMBER_NOT_FOUND));
 
-        BookDTO bookDTO = searchBookDetail(isbn);
+        BookDTO bookDTO = searchBookDetail(isbn); //
 
         Book book = new Book();
         book.setIsbn(bookDTO.getIsbn());
