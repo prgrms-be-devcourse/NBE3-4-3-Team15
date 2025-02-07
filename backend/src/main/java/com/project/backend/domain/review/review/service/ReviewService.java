@@ -36,7 +36,8 @@ public class ReviewService {
 
     /**
      * 리뮤 전체 조회
-     *
+     * @param page
+     * @param size
      * @return List<ReviewsDTO>
      *
      * @author 이광석
@@ -45,15 +46,23 @@ public class ReviewService {
     public List<ReviewsDTO> findAll(int page,int size) {
         Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC,"createdAt"));
 
-        Page<Review> ReviewPage = reviewRepository.findAll(pageable);
 
-        List<ReviewsDTO> reviewsDTOS = ReviewPage.getContent().stream()
+        return reviewRepository.findAll(pageable).stream()
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
-        return reviewsDTOS;
 
     }
 
+    /**
+     * 책id 기반 리뷰 조회
+     * @param bookId
+     * @param page
+     * @param size
+     * @return List<ReviewsDTO>
+     *
+     * @author 이광석
+     * @since 25.02.07
+     */
     public List<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
 
         Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"createdAt"));
@@ -124,13 +133,7 @@ public class ReviewService {
 
         reviewRepository.delete(review);
 
-         return ReviewsDTO.builder()
-                .id(review.getId())
-                .content(review.getContent())
-                .userId(review.getUserId())
-                .bookId(review.getBookId())
-                .rating(review.getRating())
-                .build();
+         return new ReviewsDTO(review);
 
     }
 
@@ -189,7 +192,10 @@ public class ReviewService {
     /**
      * db에서 review 꺼내고 에러처리
      * @param reviewId
-     * @return
+     * @return Review
+     *
+     * @author 이광석
+     * @since 25.02.07
      */
     private Review findById(Long reviewId){
         return reviewRepository.findById(reviewId)
