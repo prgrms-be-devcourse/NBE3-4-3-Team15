@@ -2,6 +2,7 @@ package com.project.backend.global.oauth;
 
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -54,9 +55,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         Member member = opMember.orElseGet(() -> saveMember(attributes, registrationId));
 
-        return new CustomOAuth2UserDetails(
+        return new CustomUserDetails(
                 member.getUsername(),
-                attributes,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
     }

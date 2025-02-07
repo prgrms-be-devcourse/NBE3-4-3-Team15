@@ -1,8 +1,8 @@
 package com.project.backend.global.oauth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.jwt.JwtUtil;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,8 +39,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
      */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        CustomOAuth2UserDetails user = (CustomOAuth2UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(user.getName());
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        String token = jwtUtil.generateToken(user.getUsername());
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

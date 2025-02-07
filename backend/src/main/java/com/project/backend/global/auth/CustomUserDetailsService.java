@@ -41,9 +41,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // CustomUserDetails 객체를 반환(회원 정보, 권한 포함)
         return new CustomUserDetails(
-                member.getId(),
                 member.getUsername(),
-                member.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
     }
