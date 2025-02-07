@@ -71,4 +71,20 @@ public class NotificationController {
                 "변경 성공"
         );
     }
+
+    /**
+     * 알림 삭제
+     * @param notificationId
+     * @return GenericResponse<String>
+     *
+     * @author 이광석
+     * @since
+     */
+    @DeleteMapping("/{notificationId}")
+    public GenericResponse<String> notificationDelete(@PathVariable("notificationId") Long notificationId){
+        notificationService.notificationDelete(notificationId);
+        return GenericResponse.of(
+                "삭제 성공"
+        );
+    }
 }

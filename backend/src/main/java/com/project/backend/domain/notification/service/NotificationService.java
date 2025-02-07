@@ -66,4 +66,10 @@ public class NotificationService {
         notificationRepository.save(notification);
 
     }
+
+    public void notificationDelete(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(()->new RuntimeException("해당 알림 없음"));
+        notificationRepository.delete(notification);
+    }
 }
