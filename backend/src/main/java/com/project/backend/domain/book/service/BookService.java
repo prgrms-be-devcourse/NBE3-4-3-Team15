@@ -67,7 +67,6 @@ public class BookService {
      * @param -- title (검색어) --
      * @param -- isAuthorSearch (작가검색, 도서검색 판단) --
      * @param -- token
-     *
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
@@ -86,7 +85,7 @@ public class BookService {
 
         List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
 
-        bookCache.put(sessionId, uniqueBooks);
+        bookCache.put(token, uniqueBooks);
 
         return uniqueBooks;
     }
@@ -139,7 +138,7 @@ public class BookService {
     /**
      * -- 도서 상세 검색 메소드 --
      *
-     * @param isbn isbn
+     * @param isbn      isbn
      * @param token
      * @return BookDTO
      * @author 정재익
@@ -207,8 +206,6 @@ public class BookService {
             );
         }
     }
-
-
 }
 
 //    /**
