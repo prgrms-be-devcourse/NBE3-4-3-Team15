@@ -71,6 +71,4 @@ public class ReviewCommentDto {
                 .collect(Collectors.toList()):null;
 
     }
-
-
 }
