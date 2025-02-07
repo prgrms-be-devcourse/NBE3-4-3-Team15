@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.backend.domain.book.dto.BookDTO;
 import com.project.backend.domain.book.dto.KakaoDTO;
 import com.project.backend.domain.book.dto.NaverDTO;
+import com.project.backend.domain.book.entity.Book;
+import com.project.backend.domain.book.entity.Favorite;
 import com.project.backend.domain.book.exception.BookErrorCode;
 import com.project.backend.domain.book.exception.BookException;
+import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.book.util.BookUtil;
+import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -202,6 +207,76 @@ public class BookService {
             );
         }
     }
+
+    @Transactional
+    public boolean favoriteBook(String isbn, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BookException(BookErrorCode.MEMBER_NOT_FOUND));
+
+        BookDTO bookDTO = searchBookDetail(isbn);
+
+        Book book = new Book();
+        book.setIsbn(bookDTO.getIsbn());
+        book.setTitle(bookDTO.getTitle());
+        book.setAuthor(bookDTO.getAuthor());
+        book.setDescription(bookDTO.getDescription());
+        book.setImage(bookDTO.getImage());
+
+        FavoriteId favoriteId = new FavoriteId(member.getId(), book.getIsbn());
+
+        Optional<Favorite> existingFavorite = favoriteRepository.findById(favoriteId);
+
+        if (existingFavorite.isPresent()) {
+            favoriteRepository.delete(existingFavorite.get());
+            bookRepository.decrementFavoriteCount(isbn);
+            return false;
+        } else {
+            Favorite favorite = new Favorite();
+            favorite.setId(favoriteId);
+            favorite.setMember(member);
+            favorite.setBook(book);
+
+            favoriteRepository.save(favorite);
+            bookRepository.incrementFavoriteCount(isbn);
+
+            return true;
+        }
+    }
+
+
+
+
+//    @Transactional
+//    public GenericResponse<String> favoriteBook(FavoriteDTO favoriteDTO, @AuthenticationPrincipal UserDetails userDetails) {
+//        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+//        Long memberId = customUserDetails.getId();
+//
+//        FavoriteId favoriteId = new FavoriteId(userDetails.getUsername(), favoriteDTO.getBookId());
+//
+//        Book book = bookRepository.findById(favoriteDTO.getBookId())
+//                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+//
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
+//
+//        if (favoriteRepository.existsById(favoriteId)) {
+//            favoriteRepository.deleteById(favoriteId);
+//            book.setFavoriteCount(book.getFavoriteCount() - 1);
+//            bookRepository.save(book);
+//            return GenericResponse.of("찜이 취소되었습니다.");
+//        } else {
+//            Favorite favorite = modelMapper.map(favoriteDTO, Favorite.class);
+//            favorite.setId(favoriteId);
+//            favorite.setBook(book);
+//            favorite.setMember(member);
+//            favoriteRepository.save(favorite);
+//            book.setFavoriteCount(book.getFavoriteCount() + 1);
+//            bookRepository.save(book);
+//
+//            return GenericResponse.of("해당 도서를 찜 목록에 추가하였습니다.");
+//        }
+//    }
+
 }
 
 //    /**
