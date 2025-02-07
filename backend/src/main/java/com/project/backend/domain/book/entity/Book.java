@@ -2,10 +2,7 @@ package com.project.backend.domain.book.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * -- 책 엔티티 --
@@ -15,6 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
