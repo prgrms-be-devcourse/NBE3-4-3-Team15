@@ -26,9 +26,11 @@ public class NotificationService {
      * @since 25.02.06
      */
     public NotificationDTO create(NotificationDTO notificationDTO) {
+        System.out.println(1234);
         Notification notification = Notification.builder()
                 .memberId(notificationDTO.getMemberId())
                 .isCheck(notificationDTO.isCheck())
+                .content(notificationDTO.getContent())
                 .build();
         if(notificationDTO.getReviewId()!=null){
             notification.setReviewId(notificationDTO.getReviewId());

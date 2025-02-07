@@ -11,6 +11,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class NotificationDTO {
     Long id;
 
@@ -32,4 +33,6 @@ public class NotificationDTO {
         this.isCheck = notification.isCheck();
         this.content = notification.getContent();
     }
+
+
 }
