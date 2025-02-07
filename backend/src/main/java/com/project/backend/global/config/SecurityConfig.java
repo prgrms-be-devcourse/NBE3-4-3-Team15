@@ -1,6 +1,8 @@
 package com.project.backend.global.config;
 
 import com.project.backend.global.jwt.JwtAuthentizationFilter;
+import com.project.backend.global.oauth.CustomOAuth2SuccessHandler;
+import com.project.backend.global.oauth.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +32,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthentizationFilter authenticationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
     /**
      * 스프링 시큐리티 설정 (SecurityFilterChain)
@@ -52,7 +56,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig())) // CORS 설정 적용
                 .authorizeHttpRequests(auth -> auth
                         // GET 요청은 모두 허용(책 목록, 리뷰 조회 등)
-                        .requestMatchers(HttpMethod.GET, "/book/list", "/book/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/book", "/book/{isbn}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review/{reviewId}/comments").permitAll()
 
@@ -66,6 +70,10 @@ public class SecurityConfig {
                         // 그 외 요청은 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
                 )
+                //소셜 로그인(네이버, 카카오, 구글)
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(customOAuth2SuccessHandler))
                 //X-Frame-Options 설정 (h2-console iframe)
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

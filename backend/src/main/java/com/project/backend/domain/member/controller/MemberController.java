@@ -7,6 +7,7 @@ import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,11 +60,12 @@ public class MemberController {
     @PostMapping("/login")
     @Operation(summary = "로그인")
     public ResponseEntity<GenericResponse<String>> login(
-            @RequestBody @Valid LoginDto loginDto) {
+            @RequestBody @Valid LoginDto loginDto, HttpServletResponse response) {
         String token = memberService.login(loginDto); // JWT 토큰 발급
 
         return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + token) // 헤더에 JWT 추가
+                .header("Authorization", "Bearer " + token)// 헤더에 JWT 추가
+                .header("Set-Cookie", "accessToken=" + token)
                 .body(GenericResponse.of("로그인 성공")); // body에는 성공 메시지만 반환
     }
     /**

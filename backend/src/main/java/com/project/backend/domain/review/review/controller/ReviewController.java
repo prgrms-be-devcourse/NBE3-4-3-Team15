@@ -61,6 +61,17 @@ public class ReviewController {
         );
     }
 
+    @GetMapping("/books/{bookId}")
+    public GenericResponse<List<ReviewsDTO>> getBookIdReviews(@PathVariable("bookId") Long bookId,
+                                                              @RequestParam(value = "page",defaultValue = "0") Integer page,
+                                                              @RequestParam(value = "size",defaultValue = "10") Integer size){
+        List<ReviewsDTO> reviewsDTOS = reviewService.getBookIdReviews(bookId,page,size);
+
+        return GenericResponse.of(
+                reviewsDTOS,
+                "리뷰 조회 성공"
+        );
+    }
 
 
 
@@ -145,7 +156,7 @@ public class ReviewController {
     public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
-        ReviewsDTO reviewsDTO = reviewService.findById(reviewId);
+        ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
 
 
 
