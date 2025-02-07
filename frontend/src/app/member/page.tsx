@@ -1,7 +1,31 @@
+"use client";
+
 import { Margarine } from "next/font/google";
 import Image from "next/image";
+import client from "@/lib/client";
+import React, { useMemo, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function Login() {
+  const router = useRouter();
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
+
+  const login = async () => {
+    try {
+      const response = await client.POST("/members/login", {
+        body: {
+          username: id,
+          password: password,
+        },
+      });
+      router.replace(`/`);
+    } catch (error) {
+      console.error("로그인에 실패하였습니다.");
+      alert("로그인에 실패하였습니다.");
+    }
+  };
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <div>
@@ -10,22 +34,34 @@ export default function Home() {
             <tr>
               <td>ID</td>
               <td>
-                <input type="text" className="border rounded" />
+                <input
+                  type="text"
+                  className="border rounded"
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
+                  required
+                />
               </td>
             </tr>
             <tr>
               <td>Password</td>
               <td>
-                <input type="password" className="border rounded" />
+                <input
+                  type="password"
+                  className="border rounded"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </td>
             </tr>
             <tr>
               <td>
-                <button className="btn btn-primary">로그인</button>
+                <button className="btn btn-primary mt-2">회원가입</button>
               </td>
               <td style={{ textAlign: "end" }}>
-                <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-4 py-2 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                  회원가입
+                <button className="btn btn-primary mt-2" onClick={login}>
+                  로그인
                 </button>
               </td>
             </tr>
