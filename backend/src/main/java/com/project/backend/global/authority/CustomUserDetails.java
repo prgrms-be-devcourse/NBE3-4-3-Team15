@@ -2,7 +2,10 @@ package com.project.backend.global.authority;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * 스프링시큐리티의 유저정보를 가져오는 클래스
@@ -11,21 +14,13 @@ import java.util.Collection;
  * @author -- 정재익 --
  * @since -- 2월 3일 --
  */
-public class CustomUserDetails implements UserDetails {
-    private final Long id;
+public class CustomUserDetails implements UserDetails, OAuth2User {
     private final String username;
-    private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
+    public CustomUserDetails(String username, Collection<? extends GrantedAuthority> authorities) {
         this.username = username;
-        this.password = password;
         this.authorities = authorities;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     @Override
@@ -34,13 +29,13 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public String getPassword() {
-        return password;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+    public String getPassword() {
+        return "";
     }
 
     @Override
@@ -61,5 +56,15 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of();
+    }
+
+    @Override
+    public String getName() {
+        return "";
     }
 }

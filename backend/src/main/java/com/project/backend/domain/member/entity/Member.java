@@ -28,7 +28,7 @@ public class Member extends BaseEntity {
     @Setter(AccessLevel.PRIVATE)
     private Long id;
 
-    @Column(unique = true, length = 16)
+    @Column(unique = true, length = 30)
     private String username;
 
     private String password;
