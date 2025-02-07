@@ -40,9 +40,8 @@ public class BookController {
     @GetMapping
     @Operation(summary = "도서 검색")
     public GenericResponse<List<BookDTO>> searchBooks(@RequestParam(name = "query") String query,
-                                                      @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
-                                                      @RequestHeader(name = "Authorization") String token) {
-        return GenericResponse.of(bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), token));
+                                                      @RequestParam(name = "searchBy", defaultValue = "title") String searchBy) {
+        return GenericResponse.of(bookService.searchBooks(query, searchBy.equalsIgnoreCase("author")));
     }
 
     /**
@@ -57,9 +56,8 @@ public class BookController {
      */
     @GetMapping("/{isbn}")
     @Operation(summary = "도서 상세 조회")
-    public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn,
-                                                     @RequestHeader(name = "Authorization") String token) {
-        return GenericResponse.of(bookService.searchBookDetail(isbn, token));
+    public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn                                                     ) {
+        return GenericResponse.of(bookService.searchBookDetail(isbn));
     }
 
 //    /**
