@@ -67,11 +67,13 @@ public class BookService {
      * @param -- title (검색어) --
      * @param -- isAuthorSearch (작가검색, 도서검색 판단) --
      * @param -- sessionId (개인별 세션 ID)
+     * @param -- page 시작 페이지 --
+     * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
-    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId) {
+    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId, int page, int size) {
 
         if (!StringUtils.hasText(query)) {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
@@ -79,8 +81,8 @@ public class BookService {
 
         List<BookDTO> allBooks = new ArrayList<>();
 
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver"));
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao"));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver", page, size));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao", page, size));
 
 
         List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
@@ -98,22 +100,29 @@ public class BookService {
      * @param -- query 검색어 --
      * @param -- target 검색 범위 --
      * @param -- apiType 요청하는 Api 종류 --
+     * @param -- page 시작 페이지 --
+     * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 7일 --
      */
-    private List<BookDTO> requestApi(String query, String target, String apiType) {
+    private List<BookDTO> requestApi(String query, String target, String apiType, int page, int size) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         String url;
 
         if ("kakao".equalsIgnoreCase(apiType)) {
             headers.set("Authorization", "KakaoAK " + kakaoKey);
-            url = kakaoUrl + "?query=" + query + "&size=10&target=" + target;
+            url = String.format("%s?query=%s&size=%d&page=%d&target=%s",
+                    kakaoUrl, query, size, page, target);
         } else {
             headers.set("X-Naver-Client-Id", clientId);
             headers.set("X-Naver-Client-Secret", clientSecret);
-            url = naverUrl + "?query=" + query + "&display=10";
+
+            int start = (page - 1) * size + 1;
+
+            url = String.format("%s?query=%s&display=%d&start=%d",
+                    naverUrl, query, size, start);
         }
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
