@@ -34,6 +34,16 @@ public class NotificationDTO {
         this.content = notification.getContent();
     }
 
+    public static NotificationDTO fromEntity(Notification notification) {
+        return NotificationDTO.builder()
+                .id(notification.getId())
+                .memberId(notification.getMemberId())
+                .reviewId(notification.getReviewId())
+                .reviewComment(notification.getReviewCommentId())
+                .isCheck(notification.isCheck())
+                .content(notification.getContent())
+                .build();
+    }
     public void setContent(String username, String type){
         String content= username + "님이 ";
         if(type.equals("COMMENT")) {

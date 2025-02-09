@@ -71,9 +71,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 //소셜 로그인(네이버, 카카오, 구글)
-//                .oauth2Login(oauth2 -> oauth2
-//                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-//                        .successHandler(customOAuth2SuccessHandler))
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(customOAuth2SuccessHandler))
                 //X-Frame-Options 설정 (h2-console iframe)
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -25,18 +25,14 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    
     public NotificationDTO create(NotificationDTO notificationDTO) {
         Notification notification = Notification.builder()
                 .memberId(notificationDTO.getMemberId())
+                .reviewId(notificationDTO.getReviewId())
+                .reviewCommentId(notificationDTO.getReviewComment())
                 .isCheck(notificationDTO.isCheck())
                 .content(notificationDTO.getContent())
                 .build();
-        if(notificationDTO.getReviewId()!=null){
-            notification.setReviewId(notificationDTO.getReviewId());
-        }else if(notificationDTO.getReviewComment()!=null){
-            notification.setReviewCommentId(notificationDTO.getReviewComment());
-        }
 
 
         return new NotificationDTO(notificationRepository.save(notification));
@@ -62,8 +58,7 @@ public class NotificationService {
      * @since 25.02.06
      */
     public void notificationCheck(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(()->new RuntimeException("해당 알림 없음"));
+        Notification notification = findNotificationById(notificationId);
         notification.setCheck(true);
         notificationRepository.save(notification);
 
@@ -77,8 +72,22 @@ public class NotificationService {
      * @since 25.02.06
      */
     public void notificationDelete(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(()->new RuntimeException("해당 알림 없음"));
+        Notification notification = findNotificationById(notificationId);
         notificationRepository.delete(notification);
+    }
+
+
+    /**
+     * Notification 탐색
+     * @param notificationId
+     * @return Notification
+     *
+     * @author 이광석
+     * @since 25.02.09
+     */
+    private Notification findNotificationById(Long notificationId){
+        return notificationRepository.findById(notificationId)
+                .orElseThrow(()-> new RuntimeException("해당 알림을 찾을수 없습니다."));
+
     }
 }
