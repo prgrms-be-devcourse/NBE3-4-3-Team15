@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class JwtAuthentizationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         // 요청에서 토큰 추출
-        String token = getTokenFromRequest(request);
+        String token = getJwtFromCookies(request);
 
         // 토큰이 존재하고 유효하다면, 사용자 정보를 SecurityContext에 설정
         if (token != null && jwtUtil.validateToken(token)) {
@@ -72,15 +71,7 @@ public class JwtAuthentizationFilter extends OncePerRequestFilter {
      * @param request HTTP 요청
      * @return 토큰 문자열, 없으면 null
      */
-    private String getTokenFromRequest(HttpServletRequest request) {
-        // 1. Authorization 헤더에서 Bearer <token> 형식으로 추출
-        String bearerToken = request.getHeader("Authorization");
-        // Bearer <token> 형식의 토큰만 추출
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-
-        // 2. 쿠키에서 accessToken 추출
+    private String getJwtFromCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
