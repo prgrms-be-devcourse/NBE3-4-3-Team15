@@ -1,6 +1,6 @@
 package com.project.backend.domain.member.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.backend.domain.member.entity.Member;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -22,19 +22,19 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberDto extends MineDto {
-    @JsonIgnore
+    @JsonProperty
     private long id;
 
     @NotBlank
     @Length(min = 2, max = 16)
     private String username;
 
-    @JsonIgnore
+    @JsonProperty
     @NotBlank
     @Length(min = 8)
     private String password1;
 
-    @JsonIgnore
+    @JsonProperty
     @NotBlank
     private String password2;
 
