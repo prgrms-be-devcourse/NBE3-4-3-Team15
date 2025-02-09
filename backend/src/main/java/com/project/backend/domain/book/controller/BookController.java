@@ -2,11 +2,13 @@ package com.project.backend.domain.book.controller;
 
 import com.project.backend.domain.book.dto.BookDTO;
 import com.project.backend.domain.book.service.BookService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -103,14 +105,24 @@ public class BookController {
 //        return GenericResponse.of(bookService.searchFavoriteBooks(userDetails));
 //    }
 
-    @PostMapping("/{isbn}/{memberId}")
-    @Operation(summary = "도서 찜하기 / 취소")
-    public GenericResponse<String> favoriteBook(@PathVariable(name = "isbn") String isbn,
-                                                @PathVariable(name = "memberId") Long memberId,
-                                                @RequestHeader(name = "X-Session-Id") String sessionId
-                                                ) {
-        boolean isFavorited = bookService.favoriteBook(isbn, memberId, sessionId);
+    /**
+     * 도서 찜하기,취소하기 기능
+     *
+     * @param -- isbn --
+     * @param -- 프론트에 있는 bookdto
+     * @param -- customUserDetails 로그인한 사용자 정보 --
+     * @return -- GenericResponse<String>
+     * @author -- 정재익, 김남우 --
+     * @since -- 2월 9일 --
+     */
 
+    @PostMapping("/{isbn}/favorite")
+    @Operation(summary = "도서 찜하기 / 찜취소하기")
+    public GenericResponse<String> favoriteBook(@PathVariable(name = "isbn") String isbn,
+                                                @RequestBody BookDTO bookDto,
+                                                @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        bookDto.setIsbn(isbn);
+        boolean isFavorited = bookService.favoriteBook(bookDto, customUserDetails.getUsername());
         return isFavorited ? GenericResponse.of("찜한 도서가 추가되었습니다.")
                 : GenericResponse.of("찜한 도서가 취소되었습니다.");
     }
