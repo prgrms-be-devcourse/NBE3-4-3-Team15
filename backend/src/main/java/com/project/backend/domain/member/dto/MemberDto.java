@@ -1,5 +1,6 @@
 package com.project.backend.domain.member.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.backend.domain.member.entity.Member;
 import jakarta.validation.constraints.NotBlank;
@@ -21,6 +22,7 @@ import org.hibernate.validator.constraints.Length;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MemberDto extends MineDto {
     @JsonProperty
     private long id;
