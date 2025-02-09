@@ -7,6 +7,7 @@ import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,14 +64,14 @@ public class MemberController {
             @RequestBody @Valid LoginDto loginDto, HttpServletResponse response) {
         String token = memberService.login(loginDto); // JWT 토큰 발급
 
-        return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + token)// 헤더에 JWT 추가
-                .header("Set-Cookie", "accessToken=" + token)
-                .body(GenericResponse.of("로그인 성공")); // body에는 성공 메시지만 반환
+        // JWT를 Set-Cookie로 저장 (HttpOnly, Secure 옵션을 설정하여 보안 강화)
+        response.addHeader("Set-Cookie", "accessToken=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict");
+
+        return ResponseEntity.ok(GenericResponse.of("로그인 성공"));
     }
     /**
      * 로그아웃
-     * @param token 요청 헤더에 포함된 JWT 토큰
+     * @param response
      * @return 로그아웃 성공 메시지
      *
      * @author 이원재
@@ -79,8 +80,14 @@ public class MemberController {
     @PostMapping("/logout")
     @Operation(summary = "로그아웃")
     public ResponseEntity<GenericResponse<String>> logout(
-            @RequestHeader("Authorization") String token) {
-        // 클라이언트가 JWT를 삭제하도록 응답
+            HttpServletResponse response) {
+        // 로그아웃 시 쿠키에서 JWT를 삭제
+        Cookie cookie = new Cookie("accessToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // 만료 시간을 0으로 설정하여 쿠키를 삭제
+        response.addCookie(cookie);
+
         return ResponseEntity.ok(GenericResponse.of("로그아웃 성공"));
     }
 

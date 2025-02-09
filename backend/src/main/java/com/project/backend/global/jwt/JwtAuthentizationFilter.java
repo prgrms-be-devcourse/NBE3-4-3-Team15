@@ -2,6 +2,7 @@ package com.project.backend.global.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -64,17 +65,31 @@ public class JwtAuthentizationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 요청 헤더에서 Authorization 토큰을 추출하는 메서드
+     * 요청 헤더에서 JWT 토큰을 추출하는 메서드
+     * 1. Authorization 헤더에서 Bearer <token> 형식으로 추출
+     * 2. 쿠키에서 accessToken 추출
      *
      * @param request HTTP 요청
      * @return 토큰 문자열, 없으면 null
      */
     private String getTokenFromRequest(HttpServletRequest request) {
+        // 1. Authorization 헤더에서 Bearer <token> 형식으로 추출
         String bearerToken = request.getHeader("Authorization");
         // Bearer <token> 형식의 토큰만 추출
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
+        // 2. 쿠키에서 accessToken 추출
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
         return null;
     }
 }
