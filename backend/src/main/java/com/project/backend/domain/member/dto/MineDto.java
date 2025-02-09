@@ -17,15 +17,13 @@ import java.time.LocalDate;
  */
 @Getter
 public class MineDto {
-    String password;
+    @NotBlank
+    @Length(min = 2, max = 20)
+    String nickname;
 
     @NotBlank
     @Email
     String email;
-
-    @NotBlank
-    @Length(min = 2, max = 20)
-    String nickname;
 
     int gender;
 

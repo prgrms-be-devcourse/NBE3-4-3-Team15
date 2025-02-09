@@ -94,9 +94,9 @@ public class MemberController {
      */
     @GetMapping("/mine")
     @Operation(summary = "회원 정보 조회")
-    public ResponseEntity<GenericResponse<MemberDto>> getMyProfile(
+    public ResponseEntity<GenericResponse<MineDto>> getMyProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberDto myProfile = memberService.getMyProfile(userDetails.getUsername());
+        MineDto myProfile = memberService.getMyProfile(userDetails.getUsername());
 
         return ResponseEntity.ok(GenericResponse.of(myProfile, "회원 정보 조회 성공"));
     }
