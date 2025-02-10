@@ -3,6 +3,8 @@ package com.project.backend.domain.review.comment.service;
 
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
@@ -36,6 +38,7 @@ public class ReviewCommentService {
     private final ReviewService reviewService;
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     /**
      * 리뷰 코멘트 목록 출력
@@ -92,6 +95,7 @@ public class ReviewCommentService {
                 .depth(0)
                 .isDelete(false)
                 .build();
+
         if(reviewCommentDto.getParentId()!=null){
             ReviewComment parentComment = findCommentById(reviewCommentDto.getParentId());
 
@@ -106,8 +110,26 @@ public class ReviewCommentService {
             reviewComment.setDepth(parentComment.getDepth()+1);
         }
 
+        ReviewComment newReviewComment = reviewCommentRepository.save(reviewComment);
 
-        reviewCommentRepository.save(reviewComment);
+
+
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .memberId(review.getUserId())
+                .reviewComment(newReviewComment.getId())
+                .isCheck(false)
+                .build();
+
+
+        if(reviewCommentDto.getParentId()==null) {
+
+            notificationDTO.setContent("nick", "COMMENT");
+        }else{
+            notificationDTO.setContent("nick", "REPLY");
+        }
+
+        notificationService.create(notificationDTO);
+
         return new ReviewCommentDto(reviewComment);
     }
 
