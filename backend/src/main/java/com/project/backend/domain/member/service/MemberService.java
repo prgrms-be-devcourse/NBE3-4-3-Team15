@@ -94,10 +94,12 @@ public class MemberService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
 
-        member.setEmail(mineDto.getEmail());
-        member.setGender(mineDto.getGender());
-        member.setNickname(mineDto.getNickname());
-        member.setBirth(mineDto.getBirth());
+        member.updateMemberInfo(
+                mineDto.getEmail(),
+                mineDto.getGender(),
+                mineDto.getNickname(),
+                mineDto.getBirth()
+        );
 
         return new MemberDto(member);
     }
@@ -163,7 +165,7 @@ public class MemberService {
                     if (passwordChangeDto.getNewPassword().equals(passwordChangeDto.getCurrentPassword())) {
                         throw new MemberException(SAME_AS_OLD_PASSWORD);
                     }
-                    member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+                    member.updatePassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
                     return member;
                 })
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));}

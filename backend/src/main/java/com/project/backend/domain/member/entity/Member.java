@@ -18,7 +18,6 @@ import java.util.List;
  */
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -47,4 +46,15 @@ public class Member extends BaseEntity {
 
     @ManyToMany
     private List<ReviewComment> reviewComments;
+
+    public void updateMemberInfo(String email, int gender, String nickname, LocalDate birth) {
+        this.email = email;
+        this.gender = gender;
+        this.nickname = nickname;
+        this.birth = birth;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }
