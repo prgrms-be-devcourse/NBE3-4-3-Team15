@@ -11,7 +11,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * OAuth2 로그인 성공 시 JWT 토큰을 생성하고 클라이언트에 반환하는 핸들러 클래스
@@ -42,15 +41,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(user.getUsername());
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Authorization", "Bearer " + token);
+        String redirectUrl = "http://localhost:3000/member?token=" + token;
 
-        Map<String, String> tokenResponse = Map.of(
-                "token", token,
-                "msg", "소셜 로그인 성공"
-        );
+        response.addHeader("Set-Cookie", "accessToken=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict");
 
-        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+        response.sendRedirect(redirectUrl);
     }
 }
