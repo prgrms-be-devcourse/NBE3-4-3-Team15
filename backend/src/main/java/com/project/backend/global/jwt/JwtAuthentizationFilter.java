@@ -65,8 +65,7 @@ public class JwtAuthentizationFilter extends OncePerRequestFilter {
 
     /**
      * 요청 헤더에서 JWT 토큰을 추출하는 메서드
-     * 1. Authorization 헤더에서 Bearer <token> 형식으로 추출
-     * 2. 쿠키에서 accessToken 추출
+     * 쿠키에서 accessToken 추출
      *
      * @param request HTTP 요청
      * @return 토큰 문자열, 없으면 null
