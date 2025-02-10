@@ -3,6 +3,8 @@ package com.project.backend.domain.notification.service;
 
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
+import com.project.backend.domain.notification.exception.NotificationErrorCode;
+import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -87,7 +89,11 @@ public class NotificationService {
      */
     private Notification findNotificationById(Long notificationId){
         return notificationRepository.findById(notificationId)
-                .orElseThrow(()-> new RuntimeException("해당 알림을 찾을수 없습니다."));
+                .orElseThrow(()-> new NotificationException(
+                        NotificationErrorCode.NOTIFICATION_NOT_FOUND.getStatus(),
+                        NotificationErrorCode.NOTIFICATION_NOT_FOUND.getErrorCode(),
+                        NotificationErrorCode.NOTIFICATION_NOT_FOUND.getMessage())
+                );
 
     }
 }

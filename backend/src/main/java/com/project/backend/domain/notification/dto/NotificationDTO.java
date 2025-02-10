@@ -50,6 +50,8 @@ public class NotificationDTO {
             content += "댓글을 작성하였습니다";
         }else if(type.equals("REPLY")){
             content+= "대댓글을 작성하였습니다";
+        }else if(type.equals("REVIEW")){
+            content+= "리뷰를 작성하였습니다";
         }
         this.content = content;
     }
