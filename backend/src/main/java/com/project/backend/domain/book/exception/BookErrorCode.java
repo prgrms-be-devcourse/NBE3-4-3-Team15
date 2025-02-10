@@ -13,8 +13,7 @@ public enum BookErrorCode {
     QUERY_EMPTY(HttpStatus.BAD_REQUEST, "QUERY_EMPTY", "검색어를 입력하지 않았습니다."),
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_NOT_FOUND", "해당 도서를 찾을 수 없습니다."),
     BOOK_DB_EMPTY(HttpStatus.NOT_FOUND, "BOOK_DB_EMPTY", "도서 데이터베이스가 비어있습니다."),
-    NO_FAVORITE_BOOKS(HttpStatus.NOT_FOUND, "NO_FAVORITE_BOOKS", "찜한 도서가 없습니다."),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", "멤버가 존재하지 않습니다.");
+    NO_FAVORITE_BOOKS(HttpStatus.NOT_FOUND, "NO_FAVORITE_BOOKS", "찜한 도서가 없습니다.");
 
     final HttpStatus status;
     final String code;
