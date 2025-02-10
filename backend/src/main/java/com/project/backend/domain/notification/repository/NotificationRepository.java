@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 
+/**
+ * 알림 레파지토리
+ */
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification,Long> {
 
