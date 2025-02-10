@@ -22,9 +22,9 @@ export default function Login() {
         body: {
           username: id,
           password1: password1,
-          password2: "",
-          email: "",
-          nickname: "",
+          password2: password2,
+          email: email,
+          nickname: nickname,
           gender: gender,
           birth: birth,
         },
@@ -84,7 +84,7 @@ export default function Login() {
                   type="text"
                   className="border rounded"
                   value={email}
-                  onChange={(e) => setPassword1(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </td>
@@ -102,15 +102,28 @@ export default function Login() {
               </td>
             </tr>
             <tr>
-              <td>생년월일</td>
+              <td>성별</td>
               <td>
-                <input
-                  type="date"
-                  className="border rounded"
-                  value={birth}
-                  onChange={(e) => setBirth(e.target.value)}
-                  style={{ width: "198px" }}
-                />
+                <label>
+                  <input
+                    type="radio"
+                    value="0"
+                    checked={gender === "0"}
+                    onChange={(e) => setGender(e.target.value)} // 남자 선택 시 상태 업데이트
+                    required
+                  />
+                  남자
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="1"
+                    checked={gender === "1"}
+                    onChange={(e) => setGender(e.target.value)} // 여자 선택 시 상태 업데이트
+                    required
+                  />
+                  여자
+                </label>
               </td>
             </tr>
             <tr>
@@ -121,7 +134,7 @@ export default function Login() {
                   className="border rounded"
                   value={birth}
                   onChange={(e) => setBirth(e.target.value)}
-                  required
+                  style={{ width: "198px" }}
                 />
               </td>
             </tr>
