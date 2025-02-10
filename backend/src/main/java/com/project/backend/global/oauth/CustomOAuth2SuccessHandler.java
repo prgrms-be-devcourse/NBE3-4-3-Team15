@@ -41,10 +41,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(user.getUsername());
 
-        String redirectUrl = "http://localhost:3000/member?token=" + token;
-
         response.addHeader("Set-Cookie", "accessToken=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict");
 
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect("http://localhost:3000/");
     }
 }
