@@ -32,8 +32,8 @@ public class ReviewCommentUserController {
      */
     @GetMapping("/review/comments")
     public GenericResponse<List<ReviewCommentDto>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
-        Long id = memberService.getMyProfile(userDetails.getUsername()).getId();
-        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(id);
+
+        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userDetails);
         return GenericResponse.of(
                 commentDtos,
                 "User 댓글 조회 성공"

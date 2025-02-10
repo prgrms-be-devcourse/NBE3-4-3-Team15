@@ -3,6 +3,7 @@ package com.project.backend.domain.review.comment.service;
 
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
@@ -14,6 +15,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ public class ReviewCommentService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
+    private final MemberService memberService;
 
     /**
      * 리뷰 코멘트 목록 출력
@@ -60,14 +63,15 @@ public class ReviewCommentService {
 
     /**
      * userId기반 코멘트 검색
-     * @param userId
+     * @param userDetails
      * @return List<ReviewCommentDto>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    public List<ReviewCommentDto> findUserComment(Long userId) {
-        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(userId);
+    public List<ReviewCommentDto> findUserComment(CustomUserDetails userDetails) {
+        Member member = memberRepository.findByUsername(userDetails.getUsername()).get(); //memberservice로 변경
+        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(member.getId());
         return reviewCommentDtos;
     }
 
@@ -80,7 +84,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,Long myId) {
+    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,CustomUserDetails userDetails) {  // 메소드가 너무 긴듯 분할 필요
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -89,7 +93,7 @@ public class ReviewCommentService {
                 ));
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
-                .userId(myId)
+                .userId(myId(userDetails))
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
@@ -143,7 +147,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto, Long writerId) {
+    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto, CustomUserDetails userDetails) {
 
 
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
@@ -152,9 +156,9 @@ public class ReviewCommentService {
                         ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
                         ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                 ));
+
+        authorityCheck(userDetails,reviewComment);
         reviewComment.setComment(reviewCommentDto.getComment());
-
-
         reviewCommentRepository.save(reviewComment);
 
         return new ReviewCommentDto(reviewComment);
@@ -168,7 +172,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto delete(Long commentId) {
+    public ReviewCommentDto delete(Long commentId,CustomUserDetails userDetails) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
@@ -176,6 +180,7 @@ public class ReviewCommentService {
                         ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                 ));
 
+        authorityCheck(userDetails,reviewComment);
         if(reviewComment.getParent()!=null){
             ReviewComment parent = reviewComment.getParent();
 
@@ -203,20 +208,20 @@ public class ReviewCommentService {
     /**
      * 댓글 추천
      * @param commentId
-     * @param memberId
+     * @param userDetails
      * @return Boolean - 추천(true)/추천 취소(false)
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public Boolean recommend(Long commentId,Long memberId) {
+    public Boolean recommend(Long commentId,CustomUserDetails userDetails) {
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
                         ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
                         ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
                 ));
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findByUsername(userDetails.getUsername())
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
@@ -288,4 +293,39 @@ public class ReviewCommentService {
     }
 
 
+    /**
+     * userDetails의 username 을 이용해서 userId 추출;
+     * @param userDetails
+     * @return Long
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private Long myId(CustomUserDetails userDetails){
+        return memberService.getMyProfile(userDetails.getUsername()).getId();
+    }
+
+
+    /**
+     * 코멘트 작성자와 현재 사용자가 같은지 확인
+     * @param userDetails
+     * @param comment
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private void authorityCheck(CustomUserDetails userDetails, ReviewComment comment){
+        Member member = memberRepository.findById(comment.getUserId()).get(); // memberService로 변경 예정
+
+
+        if(!member.getUsername().equals(userDetails.getUsername()))
+        {
+            throw new ReviewException(
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getMessage()
+            );
+        }
+
+    }
 }

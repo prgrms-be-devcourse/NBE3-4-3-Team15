@@ -30,7 +30,6 @@ import java.util.List;
 public class ReviewCommentController {
 
     private final ReviewCommentService reviewCommentService;
-    private final MemberService memberService;
 
 
     /**
@@ -81,8 +80,7 @@ public class ReviewCommentController {
     @GetMapping("/review/comments")
     @Operation(summary = "댓글 검색")
     public GenericResponse<List<ReviewCommentDto>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
-        Long myId = myId(userDetails);
-        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(myId);
+        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userDetails);
         return GenericResponse.of(
                 commentDtos,
                 "User 댓글 조회 성공"
@@ -106,8 +104,8 @@ public class ReviewCommentController {
                                             @Valid @RequestBody ReviewCommentDto reviewCommentDto,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        Long Id = myId(userDetails);
-       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,Id);
+
+       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,userDetails);
 
        return GenericResponse.of(
                newReviewCommentDto,
@@ -129,11 +127,10 @@ public class ReviewCommentController {
     @Operation(summary = "리뷰 댓글 수정")
     @Transactional
     public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
-                                             @PathVariable("id") Long commentId,
-                                             @RequestBody ReviewCommentDto reviewCommentDto,
+                                                         @PathVariable("id") Long commentId,
+                                                        @RequestBody ReviewCommentDto reviewCommentDto,
                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
-            Long id = myId(userDetails);
-            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto,id);
+            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto,userDetails);
 
             return GenericResponse.of(
                     newReviewCommentDto,
@@ -154,8 +151,10 @@ public class ReviewCommentController {
     @Transactional
     @Operation(summary = "리뷰 댓글 삭제")
     public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
-                                         @PathVariable("id") Long commentId){
-       ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
+                                                    @PathVariable("id") Long commentId,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId,userDetails);
         return GenericResponse.of(
                 newReviewCommentDto,
                 "리뷰 코멘트 삭제 성공"
@@ -177,8 +176,7 @@ public class ReviewCommentController {
     public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Long reviewId,
                                                    @PathVariable("id") Long commentId,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails){
-        Long Id = myId(userDetails);
-       boolean result = reviewCommentService.recommend(commentId, Id);
+       boolean result = reviewCommentService.recommend(commentId, userDetails);
        ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
         if(result){
             return GenericResponse.of(
@@ -193,15 +191,5 @@ public class ReviewCommentController {
         }
     }
 
-    /**
-     * userDetails의 username 을 이용해서 userId 추출;
-     * @param userDetails
-     * @return Long
-     *
-     * @author 이광석
-     * @since 25.02.10
-     */
-    private Long myId(CustomUserDetails userDetails){
-        return memberService.getMyProfile(userDetails.getUsername()).getId();
-    }
+
 }
