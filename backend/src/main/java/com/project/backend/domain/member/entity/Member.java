@@ -1,5 +1,6 @@
 package com.project.backend.domain.member.entity;
 
+import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
@@ -8,6 +9,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -41,11 +43,17 @@ public class Member extends BaseEntity {
 
     private LocalDate birth;
 
-    @ManyToMany
-    private List<Review> recommendReviews;
+    @ManyToMany(mappedBy = "recommendMember")
+    private Set<Review> recommendReviews;
 
-    @ManyToMany
-    private List<ReviewComment> reviewComments;
+    @ManyToMany(mappedBy = "recommend")
+    private Set<ReviewComment> recommendReviewComments;
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Follow> followers;
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Follow> followings;
 
     public void updateMemberInfo(String email, int gender, String nickname, LocalDate birth) {
         this.email = email;
