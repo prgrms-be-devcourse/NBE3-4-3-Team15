@@ -83,8 +83,8 @@ public class BookService {
         }
 
         List<BookDTO> allBooks = new ArrayList<>();
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver", page, size / 2));
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao", page, size / 2));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver", page, size ));
+        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao", page, size));
 
         List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
 
