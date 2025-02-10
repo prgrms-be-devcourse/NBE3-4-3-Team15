@@ -9,7 +9,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -44,10 +43,10 @@ public class Member extends BaseEntity {
     private LocalDate birth;
 
     @ManyToMany(mappedBy = "recommendMember")
-    private Set<Review> recommendReviews;
+    private List<Review> recommendReviews;
 
     @ManyToMany(mappedBy = "recommend")
-    private Set<ReviewComment> recommendReviewComments;
+    private List<ReviewComment> recommendReviewComments;
 
     @OneToMany(mappedBy = "following", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Follow> followers;
