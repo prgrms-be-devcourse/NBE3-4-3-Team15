@@ -17,9 +17,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
     boolean existsByIsbn(String isbn);
-
     Book findByIsbn(String isbn);
 
+    /**
+     * -- 도서의 찜 개수 업데이트 --
+     * 특정 도서의 찜 개수를 지정된 값만큼 증가 또는 감소
+     *
+     * @param book 찜 개수를 업데이트할 도서 객체
+     * @param amount 증가 또는 감소할 찜 개수 값
+     * @author -- 정재익 --
+     * @since -- 2월 10일 --
+     */
     @Modifying
     @Transactional
     @Query("UPDATE Book b SET b.favoriteCount = b.favoriteCount + :amount WHERE b.id = :#{#book.id}")
