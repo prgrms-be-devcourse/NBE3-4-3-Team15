@@ -1,8 +1,10 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.follow.service.FollowService;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
+    private final FollowService followService;
 
     /**
      * 리뮤 전체 조회
@@ -102,6 +106,8 @@ public class ReviewService {
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
                     .build());
+
+
 
     }
 
