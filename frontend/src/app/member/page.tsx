@@ -1,29 +1,31 @@
+//page.tsx
 "use client";
 
-import client from "@/lib/client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
-export default function Login() {
-  const router = useRouter();
+const Login: React.FC = () => {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+
   const login = async () => {
     try {
       const response = await fetch("http://localhost:8080/members/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: id, password: password }),
+        credentials: "include", // 쿠키를 포함하도록 설정
       });
 
       if (response.ok) {
-        alert("로그인 성공!");
-        router.replace(`/`);
+        window.location.href = "/";
       } else {
-        alert("로그인에 실패하였습니다.");
+        const errorData = await response.json();
+        alert(
+          `로그인에 실패하였습니다: ${errorData.message || "알 수 없는 오류"}`
+        );
       }
     } catch (error) {
-      console.error("로그인에 실패하였습니다.");
+      console.error("로그인에 실패하였습니다:", error);
       alert("로그인에 실패하였습니다.");
     }
   };
@@ -114,4 +116,8 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
+// displayName 설정
+Login.displayName = "Login";
+
+export default Login;
