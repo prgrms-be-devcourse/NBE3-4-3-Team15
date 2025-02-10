@@ -29,7 +29,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
     private final ReviewService reviewService;
-    private final MemberService memberService;
+
 
     /**
      * 리뷰 목록을 조회
@@ -60,8 +60,8 @@ public class ReviewController {
     @GetMapping("/myReview")
     @Operation(summary = "특정 유저의 리뷰 목록 조회")
     public GenericResponse<List<ReviewsDTO>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails){
-        Long id = myId(userDetails);
-        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(id);
+
+        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userDetails);
         return GenericResponse.of(
                 reviewsDTOS,
                 "리뷰 목록 반환 성공"
@@ -95,10 +95,9 @@ public class ReviewController {
     @PostMapping
     @Operation(summary = "리뷰 추가")
     @Transactional
-    public GenericResponse<String> postReview( @RequestBody ReviewsDTO reviewsDTO
-    ,@AuthenticationPrincipal CustomUserDetails userDetails){
-        Long writerId = myId(userDetails);
-        reviewService.write(writerId,reviewsDTO);
+    public GenericResponse<String> postReview( @RequestBody ReviewsDTO reviewsDTO,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails){
+        reviewService.write(userDetails,reviewsDTO);
 
 
         return GenericResponse.of(
@@ -116,12 +115,13 @@ public class ReviewController {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{reviewId}")
     @Operation(summary = "리뷰 수정")
     @Transactional
     public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
-                                             @PathVariable("id") Long id){
-        reviewService.modify(reviewsDTO,id);
+                                             @PathVariable("reviewId") Long reviewId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
+        reviewService.modify(reviewsDTO,reviewId,userDetails);
         return GenericResponse.of(
                 reviewsDTO,
                 "리뷰 수정 성공"
@@ -137,11 +137,12 @@ public class ReviewController {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{reviewId}")
     @Operation(summary = "리뷰 삭제")
     @Transactional
-    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
-        ReviewsDTO review=  reviewService.delete(id);
+    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("reviewId") Long id,
+                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
+        ReviewsDTO review=  reviewService.delete(id,userDetails);
 
         return GenericResponse.of(
                 review,
@@ -164,11 +165,9 @@ public class ReviewController {
     @Transactional
     public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
-        Long myId = myId(userDetails);
-        boolean result = reviewService.recommend(reviewId,myId);
+
+        boolean result = reviewService.recommend(reviewId,userDetails);
         ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
-
-
 
         String message = result ?"리뷰 추천 성공" : "리뷰 추천 취소 성공";
         return GenericResponse.of(
@@ -177,15 +176,5 @@ public class ReviewController {
         );
     }
 
-    /**
-     * userDetails을 통해서 userId 추출
-     * @param userDetails
-     * @return Long
-     *
-     * @author 이광석
-     * @since 25.02.10
-     */
-    private Long myId(CustomUserDetails userDetails){
-        return memberService.getMyProfile(userDetails.getUsername()).getId();
-    }
+
 }

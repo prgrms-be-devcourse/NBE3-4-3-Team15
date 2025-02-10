@@ -3,11 +3,13 @@ package com.project.backend.domain.review.review.service;
 
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     /**
      * 리뮤 전체 조회
@@ -77,11 +80,11 @@ public class ReviewService {
 
     /**
      * userid 기반 리뷰 찾기
-     * @param userId
+     * @param userDetails
      * @return  List<ReviewsDTO>
      */
-    public List<ReviewsDTO> getUserReviews(Long userId) {
-        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(userId);
+    public List<ReviewsDTO> getUserReviews(CustomUserDetails userDetails) {
+        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(myId(userDetails));
         return reviewsDTOS;
     }
 
@@ -93,9 +96,9 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void write(Long writerId,ReviewsDTO reviewsDTO) {
+    public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
         reviewRepository.save(Review.builder()
-                        .userId(writerId)
+                        .userId(myId(userDetails))
                         .bookId(reviewsDTO.getBookId())
                         .userId(reviewsDTO.getUserId())
                         .content(reviewsDTO.getContent())
@@ -108,13 +111,15 @@ public class ReviewService {
     /**
      * 리뷰 수정
      * @param -- reviewsDTO(content,rating)
-     * @param id - 리뷰 id
+     * @param userDetails
      *
      * @author 이광석
      * @since 25.01.27
      */
-    public void modify(ReviewsDTO reviewsDTO,Long id) {
-        Review review = findById(id);
+    public void modify(ReviewsDTO reviewsDTO,Long reviewId,CustomUserDetails userDetails) {
+        Review review = findById(reviewId);
+        authorityCheck(userDetails,review);
+
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
         reviewRepository.save(review);
@@ -128,8 +133,9 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public ReviewsDTO delete(Long id) {
-        Review review = findById(id);
+    public ReviewsDTO delete(Long reviewId,CustomUserDetails userDetails) {
+        Review review = findById(reviewId);
+        authorityCheck(userDetails,review);
 
         reviewRepository.delete(review);
 
@@ -146,10 +152,10 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public boolean recommend(Long reviewId, Long memberId) {
+    public boolean recommend(Long reviewId, CustomUserDetails userDetails) {
         Review review = findById(reviewId);
 
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(myId(userDetails))
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
@@ -206,4 +212,32 @@ public class ReviewService {
                 );
     }
 
+
+    /**
+     * userDetails을 통해서 userId 추출
+     * @param userDetails
+     * @return Long
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private Long myId(CustomUserDetails userDetails){
+        return memberService.getMyProfile(userDetails.getUsername()).getId();
+    }
+
+
+    private void authorityCheck(CustomUserDetails userDetails, Review review){
+        Member member = memberRepository.findById(review.getUserId()).get(); // memberService로 변경 예정
+
+
+        if(!member.getUsername().equals(userDetails.getUsername()))
+        {
+            throw new ReviewException(
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getMessage()
+            );
+        }
+
+    }
 }

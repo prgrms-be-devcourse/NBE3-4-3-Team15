@@ -80,7 +80,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,Long myId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -89,7 +89,7 @@ public class ReviewCommentService {
                 ));
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
-                .userId(reviewCommentDto.getUserId())
+                .userId(myId)
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
@@ -143,7 +143,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto, Long writerId) {
 
 
         ReviewComment reviewComment = reviewCommentRepository.findById(commentId)

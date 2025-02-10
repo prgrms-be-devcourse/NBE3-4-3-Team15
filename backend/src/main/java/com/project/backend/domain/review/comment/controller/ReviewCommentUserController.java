@@ -1,9 +1,12 @@
 package com.project.backend.domain.review.comment.controller;
 
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,18 +20,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewCommentUserController {
     private final ReviewCommentService reviewCommentService;
+    private final MemberService memberService;
 
     /**
      * userId 기반 댓글 검색
-     * @param userId
+     * @param userDetails
      * @return GenericResponse<List<ReviewCommentDto>>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    @GetMapping("/review/comments/{userId}")
-    public GenericResponse<List<ReviewCommentDto>> getUserComment(@PathVariable("userId")Long userId){
-        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
+    @GetMapping("/review/comments")
+    public GenericResponse<List<ReviewCommentDto>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
+        Long id = memberService.getMyProfile(userDetails.getUsername()).getId();
+        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(id);
         return GenericResponse.of(
                 commentDtos,
                 "User 댓글 조회 성공"

@@ -1,7 +1,9 @@
 package com.project.backend.domain.review.comment.controller;
 
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -9,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.List;
 public class ReviewCommentController {
 
     private final ReviewCommentService reviewCommentService;
+    private final MemberService memberService;
 
 
     /**
@@ -68,16 +72,17 @@ public class ReviewCommentController {
 
     /**
      * userId 기반 댓글 검색
-     * @param userId
+     * @param userDetails
      * @return GenericResponse<List<ReviewCommentDto>>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    @GetMapping("/review/comments/{userId}")
+    @GetMapping("/review/comments")
     @Operation(summary = "댓글 검색")
-    public GenericResponse<List<ReviewCommentDto>> getUserComment(@PathVariable("userId")Long userId){
-        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
+    public GenericResponse<List<ReviewCommentDto>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
+        Long myId = myId(userDetails);
+        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(myId);
         return GenericResponse.of(
                 commentDtos,
                 "User 댓글 조회 성공"
@@ -98,10 +103,11 @@ public class ReviewCommentController {
     @PostMapping
     @Operation(summary = "리뷰 댓글 생성")
     public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Long reviewId,
-                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto){
+                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
 
-
-       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto);
+        Long Id = myId(userDetails);
+       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,Id);
 
        return GenericResponse.of(
                newReviewCommentDto,
@@ -124,9 +130,10 @@ public class ReviewCommentController {
     @Transactional
     public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
                                              @PathVariable("id") Long commentId,
-                                             @RequestBody ReviewCommentDto reviewCommentDto){
-
-            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
+                                             @RequestBody ReviewCommentDto reviewCommentDto,
+                                                        @AuthenticationPrincipal CustomUserDetails userDetails){
+            Long id = myId(userDetails);
+            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto,id);
 
             return GenericResponse.of(
                     newReviewCommentDto,
@@ -159,7 +166,7 @@ public class ReviewCommentController {
      * 코멘트 추천
      * @param reviewId
      * @param commentId
-     * @param memberId
+     * @param userDetails
      * @return GenericResponse<ReviewCommentDto>(추천/추천 취소 메시지 다름)
      *
      * @author -- 이광석
@@ -169,9 +176,9 @@ public class ReviewCommentController {
     @Operation(summary = "리뷰 댓글 추천")
     public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Long reviewId,
                                                    @PathVariable("id") Long commentId,
-                                                   @PathVariable("memberId") Long memberId){
-
-       boolean result = reviewCommentService.recommend(commentId, memberId);
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long Id = myId(userDetails);
+       boolean result = reviewCommentService.recommend(commentId, Id);
        ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
         if(result){
             return GenericResponse.of(
@@ -184,5 +191,17 @@ public class ReviewCommentController {
                     "리뷰 코멘츠 추천 취소 성공"
             );
         }
+    }
+
+    /**
+     * userDetails의 username 을 이용해서 userId 추출;
+     * @param userDetails
+     * @return Long
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private Long myId(CustomUserDetails userDetails){
+        return memberService.getMyProfile(userDetails.getUsername()).getId();
     }
 }
