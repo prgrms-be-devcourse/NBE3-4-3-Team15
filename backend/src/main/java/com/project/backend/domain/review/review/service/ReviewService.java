@@ -226,6 +226,14 @@ public class ReviewService {
     }
 
 
+    /**
+     * 리뷰작성자와 현재 사용자가 같은지 확인
+     * @param userDetails
+     * @param review
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
     private void authorityCheck(CustomUserDetails userDetails, Review review){
         Member member = memberRepository.findById(review.getUserId()).get(); // memberService로 변경 예정
 

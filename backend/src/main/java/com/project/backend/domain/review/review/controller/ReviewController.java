@@ -68,7 +68,16 @@ public class ReviewController {
         );
     }
 
-
+    /**
+     * bookId 기반 리뷰(코멘트 포함)검색
+     * @param bookId
+     * @param page
+     * @param size
+     * @return GenericResponse<List<ReviewsDTO>>
+     *
+     * @author 이광석
+     * @since 25.02.7
+     */
     @GetMapping("/books/{bookId}")
     public GenericResponse<List<ReviewsDTO>> getBookIdReviews(@PathVariable("bookId") Long bookId,
                                                               @RequestParam(value = "page",defaultValue = "0") Integer page,
