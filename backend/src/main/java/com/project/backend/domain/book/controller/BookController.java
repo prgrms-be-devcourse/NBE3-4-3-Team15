@@ -127,4 +127,20 @@ public class BookController {
                 ? ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of("찜한 도서가 추가되었습니다."))
                 : ResponseEntity.ok(GenericResponse.of("찜한 도서가 취소되었습니다."));
     }
+
+    /**
+     * -- 찜 도서 목록 확인 메소드 --
+     * 로그인한 사용자의 정보를 통해 가져와 favoriteRepository에서 찜한 도서 목록 조회
+     *
+     * @param -- customUserDetails 로그인한 사용자 정보 --
+     * @return -- GenericResponse<List<BookDTO>> --
+     * @author -- 정재익 --
+     * @since -- 2월 9일 --
+     */
+    @GetMapping("/favorite")
+    @Operation(summary = "도서 찜 목록")
+    public ResponseEntity<GenericResponse<List<BookDTO>>> getFavoriteBooks(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        List<BookDTO> favoriteBooks = bookService.getFavoriteBooks(customUserDetails.getUsername());
+        return ResponseEntity.ok(GenericResponse.of(favoriteBooks, "찜한 도서 목록입니다."));
+    }
 }
