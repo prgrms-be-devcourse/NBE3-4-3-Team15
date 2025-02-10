@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -115,15 +117,18 @@ public class BookController {
      * @author -- 정재익, 김남우 --
      * @since -- 2월 9일 --
      */
-
     @PostMapping("/{isbn}/favorite")
     @Operation(summary = "도서 찜하기 / 찜취소하기")
-    public GenericResponse<String> favoriteBook(@PathVariable(name = "isbn") String isbn,
-                                                @RequestBody BookDTO bookDto,
-                                                @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<GenericResponse<String>> favoriteBook(
+            @PathVariable(name = "isbn") String isbn,
+            @RequestBody BookDTO bookDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
         bookDto.setIsbn(isbn);
         boolean isFavorited = bookService.favoriteBook(bookDto, customUserDetails.getUsername());
-        return isFavorited ? GenericResponse.of("찜한 도서가 추가되었습니다.")
-                : GenericResponse.of("찜한 도서가 취소되었습니다.");
+
+        return isFavorited
+                ? ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of("찜한 도서가 추가되었습니다."))
+                : ResponseEntity.ok(GenericResponse.of("찜한 도서가 취소되었습니다."));
     }
 }
