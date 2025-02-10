@@ -9,10 +9,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -43,13 +40,17 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public List<ReviewsDTO> findAll(int page,int size) {
+    public Page<ReviewsDTO> findAll(int page,int size) {
         Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC,"createdAt"));
 
-
-        return reviewRepository.findAll(pageable).stream()
+        Page<Review> pages = reviewRepository.findAll(pageable);
+        List<ReviewsDTO> reviewsDTOList = pages.getContent()
+                .stream()
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
+        Page<ReviewsDTO> reviewsDTOPage = new PageImpl<>(reviewsDTOList,pageable,pages.getTotalElements());
+
+        return reviewsDTOPage;
 
     }
 
@@ -63,15 +64,18 @@ public class ReviewService {
      * @author 이광석
      * @since 25.02.07
      */
-    public List<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
+    public Page<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
 
         Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"createdAt"));
 
-        Page<Review> reviewPage = reviewRepository.findAllByBookId(bookId,pageable);
-        List<ReviewsDTO> reviewsDTOS = reviewPage.stream()
+        Page<Review> pages = reviewRepository.findAllByBookId(bookId,pageable);
+        List<ReviewsDTO> reviewsDTOList = reviewRepository.findAllByBookId(bookId,pageable)
+                .stream()
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
-        return reviewsDTOS;
+        Page<ReviewsDTO> reviewsDTOPage = new PageImpl<>(reviewsDTOList,pageable,pages.getTotalElements());
+
+        return reviewsDTOPage;
 
     }
 

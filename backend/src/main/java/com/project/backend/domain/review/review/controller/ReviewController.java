@@ -1,6 +1,7 @@
 package com.project.backend.domain.review.review.controller;
 
 
+import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,11 +37,11 @@ public class ReviewController {
      */
     @GetMapping
     @Operation(summary = "리뷰 목록")
-    public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getReviews(@RequestParam(value="page",defaultValue = "0")int page,
+    public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getReviews(@RequestParam(value="page",defaultValue = "0")int page,
                                                                        @RequestParam(value="size",defaultValue="10")int size){
-        List<ReviewsDTO> reviewsDTOS = reviewService.findAll(page,size);
+        Page<ReviewsDTO> pages = reviewService.findAll(page,size);
         return ResponseEntity.ok(GenericResponse.of(
-                reviewsDTOS,
+                pages,
                 "리뷰 목록 반환 성공"
         ));
     }
@@ -71,13 +73,13 @@ public class ReviewController {
      *
      */
     @GetMapping("/books/{bookId}")
-    public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getBookIdReviews(@PathVariable("bookId") Long bookId,
+    public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getBookIdReviews(@PathVariable("bookId") Long bookId,
                                                               @RequestParam(value = "page",defaultValue = "0") Integer page,
                                                               @RequestParam(value = "size",defaultValue = "10") Integer size){
-        List<ReviewsDTO> reviewsDTOS = reviewService.getBookIdReviews(bookId,page,size);
+        Page<ReviewsDTO> pages= reviewService.getBookIdReviews(bookId,page,size);
 
         return ResponseEntity.ok(GenericResponse.of(
-                reviewsDTOS,
+                pages,
                 "리뷰 조회 성공"
         ));
     }
