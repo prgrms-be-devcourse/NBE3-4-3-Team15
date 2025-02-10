@@ -21,6 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -294,12 +297,14 @@ public class BookService {
      * @author -- 김남우 --
      * @since -- 2월 10일 --
      */
-    public List<BookDTO> getFavoriteBooks(String username) {
+    public Page<BookDTO> getFavoriteBooks(String username, int page, int size) {
 
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
 
-        List<BookDTO> favoriteBooks = favoriteRepository.findFavoriteBooksByMemberId(member.getId()); // 멤버 ID에 해당하는 찜 도서 목록 조회
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<BookDTO> favoriteBooks = favoriteRepository.findFavoriteBooksByMemberId(member.getId(), pageable); // 멤버 ID에 해당하는 찜 도서 목록 조회
 
         if (favoriteBooks.isEmpty()) {
             throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS);
