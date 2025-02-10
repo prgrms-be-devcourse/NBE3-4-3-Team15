@@ -47,7 +47,7 @@ public class BookController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        Page<BookDTO> books = bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), page, searchBy.equalsIgnoreCase("author") ? size : size / 2);
+        Page<BookDTO> books = bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), page, size);
         return ResponseEntity.ok(GenericResponse.of(books));
     }
 

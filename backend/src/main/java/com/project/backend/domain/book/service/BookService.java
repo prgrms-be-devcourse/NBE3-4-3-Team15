@@ -77,26 +77,35 @@ public class BookService {
      * @since -- 2월 10일 --
      */
     public Page<BookDTO> searchBooks(String query, boolean isAuthorSearch, int page, int size) {
-
         if (!StringUtils.hasText(query)) {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
         }
 
         List<BookDTO> allBooks = new ArrayList<>();
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver", page, size ));
-        allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao", page, size));
+
+        if (isAuthorSearch) {
+            allBooks.addAll(requestApi(query, "person", "kakao", 1, page * size));
+        } else {
+            allBooks.addAll(requestApi(query, "d_titl", "naver", 1, page * size / 2));
+            allBooks.addAll(requestApi(query, "title", "kakao", 1, page * size / 2));
+        }
 
         List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
-
         bookCache.put(query, uniqueBooks);
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), uniqueBooks.size());
+        int start = (page - 1) * size;
 
+        if (start >= uniqueBooks.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, uniqueBooks.size());
+        }
+
+        int end = Math.min(start + size, uniqueBooks.size());
         List<BookDTO> pagedBooks = uniqueBooks.subList(start, end);
+
         return new PageImpl<>(pagedBooks, pageable, uniqueBooks.size());
     }
+
 
     /**
      * -- Api 요청 메소드 --
