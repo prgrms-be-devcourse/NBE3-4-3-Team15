@@ -284,4 +284,27 @@ public class BookService {
             return true;
         }
     }
+
+    /**
+     * -- 찜 도서 목록 메소드 --
+     * 로그인한 유저의 찜 도서 목록 반환
+     *
+     * @param -- username --
+     * @return -- List<BookDTO> --
+     * @author -- 김남우 --
+     * @since -- 2월 10일 --
+     */
+    public List<BookDTO> getFavoriteBooks(String username) {
+
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
+
+        List<BookDTO> favoriteBooks = favoriteRepository.findFavoriteBooksByMemberId(member.getId()); // 멤버 ID에 해당하는 찜 도서 목록 조회
+
+        if (favoriteBooks.isEmpty()) {
+            throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS);
+        }
+
+        return favoriteBooks;
+    }
 }
