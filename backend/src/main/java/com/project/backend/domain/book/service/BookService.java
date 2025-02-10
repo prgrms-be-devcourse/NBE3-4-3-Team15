@@ -73,28 +73,25 @@ public class BookService {
      *
      * @param -- title (검색어) --
      * @param -- isAuthorSearch (작가검색, 도서검색 판단) --
-     * @param -- sessionId (개인별 세션 ID)
      * @param -- page 시작 페이지 --
      * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 7일 --
      */
-    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, String sessionId, int page, int size) {
+    public List<BookDTO> searchBooks(String query, boolean isAuthorSearch, int page, int size) {
 
         if (!StringUtils.hasText(query)) {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
         }
 
         List<BookDTO> allBooks = new ArrayList<>();
-
         allBooks.addAll(requestApi(query, isAuthorSearch ? "d_auth" : "d_titl", "naver", page, size));
         allBooks.addAll(requestApi(query, isAuthorSearch ? "person" : "title", "kakao", page, size));
 
-
         List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
 
-        bookCache.put(sessionId, uniqueBooks);
+        bookCache.put(query, uniqueBooks);
 
         return uniqueBooks;
     }
@@ -154,25 +151,25 @@ public class BookService {
     /**
      * -- 도서 상세 검색 메소드 --
      *
-     * @param isbn      isbn
-     * @param sessionId 개인별 session Id
+     * @param isbn isbn
      * @return BookDTO
      * @author 정재익
      * @since 2월 5일
      */
-    public BookDTO searchBookDetail(String isbn, String sessionId) {
-        List<BookDTO> books = bookCache.get(sessionId);
-
-        if (books == null) {
-            throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
-        }
-
+    public BookDTO searchBookDetail(String isbn) {
         String normalizedIsbn = BookUtil.extractIsbn(isbn);
 
-        return books.stream()
-                .filter(book -> book.getIsbn().equalsIgnoreCase(normalizedIsbn))
-                .findFirst()
-                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+        for (List<BookDTO> books : bookCache.values()) {
+            Optional<BookDTO> foundBook = books.stream()
+                    .filter(book -> book.getIsbn().equalsIgnoreCase(normalizedIsbn))
+                    .findFirst();
+
+            if (foundBook.isPresent()) {
+                return foundBook.get();
+            }
+        }
+
+        throw new BookException(BookErrorCode.BOOK_NOT_FOUND);
     }
 
     /**
