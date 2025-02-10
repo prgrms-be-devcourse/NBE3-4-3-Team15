@@ -252,33 +252,33 @@ public class BookService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
 
-        FavoriteId favoriteId = new FavoriteId(member.getId(), bookRepository.findByIsbn(bookDto.getIsbn()).getIsbn());
+        FavoriteId favoriteId = new FavoriteId(member.getId(), bookRepository.findByIsbn(bookDto.getIsbn()).getId());
 
-        String isbn = bookRepository.findByIsbn(bookDto.getIsbn()).getIsbn();
-        
+        Book book = bookRepository.findByIsbn(bookDto.getIsbn());
+
         if (favoriteRepository.existsById(favoriteId)) {
             favoriteRepository.deleteById(favoriteId); // 먼저 favorite 테이블에서 삭제
-            
-            int favoriteCount = bookRepository.findByIsbn(isbn).getFavoriteCount();
+
+            int favoriteCount = book.getFavoriteCount();
             if (favoriteCount == 1) {
-                bookRepository.deleteByIsbn(isbn); // favoriteCount가 1이면 Book 테이블에서 도서 삭제
+                bookRepository.delete(book); // favoriteCount가 1이면 Book 테이블에서 도서 삭제
             }
             else {
-                bookRepository.updateFavoriteCount(isbn, -1); // 아니면 favoriteCount 감소
+                bookRepository.updateFavoriteCount(book, -1); // 아니면 favoriteCount 감소
             }
 
             return false;
         }
 
         else {
-            bookRepository.updateFavoriteCount(isbn, +1); // favoriteCount 1 증가
+            bookRepository.updateFavoriteCount(book, +1); // favoriteCount 1 증가
 
-            Book book = bookRepository.findByIsbn(bookDto.getIsbn());
             Favorite favorite = Favorite.builder()
                     .id(favoriteId)
                     .book(book)
                     .member(member)
                     .build();
+
             favoriteRepository.save(favorite); // favorite 테이블에 저장
 
             return true;
