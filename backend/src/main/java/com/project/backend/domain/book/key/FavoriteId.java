@@ -25,7 +25,7 @@ public class FavoriteId implements Serializable {
      * <p>
      * 여러명의 유저가 하나의 책을 추천할 수도 있고
      * 하나의 유저가 여러개의 책을 추천할 수도 있으므로
-     * bookIsbn, memberId 모두 두개다 유일성을 만족하지 못함
+     * bookId, memberId 모두 두개다 유일성을 만족하지 못함
      * 다만 bookId와 memberId의 조합이 고유성을 가지고 있기 때문에 복합키로 설정
      *
      * @param -- Object o --
