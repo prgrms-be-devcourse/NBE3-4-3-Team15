@@ -23,7 +23,5 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Modifying
     @Transactional
     @Query("UPDATE Book b SET b.favoriteCount = b.favoriteCount + :amount WHERE b.id = :#{#book.id}")
-    void updateFavoriteCount(@Param("isbn") String isbn, @Param("amount") int amount);
-
-    void deleteByIsbn(String isbn);
+    void updateFavoriteCount(@Param("book") Book book, @Param("amount") int amount);
 }
