@@ -9,27 +9,14 @@ interface NavbarProps {
   setAccessToken: (token: string | null) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ accessToken, setAccessToken }) => {
-  useEffect(() => {
-    // 상태가 변경되면 상위 컴포넌트에도 변경 사항 전달
-    if (accessToken) setAccessToken(accessToken);
-  }, [accessToken, setAccessToken]);
-
-  /**
-   * 로그아웃
-   */
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    setAccessToken(null);
-  };
-
+const Navbar: React.FC = () => {
   return (
     <nav
       className="nav-class"
       style={{ position: "fixed", right: "0", top: "10px" }}
     >
       <ul>
-        {accessToken ? (
+        {false ? (
           <>
             <li
               style={{
@@ -38,9 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({ accessToken, setAccessToken }) => {
                 marginRight: "10px",
               }}
             >
-              <button className="btn btn-sm btn-primary" onClick={logout}>
-                로그아웃
-              </button>
+              <button className="btn btn-sm btn-primary">로그아웃</button>
             </li>
           </>
         ) : (
