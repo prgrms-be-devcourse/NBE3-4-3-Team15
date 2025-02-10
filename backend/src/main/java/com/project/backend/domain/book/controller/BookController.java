@@ -40,7 +40,6 @@ public class BookController {
      * @param -- page 시작 페이지 --
      * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- GenericResponse<List<BookDTO>> --
-     * @header -- X-Session-Id (개인별 세션 ID) --
      * @author -- 정재익 --
      * @since -- 2월 7일 --
      */
@@ -50,10 +49,9 @@ public class BookController {
             @RequestParam(name = "query") String query,
             @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestHeader(name = "X-Session-Id") String sessionId) {
+            @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        List<BookDTO> books = bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), sessionId, page, size);
+        List<BookDTO> books = bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), page, size);
 
         return GenericResponse.of(books);
     }
@@ -64,15 +62,13 @@ public class BookController {
      *
      * @param -- isbn --
      * @return -- GenericResponse<BookDTO> --
-     * @header -- X-Session-Id (개인별 세션 ID) --
      * @author -- 정재익 --
      * @since -- 2월 5일 --
      */
     @GetMapping("/{isbn}")
     @Operation(summary = "도서 상세 검색")
-    public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn,
-                                                     @RequestHeader(name = "X-Session-Id") String sessionId) {
-        return GenericResponse.of(bookService.searchBookDetail(isbn, sessionId));
+    public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn) {
+        return GenericResponse.of(bookService.searchBookDetail(isbn));
     }
 
     /**
