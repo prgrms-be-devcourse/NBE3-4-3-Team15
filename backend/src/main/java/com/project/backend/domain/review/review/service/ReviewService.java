@@ -93,9 +93,9 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void write(ReviewsDTO reviewsDTO) {
+    public void write(Long writerId,ReviewsDTO reviewsDTO) {
         reviewRepository.save(Review.builder()
-                        .userId(reviewsDTO.getUserId())
+                        .userId(writerId)
                         .bookId(reviewsDTO.getBookId())
                         .userId(reviewsDTO.getUserId())
                         .content(reviewsDTO.getContent())
