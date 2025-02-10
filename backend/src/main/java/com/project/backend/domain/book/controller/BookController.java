@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -130,17 +131,23 @@ public class BookController {
 
     /**
      * -- 찜 도서 목록 확인 메소드 --
-     * 로그인한 사용자의 정보를 통해 가져와 favoriteRepository에서 찜한 도서 목록 조회
+     * 로그인한 사용자의 정보를 통해 favoriteRepository에서 찜한 도서 목록 조회
      *
-     * @param -- customUserDetails 로그인한 사용자 정보 --
-     * @return -- GenericResponse<List<BookDTO>> --
-     * @author -- 정재익 --
-     * @since -- 2월 9일 --
+     * @param customUserDetails 로그인한 사용자 정보
+     * @param page 페이지 번호 (기본값: 0)
+     * @param size 페이지 크기 (기본값: 10)
+     * @return GenericResponse<Page<BookDTO>>
+     * @author 김남우
+     * @since 2월 10일
      */
     @GetMapping("/favorite")
     @Operation(summary = "도서 찜 목록")
-    public ResponseEntity<GenericResponse<List<BookDTO>>> getFavoriteBooks(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        List<BookDTO> favoriteBooks = bookService.getFavoriteBooks(customUserDetails.getUsername());
+    public ResponseEntity<GenericResponse<Page<BookDTO>>> getFavoriteBooks(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        Page<BookDTO> favoriteBooks = bookService.getFavoriteBooks(customUserDetails.getUsername(), page, size);
         return ResponseEntity.ok(GenericResponse.of(favoriteBooks, "찜한 도서 목록입니다."));
     }
 }
