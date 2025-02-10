@@ -1,12 +1,10 @@
 "use client";
 
-import { Margarine } from "next/font/google";
-import Image from "next/image";
 import client from "@/lib/client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function join() {
   const router = useRouter();
   const [id, setId] = useState("");
   const [password1, setPassword1] = useState("");

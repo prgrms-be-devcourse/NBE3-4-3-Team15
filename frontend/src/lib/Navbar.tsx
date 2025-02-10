@@ -44,17 +44,24 @@ const Navbar: React.FC<NavbarProps> = ({ accessToken }) => {
     >
       <ul>
         {isLoggedIn ? (
-          <li
-            style={{
-              cursor: "pointer",
-              display: "inline-block",
-              marginRight: "10px",
-            }}
-          >
-            <button className="btn btn-sm btn-primary" onClick={handleLogout}>
-              로그아웃
-            </button>
-          </li>
+          <>
+            <li>
+              <Link href="/member/mine">
+                <button className="btn btn-sm btn-primary">내정보</button>
+              </Link>
+            </li>
+            <li
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                marginRight: "10px",
+              }}
+            >
+              <button className="btn btn-sm btn-primary" onClick={handleLogout}>
+                로그아웃
+              </button>
+            </li>
+          </>
         ) : (
           <>
             <li>
