@@ -10,13 +10,12 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function ClientPage() {
-  const [book, setBook] = useState({
-    id: "1",
-    title: "test1",
-    image: "image1",
-    author: "author1",
-    isbn: "book: isbn1",
-  });
+  const router = useRouter();
+  const [book, setBook] = useState({});
+  const param = useSearchParams();
+
+  console.log(param.get("book"));
+
   return (
     <div>
       <div>

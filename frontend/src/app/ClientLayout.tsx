@@ -4,6 +4,7 @@ import { components } from "@/lib/backend/schema";
 import client from "@/lib/client";
 import Link from "next/link";
 import "@/lib/Navbar.css";
+import { useRouter } from "next/navigation";
 
 export default function ClientLayout({
   children,
@@ -11,6 +12,7 @@ export default function ClientLayout({
   children: React.ReactNode;
 }>) {
   const isLogin = false;
+
   const logout = async () => {
     const response = await client.DELETE("/members/logout");
 

@@ -16,61 +16,48 @@ export default function ClientPage() {
 
   const query = param.get("query");
 
-  const [books, setBooks] = useState([
-    {
-      id: "1",
-      title: "test1",
-      image: "test1",
-      author: "test1",
-      isbn: "1",
-    },
-    {
-      id: "2",
-      title: "test2",
-      image: "test2",
-      author: "test2",
-      isbn: "2",
-    },
-    {
-      id: "3",
-      title: "test3",
-      image: "test3",
-      author: "test3",
-      isbn: "3",
-    },
-    {
-      id: "4",
-      title: "test4",
-      image: "test4",
-      author: "test4",
-      isbn: "4",
-    },
-    {
-      id: "5",
-      title: "test5",
-      image: "test5",
-      author: "test5",
-      isbn: "5",
-    },
-  ]);
+  const page = param.get("page");
+
+  const [books, setBooks] = useState([]);
+
+  const [pages, setPages] = useState([]);
+
+  const [curPage, setCurPage] = useState(1);
+
+  const [lastPage, setLastPage] = useState(0);
+
+  const search = async () => {
+    try {
+      const response = await client.GET("/book", {
+        params: {
+          query: {
+            query,
+            page,
+          },
+        },
+      });
+
+      const data = response.data?.data;
+
+      setBooks(data.content);
+
+      let pagelist = [];
+
+      for (let i = 0; i < data.totalPages; i++) {
+        pagelist.push(i + 1);
+      }
+
+      setPages(pagelist);
+      setLastPage(data.totalPages);
+      setCurPage(page);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
-    const search = async () => {
-      try {
-        const resposne = await client.GET("/book", {
-          params: {
-            query: {
-              query,
-            },
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     search();
-  });
+  }, [page]);
 
   return (
     <div>
@@ -89,19 +76,81 @@ export default function ClientPage() {
         />
         <input
           placeholder="검색하고자 하는 책"
-          style={{ display: "inline-block", float: "left", marginLeft: "3px" }}
+          style={{
+            display: "inline-block",
+            float: "left",
+            marginLeft: "3px",
+            width: "calc(100% - 23px)",
+          }}
         ></input>
       </div>
-      <div style={{ position: "fixed", top: "50px", left: "20px" }}>
+      <div
+        style={{
+          position: "fixed",
+          top: "50px",
+          left: "20px",
+          overflow: "auto",
+          height: "90vh",
+        }}
+      >
         {books.map((book) => (
-          <Link href={{ pathname: "/book/" + book.id }} key={book.id}>
+          <Link
+            href={{
+              pathname: "/book/" + book.isbn,
+              query: {
+                book: JSON.stringify(book),
+              },
+            }}
+            as={"/book/" + book.isbn}
+            key={book.isbn}
+          >
             <div>
-              <span>{book.title}</span>
-              <span>{book.image}</span>
-              <span>{book.author}</span>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "50px 50px 850px 50px 100px",
+                }}
+              >
+                <img src={book.image} alt="" style={{ height: "50px" }} />
+                <span>제목: </span>
+                <span>{book.title}</span>
+                <span>작가: </span>
+                <span>{book.author}</span>
+              </div>
             </div>
           </Link>
         ))}
+      </div>
+      <div style={{ position: "fixed", bottom: "0", left: "45%" }}>
+        <ul className="pagination">
+          <Link href={`?query=${query}&page=1`}>
+            <li>
+              <button
+                className="btn btn-sm btn-primary"
+                disabled={curPage == 1}
+              >
+                Previous
+              </button>
+            </li>
+          </Link>
+          {pages.map((page) => (
+            <Link key={page} href={`?query=${query}&page=${page}`}>
+              <li>
+                <button className="btn btn-sm">{page}</button>
+              </li>
+            </Link>
+          ))}
+          <Link href={`?query=${query}&page=${lastPage}`}>
+            <li>
+              <button
+                className="btn btn-sm btn-primary"
+                disabled={lastPage == curPage}
+              >
+                Last
+              </button>
+            </li>
+          </Link>
+        </ul>
       </div>
     </div>
   );

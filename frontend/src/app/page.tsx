@@ -19,7 +19,7 @@ export default function Home() {
     if (e.key === "Enter") {
       // enter 했을 때의 코드 작성
       // if(e.keyCode === 13) 도 사용가능하다.
-      router.push(`/book?query=${query}`);
+      router.push(`/book?query=${query}&page=1`);
     }
   };
 
