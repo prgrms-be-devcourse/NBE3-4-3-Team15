@@ -1,5 +1,7 @@
 package com.project.backend.domain.member.service;
 
+import com.project.backend.domain.book.repository.BookRepository;
+import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.dto.MineDto;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
@@ -28,6 +32,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final FavoriteRepository favoriteRepository;
+    private final BookRepository bookRepository;
 
     /**
      * 회원가입 처리
@@ -119,6 +125,12 @@ public class MemberService {
         if(!passwordEncoder.matches(password, member.getPassword())) {
             throw new MemberException(INCORRECT_PASSWORD);
         }
+
+        // 탈퇴 회원이 찜한 도서 찜 취소 처리 및 도서 테이블 데이터 UPDATE
+        List<Long> bookIds = favoriteRepository.findBookIdsByMemberId(member.getId()); // 탈퇴 회원이 찜한 도서 조회
+        favoriteRepository.deleteByMemberId(member.getId()); // 찜 취소
+        for (Long bookId : bookIds) { bookRepository.decreaseFavoriteCount(bookId); } // 찜 취소된 도서 favoriteCount 감소
+        bookRepository.deleteBooksZeroFavoriteCount(); // 찜 수가 0이라면 도서 테이블에서 삭제
 
         memberRepository.delete(member);
     }
