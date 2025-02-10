@@ -41,7 +41,7 @@ public class ReviewService {
      * @since 25.01.27
      */
     public Page<ReviewsDTO> findAll(int page,int size) {
-        Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC,"createdAt"));
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by(Sort.Direction.DESC,"createdAt"));
 
         Page<Review> pages = reviewRepository.findAll(pageable);
         List<ReviewsDTO> reviewsDTOList = pages.getContent()
@@ -66,7 +66,7 @@ public class ReviewService {
      */
     public Page<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
 
-        Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"createdAt"));
+        Pageable pageable = PageRequest.of(page-1,size,Sort.by(Sort.Direction.DESC,"createdAt"));
 
         Page<Review> pages = reviewRepository.findAllByBookId(bookId,pageable);
         List<ReviewsDTO> reviewsDTOList = reviewRepository.findAllByBookId(bookId,pageable)

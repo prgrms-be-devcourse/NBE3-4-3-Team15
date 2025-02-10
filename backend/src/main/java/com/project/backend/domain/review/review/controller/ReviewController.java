@@ -37,7 +37,7 @@ public class ReviewController {
      */
     @GetMapping
     @Operation(summary = "리뷰 목록")
-    public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getReviews(@RequestParam(value="page",defaultValue = "0")int page,
+    public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getReviews(@RequestParam(value="page",defaultValue = "1")int page,
                                                                        @RequestParam(value="size",defaultValue="10")int size){
         Page<ReviewsDTO> pages = reviewService.findAll(page,size);
         return ResponseEntity.ok(GenericResponse.of(
