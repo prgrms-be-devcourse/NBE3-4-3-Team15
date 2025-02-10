@@ -14,7 +14,22 @@ export default function ClientPage() {
 
   const param = useSearchParams();
 
-  const query = param.get("query");
+  const [query, setQuery] = useState(param.get("query"));
+
+  const [searchQuery, setSearchQuery] = useState(query);
+
+  const handleChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      // enter 했을 때의 코드 작성
+      // if(e.keyCode === 13) 도 사용가능하다.
+      setQuery(searchQuery);
+      router.push(`/book?query=${query}&page=1`);
+    }
+  };
 
   const page = param.get("page");
 
@@ -57,7 +72,7 @@ export default function ClientPage() {
 
   useEffect(() => {
     search();
-  }, [page]);
+  }, [query, page]);
 
   return (
     <div>
@@ -82,6 +97,9 @@ export default function ClientPage() {
             marginLeft: "3px",
             width: "calc(100% - 23px)",
           }}
+          value={searchQuery}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
         ></input>
       </div>
       <div
