@@ -3,6 +3,8 @@ package com.project.backend.domain.review.comment.service;
 
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
@@ -36,6 +38,7 @@ public class ReviewCommentService {
     private final ReviewService reviewService;
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     /**
      * 리뷰 코멘트 목록 출력
@@ -92,6 +95,7 @@ public class ReviewCommentService {
                 .depth(0)
                 .isDelete(false)
                 .build();
+
         if(reviewCommentDto.getParentId()!=null){
             ReviewComment parentComment = findCommentById(reviewCommentDto.getParentId());
 
@@ -106,10 +110,31 @@ public class ReviewCommentService {
             reviewComment.setDepth(parentComment.getDepth()+1);
         }
 
+        ReviewComment newReviewComment = reviewCommentRepository.save(reviewComment);
 
-        reviewCommentRepository.save(reviewComment);
+        createCommentNotification(newReviewComment,review,reviewCommentDto);
+
         return new ReviewCommentDto(reviewComment);
     }
+
+    public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .memberId(review.getUserId())
+                .reviewComment(reviewComment.getId())
+                .isCheck(false)
+                .build();
+
+
+        if(reviewCommentDto.getParentId()==null) {
+
+            notificationDTO.setContent("nick", "COMMENT");
+        }else{
+            notificationDTO.setContent("nick", "REPLY");
+        }
+
+        notificationService.create(notificationDTO);
+    }
+
 
     /**
      * 댓글 수정
@@ -124,12 +149,7 @@ public class ReviewCommentService {
     public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto) {
 
 
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment reviewComment = findCommentById(commentId);
         reviewComment.setComment(reviewCommentDto.getComment());
 
 
@@ -147,12 +167,7 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public ReviewCommentDto delete(Long commentId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment reviewComment = findCommentById(commentId);
 
         if(reviewComment.getParent()!=null){
             ReviewComment parent = reviewComment.getParent();
@@ -188,12 +203,7 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public Boolean recommend(Long commentId,Long memberId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment reviewComment = findCommentById(commentId);
         Member member = memberRepository.findById(memberId)
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
@@ -226,12 +236,7 @@ public class ReviewCommentService {
      * @since 25.02.03
      */
     public ReviewCommentDto findById(Long commentId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-        ));
+        ReviewComment reviewComment = findCommentById(commentId);
 
         return new ReviewCommentDto(reviewComment);
     }
@@ -246,16 +251,20 @@ public class ReviewCommentService {
      * @author 이광석
      */
     public List<ReviewCommentDto> findReplies(Long commentId) {
-        ReviewComment parent = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment parent = findCommentById(commentId);
+
         List<ReviewCommentDto> sons = reviewCommentRepository.findByParent(parent);
         return sons;
     }
 
+    /**
+     * 댓글 목록 조회
+     * @param commentId
+     * @return ReviewComment
+     *
+     * @author 이광석
+     * @since 20.05.07
+     */
     private ReviewComment findCommentById (Long commentId){
         return reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(
