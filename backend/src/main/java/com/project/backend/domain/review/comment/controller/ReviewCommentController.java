@@ -83,11 +83,7 @@ public class ReviewCommentController {
     public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
         List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userDetails);
         return ResponseEntity.ok(GenericResponse.of(
-//=======
-//    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@PathVariable("userId")Long userId){
-//        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
-//        return ResponseEntity.ok(GenericResponse.of(
-//>>>>>>> main
+
                 commentDtos,
                 "User 댓글 조회 성공"
         ));
@@ -110,10 +106,6 @@ public class ReviewCommentController {
     public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
                                             @Valid @RequestBody ReviewCommentDto reviewCommentDto,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails){
-//=======
-//    public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
-//                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto){
-//>>>>>>> main
 
 
        ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,userDetails);
@@ -143,12 +135,6 @@ public class ReviewCommentController {
                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
             ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto,userDetails);
 
-//    public ResponseEntity<GenericResponse<ReviewCommentDto>> putComment(@PathVariable("reviewId") Long reviewId,
-//                                             @PathVariable("id") Long commentId,
-//                                             @RequestBody ReviewCommentDto reviewCommentDto){
-//
-//            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
-//>>>>>>> main
 
             return ResponseEntity.ok(GenericResponse.of(
                     newReviewCommentDto,
@@ -169,18 +155,13 @@ public class ReviewCommentController {
     @Transactional
     @Operation(summary = "리뷰 댓글 삭제")
 
-    public ResponseEntity<GenericResponse<ReviewCommentDto>> delete(@PathVariable("reviewId") Integer reviewId,
+    public ResponseEntity<GenericResponse<ReviewCommentDto>> delete(@PathVariable("reviewId") Long reviewId,
                                                     @PathVariable("id") Long commentId,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId,userDetails);
+        ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(reviewId,commentId,userDetails);
         return ResponseEntity.ok(GenericResponse.of(
-//=======
-//    public ResponseEntity<GenericResponse<ReviewCommentDto>> delete(@PathVariable("reviewId") Integer reviewId,
-//                                         @PathVariable("id") Long commentId){
-//       ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
-//        return ResponseEntity.ok(GenericResponse.of(
-//>>>>>>> main
+
                 newReviewCommentDto,
                 "리뷰 코멘트 삭제 성공"
         ));
@@ -205,16 +186,7 @@ public class ReviewCommentController {
        ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
        String message = result ? "리뷰 코멘트 추천 성공" : "리뷰 코멘트 추천 취소 성공";
         return ResponseEntity.ok(GenericResponse.of(reviewCommentDto, message));
-//=======
-//                                                   @PathVariable("memberId") Long memberId){
-//
-//        boolean isRecommended = reviewCommentService.recommend(commentId, memberId);
-//        ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
-//
-//        String message = isRecommended ? "리뷰 코멘트 추천 성공" : "리뷰 코멘트 추천 취소 성공";
-//
-//        return ResponseEntity.ok(GenericResponse.of(reviewCommentDto, message));
-//>>>>>>> main
+
     }
 
 

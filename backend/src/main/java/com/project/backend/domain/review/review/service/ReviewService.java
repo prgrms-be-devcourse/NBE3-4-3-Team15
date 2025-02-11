@@ -9,6 +9,7 @@ import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
+import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -117,6 +118,7 @@ public class ReviewService {
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
+                        .isDelete(false)
                     .build());
 
         MemberDto memberDto = memberService.getMemberById(myId(userDetails));   //리뷰 작성자
@@ -165,10 +167,30 @@ public class ReviewService {
         Review review = findById(reviewId);
         authorityCheck(userDetails,review);
 
-        reviewRepository.delete(review);
+        if(review.getComments().isEmpty()){
+            reviewRepository.delete(review);
+        }else {
+            review.setContent("해당 댓글은 삭제 되었습니다");
+
+            review.setDelete(true);
+            reviewRepository.save(review);
+        }
 
          return new ReviewsDTO(review);
 
+    }
+
+    /**
+     * 리뷰 삭제 메소드
+     * @param review
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    public void reviewDelete(Review review){
+        System.out.println("review1");
+        reviewRepository.delete(review);
+        System.out.println("review2");
     }
 
     /**
@@ -274,6 +296,8 @@ public class ReviewService {
                     ReviewErrorCode.UNAUTHORIZED_ACCESS.getMessage()
             );
         }
-
     }
+
+
+
 }

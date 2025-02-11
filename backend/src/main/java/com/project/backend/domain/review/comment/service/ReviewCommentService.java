@@ -121,6 +121,15 @@ public class ReviewCommentService {
         return new ReviewCommentDto(reviewComment);
     }
 
+    /**
+     * 코멘트 관련 알람 생성 메소드
+     * @param reviewComment
+     * @param review
+     * @param reviewCommentDto
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
     public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .memberId(review.getUserId())
@@ -166,42 +175,22 @@ public class ReviewCommentService {
     /**
      * 댓글 삭제
      * @param commentId
-     * @return RevieCommendDto - id,commend, userId
+     * @return ReviewCommendDto - id,commend, userId
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto delete(Long commentId,CustomUserDetails userDetails) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+    public ReviewCommentDto delete(Long reviewId,Long commentId,CustomUserDetails userDetails) {
+        ReviewComment reviewComment = findCommentById(commentId);
 
-        authorityCheck(userDetails,reviewComment);
-        if(reviewComment.getParent()!=null){
-            ReviewComment parent = reviewComment.getParent();
-
-            reviewCommentRepository.delete(reviewComment);
-
-            if(parent.isDelete()){
-                reviewCommentRepository.delete(parent);
-            }
-        }else{
-            if(reviewComment.getReplies().size()==0|| reviewComment.getReplies()==null){
-                reviewCommentRepository.delete(reviewComment);
-            }else{
-                reviewComment.setComment("해당 코멘트는 삭제되었습니다. ");
-                reviewComment.setUserId(null);
-                reviewComment.setDelete(true);
-                reviewCommentRepository.save(reviewComment);
-            }
+        if(reviewComment.getParent()!=null){ //대댓글인 경우
+            deleteReply(reviewComment,reviewId);
+        }else{ //댓글인 경우
+            deleteComment(reviewComment,reviewId);
         }
 
+
         return new ReviewCommentDto(reviewComment);
-
-
     }
 
     /**
@@ -319,6 +308,58 @@ public class ReviewCommentService {
                     ReviewErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
                     ReviewErrorCode.UNAUTHORIZED_ACCESS.getMessage()
             );
+        }
+
+    }
+
+    /**
+     * 코멘트 삭제 메소드
+     * @param comment
+     * @param reviewId
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    public void deleteComment(ReviewComment comment,Long reviewId){
+
+        Review review = reviewRepository.findById(reviewId).get();
+
+        review.getComments().remove(comment);
+
+        if(comment.getReplies().isEmpty()) {
+            reviewCommentRepository.delete(comment);
+            if(review.getComments().isEmpty()){
+                reviewService.reviewDelete(review);
+            }
+        }else{
+            comment.setDelete(true);
+            comment.setComment("해당 댓글은 삭제되었습니다");
+            reviewCommentRepository.save(comment);
+        }
+
+
+    }
+
+    /**
+     * 대댓글 삭제 메소드
+     * @param reply
+     * @param reviewId
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    public void deleteReply(ReviewComment reply,Long reviewId){
+
+        ReviewComment parent = reply.getParent();
+
+        parent.getReplies().remove(reply); // 부모 대댓글 리스트에서 대댓글 삭제
+
+        reviewCommentRepository.delete(reply); //대댓글 삭제
+
+
+        //reviewCommentRepository.save(parent);
+        if(parent.isDelete() && parent.getReplies().isEmpty()){
+            deleteComment(parent,reviewId);
         }
 
     }
