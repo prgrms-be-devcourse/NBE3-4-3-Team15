@@ -32,7 +32,7 @@ public class ReviewCommentDto {
     
     private Long reviewId;
 
-    @NotNull
+
     private Long userId;
 
     @NotBlank

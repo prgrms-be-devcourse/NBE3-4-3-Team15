@@ -1,18 +1,18 @@
 package com.project.backend.domain.review.review.controller;
 
 
-import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +27,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
     private final ReviewService reviewService;
+
 
     /**
      * 리뷰 목록을 조회
@@ -48,16 +49,18 @@ public class ReviewController {
 
     /**
      * 특정 유저의 리뷰 목록 조회
-     * @param userId
+     * @param userDetails
      * @return ResponseEntity<GenericResponse<List<ReviewsDTO>>>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    @GetMapping("/{userId}")
+    @GetMapping("/myReview")
     @Operation(summary = "특정 유저의 리뷰 목록 조회")
-    public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getUserReviews(@PathVariable("userId") Long userId){
-        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userId);
+
+    public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails){
+
+        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userDetails);
         return ResponseEntity.ok(GenericResponse.of(
             reviewsDTOS,
                 "리뷰 목록 반환 성공"
@@ -65,12 +68,14 @@ public class ReviewController {
     }
 
     /**
-     * bookId 기반 리뷰 검색
+     * bookId 기반 리뷰(코멘트 포함)검색
      * @param bookId
      * @param page
      * @param size
      * @return ResponseEntity<GenericResponse<List<ReviewsDTO>>>
      *
+     * @author 이광석
+     * @since 25.02.7
      */
     @GetMapping("/books/{bookId}")
     public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getBookIdReviews(@PathVariable("bookId") Long bookId,
@@ -98,9 +103,11 @@ public class ReviewController {
     @PostMapping
     @Operation(summary = "리뷰 추가")
     @Transactional
-    public ResponseEntity<GenericResponse<String>> postReview( @RequestBody ReviewsDTO reviewsDTO){
 
-        reviewService.write(reviewsDTO);
+    public ResponseEntity<GenericResponse<String>>postReview( @RequestBody ReviewsDTO reviewsDTO,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails){
+        reviewService.write(userDetails,reviewsDTO);
+
 
 
         return ResponseEntity.ok(GenericResponse.of(
@@ -118,12 +125,13 @@ public class ReviewController {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{reviewId}")
     @Operation(summary = "리뷰 수정")
     @Transactional
     public ResponseEntity<GenericResponse<ReviewsDTO>> putReviews( @RequestBody ReviewsDTO reviewsDTO,
-                                             @PathVariable("id") Long id){
-        reviewService.modify(reviewsDTO,id);
+                                             @PathVariable("reviewId") Long reviewId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
+        reviewService.modify(reviewsDTO,reviewId,userDetails);
         return ResponseEntity.ok(GenericResponse.of(
                 reviewsDTO,
                 "리뷰 수정 성공"
@@ -139,12 +147,13 @@ public class ReviewController {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{reviewId}")
     @Operation(summary = "리뷰 삭제")
     @Transactional
-    public ResponseEntity<GenericResponse<ReviewsDTO>> deleteReviews(@PathVariable("id") Long id){
-        ReviewsDTO review=  reviewService.delete(id);
 
+    public ResponseEntity<GenericResponse<ReviewsDTO>> deleteReviews(@PathVariable("reviewId") Long id,
+                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
+        ReviewsDTO review=  reviewService.delete(id,userDetails);
         return ResponseEntity.ok(GenericResponse.of(
                 review,
                 "리뷰 삭제 성공"
@@ -161,15 +170,16 @@ public class ReviewController {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    @PutMapping("/{reviewId}/recommend/{memberId}")
+    @PutMapping("/{reviewId}/recommend")
     @Operation(summary = "리뷰 추천")
     @Transactional
+
     public ResponseEntity<GenericResponse<ReviewsDTO>> recommendReview(@PathVariable("reviewId") Long reviewId,
-                                                  @PathVariable("memberId") Long memberId){
-        boolean result = reviewService.recommend(reviewId,memberId);
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        boolean result = reviewService.recommend(reviewId,userDetails);
+
         ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
-
-
 
         String message = result ?"리뷰 추천 성공" : "리뷰 추천 취소 성공";
         return ResponseEntity.ok(GenericResponse.of(
@@ -177,4 +187,6 @@ public class ReviewController {
                 message
         ));
     }
+
+
 }

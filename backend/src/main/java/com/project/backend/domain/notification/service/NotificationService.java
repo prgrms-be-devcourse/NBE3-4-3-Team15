@@ -1,11 +1,15 @@
 package com.project.backend.domain.notification.service;
 
 
+import com.project.backend.domain.member.dto.MemberDto;
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final MemberService memberService;
 
     /**
      * 알람 생성
@@ -42,14 +47,15 @@ public class NotificationService {
 
     /**
      * 알람 조회
-     * @param memberId
+     * @param userDetails
      * @return List<NotificationDTO>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    public List<NotificationDTO> findByUser(Long memberId) {
-        return notificationRepository.findALLByMemberId(memberId);
+    public List<NotificationDTO> findByUser(CustomUserDetails userDetails) {
+        MemberDto member = memberService.getMyProfile(userDetails.getUsername());
+        return notificationRepository.findALLByMemberId(member.getId());
     }
 
     /**
@@ -59,8 +65,9 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public void notificationCheck(Long notificationId) {
+    public void notificationCheck(Long notificationId, CustomUserDetails userDetails) {
         Notification notification = findNotificationById(notificationId);
+        authorityCheck(userDetails,notification);
         notification.setCheck(true);
         notificationRepository.save(notification);
 
@@ -73,8 +80,9 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public void notificationDelete(Long notificationId) {
+    public void notificationDelete(Long notificationId,CustomUserDetails userDetails) {
         Notification notification = findNotificationById(notificationId);
+        authorityCheck(userDetails,notification);
         notificationRepository.delete(notification);
     }
 
@@ -95,5 +103,26 @@ public class NotificationService {
                         NotificationErrorCode.NOTIFICATION_NOT_FOUND.getMessage())
                 );
 
+    }
+
+
+    /**
+     * 로그인 된 사용자와 알림 member가 같은지 확인
+     * @param userDetails
+     * @param notification
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    private void authorityCheck(CustomUserDetails userDetails, Notification notification){
+        MemberDto memberDto = memberService.getMyProfile(userDetails.getUsername());
+
+        if(notification.getMemberId()!=memberDto.getId()){
+            throw new NotificationException(
+                    NotificationErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
+                    NotificationErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
+                    NotificationErrorCode.UNAUTHORIZED_ACCESS.getMessage()
+            );
+        }
     }
 }

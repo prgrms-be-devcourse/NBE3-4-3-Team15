@@ -9,16 +9,17 @@ import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
+import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class ReviewService {
     private final MemberService memberService;
     private final NotificationService notificationService;
     private final FollowService followService;
+
 
     /**
      * 리뮤 전체 조회
@@ -90,11 +92,11 @@ public class ReviewService {
 
     /**
      * userid 기반 리뷰 찾기
-     * @param userId
+     * @param userDetails
      * @return  List<ReviewsDTO>
      */
-    public List<ReviewsDTO> getUserReviews(Long userId) {
-        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(userId);
+    public List<ReviewsDTO> getUserReviews(CustomUserDetails userDetails) {
+        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(myId(userDetails));
         return reviewsDTOS;
     }
 
@@ -106,17 +108,20 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void write(ReviewsDTO reviewsDTO) {
-        Review review =reviewRepository.save(Review.builder()
-                        .userId(reviewsDTO.getUserId())
-                        .bookId(reviewsDTO.getBookId())
 
+    public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
+
+
+        Review review =reviewRepository.save(Review.builder()
+                        .userId(myId(userDetails))
+                        .bookId(reviewsDTO.getBookId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
+                        .isDelete(false)
                     .build());
 
-        MemberDto memberDto = memberService.getMemberById(reviewsDTO.getUserId());   //리뷰 작성자
+        MemberDto memberDto = memberService.getMemberById(myId(userDetails));   //리뷰 작성자
         List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
 
 
@@ -136,13 +141,15 @@ public class ReviewService {
     /**
      * 리뷰 수정
      * @param -- reviewsDTO(content,rating)
-     * @param id - 리뷰 id
+     * @param userDetails
      *
      * @author 이광석
      * @since 25.01.27
      */
-    public void modify(ReviewsDTO reviewsDTO,Long id) {
-        Review review = findById(id);
+    public void modify(ReviewsDTO reviewsDTO,Long reviewId,CustomUserDetails userDetails) {
+        Review review = findById(reviewId);
+        authorityCheck(userDetails,review);
+
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
         reviewRepository.save(review);
@@ -156,13 +163,34 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public ReviewsDTO delete(Long id) {
-        Review review = findById(id);
+    public ReviewsDTO delete(Long reviewId,CustomUserDetails userDetails) {
+        Review review = findById(reviewId);
+        authorityCheck(userDetails,review);
 
-        reviewRepository.delete(review);
+        if(review.getComments().isEmpty()){
+            reviewRepository.delete(review);
+        }else {
+            review.setContent("해당 댓글은 삭제 되었습니다");
+
+            review.setDelete(true);
+            reviewRepository.save(review);
+        }
 
          return new ReviewsDTO(review);
 
+    }
+
+    /**
+     * 리뷰 삭제 메소드
+     * @param review
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    public void reviewDelete(Review review){
+        System.out.println("review1");
+        reviewRepository.delete(review);
+        System.out.println("review2");
     }
 
     /**
@@ -174,10 +202,10 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public boolean recommend(Long reviewId, Long memberId) {
+    public boolean recommend(Long reviewId, CustomUserDetails userDetails) {
         Review review = findById(reviewId);
 
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(myId(userDetails))
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
@@ -233,5 +261,43 @@ public class ReviewService {
                         ReviewErrorCode.REVIEW_NOT_FOUND.getMessage())
                 );
     }
+
+
+    /**
+     * userDetails을 통해서 userId 추출
+     * @param userDetails
+     * @return Long
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private Long myId(CustomUserDetails userDetails){
+        return memberService.getMyProfile(userDetails.getUsername()).getId();
+    }
+
+
+    /**
+     * 리뷰작성자와 현재 사용자가 같은지 확인
+     * @param userDetails
+     * @param review
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private void authorityCheck(CustomUserDetails userDetails, Review review){
+        Member member = memberRepository.findById(review.getUserId()).get(); // memberService로 변경 예정
+
+
+        if(!member.getUsername().equals(userDetails.getUsername()))
+        {
+            throw new ReviewException(
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getMessage()
+            );
+        }
+    }
+
+
 
 }

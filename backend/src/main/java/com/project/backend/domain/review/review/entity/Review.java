@@ -53,5 +53,7 @@ public class Review extends BaseEntity {
     @ManyToMany
     private Set<Member> recommendMember;
 
+    boolean isDelete;
+
 
 }

@@ -3,9 +3,11 @@ package com.project.backend.domain.notification.controller;
 
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,15 +44,16 @@ public class NotificationController {
 
     /**
      * 특정 유저 알람 조회
-     * @param memberId
+     * @param userDetails
      * @return ResponseEntity<GenericResponse<List<NotificationDTO>>>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    @GetMapping("/{memberId}")
-    public ResponseEntity<GenericResponse<List<NotificationDTO>>> getUserIdNotification(@PathVariable("memberId") Long memberId ){
-        List<NotificationDTO> notificationDTOS = notificationService.findByUser(memberId);
+    @GetMapping("/myNotification")
+    public ResponseEntity<GenericResponse<List<NotificationDTO>>> getUserIdNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
+        System.out.println("here");
+        List<NotificationDTO> notificationDTOS = notificationService.findByUser(userDetails);
         return ResponseEntity.ok(GenericResponse.of(
                 notificationDTOS,
                 "알림 조회 성공"
@@ -66,8 +69,10 @@ public class NotificationController {
      * @since 25.02.06
      */
     @PutMapping("/{notificationId}")
-    public ResponseEntity<GenericResponse<String>> notificationCheck(@PathVariable("notificationId") Long notificationId ){
-        notificationService.notificationCheck(notificationId);
+    public ResponseEntity<GenericResponse<String>> notificationCheck(@PathVariable("notificationId") Long notificationId,
+                                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        notificationService.notificationCheck(notificationId, userDetails);
         return ResponseEntity.ok(GenericResponse.of(
                 "변경 성공"
         ));
@@ -82,8 +87,9 @@ public class NotificationController {
      * @since
      */
     @DeleteMapping("/{notificationId}")
-    public ResponseEntity<GenericResponse<String>> notificationDelete(@PathVariable("notificationId") Long notificationId){
-        notificationService.notificationDelete(notificationId);
+    public ResponseEntity<GenericResponse<String>> notificationDelete(@PathVariable("notificationId") Long notificationId,
+                                                                      @AuthenticationPrincipal CustomUserDetails userDetails){
+        notificationService.notificationDelete(notificationId,userDetails);
         return ResponseEntity.ok(GenericResponse.of(
                 "삭제 성공"
         ));
