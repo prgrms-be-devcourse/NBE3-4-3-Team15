@@ -117,6 +117,26 @@ public class BookUtil {
     }
 
     /**
+     * -- 엔티티 DTO 변환 메소드 --
+     *
+     * @param -- book --
+     * @return -- BookDTO --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
+    public static BookDTO EntityToDTO(Book book) {
+        return new BookDTO(
+                book.getId(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getDescription(),
+                book.getImage(),
+                book.getIsbn(),
+                book.getFavoriteCount()
+        );
+    }
+
+    /**
      * -- 이진 검색 메소드 --
      * 중복 데이터 검색시 효율적인 검색을 위해 도입
      *

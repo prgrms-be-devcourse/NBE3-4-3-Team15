@@ -86,7 +86,7 @@ public class BookService {
         books.addAll(requestApi(query, "kakao", 0));
 
         saveBooks(books);
-        List<BookDTO> bookList = searchBookDB(query);
+        List<BookDTO> bookList = searchBooksDB(query);
         return BookUtil.pagingBooks(page, size, bookList);
     }
 
@@ -99,17 +99,9 @@ public class BookService {
      * @since -- 2월 11일 --
      */
     public BookDTO searchDetailBooks(Long id) {
-        Optional<Book> bookOptional = bookRepository.findById(id);
-
-        return bookOptional.map(book -> new BookDTO(
-                book.getId(),
-                book.getTitle(),
-                book.getAuthor(),
-                book.getDescription(),
-                book.getImage(),
-                book.getIsbn(),
-                book.getFavoriteCount()
-        )).orElseThrow(() -> new RuntimeException("책을 찾을 수 없습니다. ID: " + id));
+        return bookRepository.findById(id)
+                .map(BookUtil::EntityToDTO)
+                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
     }
 
 
@@ -150,19 +142,10 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 11일 --
      */
-    public List<BookDTO> searchBookDB(String query) {
-        List<Book> books = bookRepository.findByTitleOrAuthor(query);
-        return books.stream()
+    public List<BookDTO> searchBooksDB(String query) {
+        return bookRepository.findByTitleOrAuthor(query).stream()
                 .limit(400)
-                .map(book -> new BookDTO(
-                        book.getId(),
-                        book.getTitle(),
-                        book.getAuthor(),
-                        book.getDescription(),
-                        book.getImage(),
-                        book.getIsbn(),
-                        book.getFavoriteCount()
-                ))
+                .map(BookUtil::EntityToDTO)
                 .collect(Collectors.toList());
     }
 
