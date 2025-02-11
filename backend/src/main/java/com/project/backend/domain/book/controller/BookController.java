@@ -52,6 +52,14 @@ public class BookController {
         return ResponseEntity.ok(GenericResponse.of(books));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "도서 상세 검색")
+    public ResponseEntity<GenericResponse<BookDTO>> searchDetailBooks(
+            @PathVariable(name = "id") Long id) {
+        BookDTO detailBook = bookService.searchDetailBooks(id);
+        return ResponseEntity.ok(GenericResponse.of(detailBook));
+    }
+
     /**
      * 도서 찜하기,취소하기 기능
      *

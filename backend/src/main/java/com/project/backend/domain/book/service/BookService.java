@@ -85,14 +85,15 @@ public class BookService {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
         }
 
-        List<BookDTO> allBooks = new ArrayList<>();
+        List<Book> allBooks = new ArrayList<>();
 
         allBooks.addAll(requestApi(query, "naver", 1));
         allBooks.addAll(requestApi(query, "naver", 100));
         allBooks.addAll(requestApi(query, "kakao", 0));
 
+        saveBooks(allBooks);
 
-        List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
+        List<BookDTO> uniqueBooks = searchBookDB(query);
 
         Pageable pageable = PageRequest.of(page, size);
         int start = page * size;
@@ -107,6 +108,41 @@ public class BookService {
         return new PageImpl<>(pagedBooks, pageable, uniqueBooks.size());
     }
 
+    public void saveBooks(List<Book> allBooks) {
+        bookRepository.saveAll(removeDuplicateBooks(allBooks));
+    }
+
+
+    public List<BookDTO> searchBookDB(String query) {
+        List<Book> books = bookRepository.findByTitleOrAuthor(query);
+        return books.stream()
+                .limit(400) // 최대 400개만 반환
+                .map(book -> new BookDTO(
+                        book.getId(),
+                        book.getTitle(),
+                        book.getAuthor(),
+                        book.getDescription(),
+                        book.getImage(),
+                        book.getIsbn(),
+                        book.getFavoriteCount()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public BookDTO searchDetailBooks(Long id) {
+        Optional<Book> bookOptional = bookRepository.findById(id);
+
+        return bookOptional.map(book -> new BookDTO(
+                book.getId(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getDescription(),
+                book.getImage(),
+                book.getIsbn(),
+                book.getFavoriteCount()
+        )).orElseThrow(() -> new RuntimeException("책을 찾을 수 없습니다. ID: " + id));
+    }
+
     /**
      * -- Api 요청 메소드 --
      * 네이버 도서와 카카오 도서 Api 요청을 통합한 메서드
@@ -119,7 +155,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 10일 --
      */
-    private List<BookDTO> requestApi(String query, String apiType, int naverStart) {
+    private List<Book> requestApi(String query, String apiType, int naverStart) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         String url;
@@ -151,7 +187,7 @@ public class BookService {
         }
 
         return listData.stream()
-                .map(item -> convertToBookDTO(item, apiType))
+                .map(item -> convertToBook(item, apiType))
                 .collect(Collectors.toList());
     }
 
