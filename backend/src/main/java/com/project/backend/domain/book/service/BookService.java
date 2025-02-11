@@ -172,34 +172,35 @@ public class BookService {
     }
 
     /**
-     * -- BookDTO 변환 메소드 --
-     * 데이터를 BookDTO로 변환
+     * -- Book 변환 메소드 --
      *
      * @param -- Object item 데이터 --
      * @param -- String apiType 네이버와 카카오 구분 --
-     * @return BookDTO
+     * @return Book
      * @author 정재익
      * @since 2월 7일
      */
-    private Book convertToBookDTO(Object item, String apiType) {
+    private Book convertToBook(Object item, String apiType) {
         if ("kakao".equalsIgnoreCase(apiType)) {
             KakaoDTO kakaoBook = objectMapper.convertValue(item, KakaoDTO.class);
-            return new Book(
-                    kakaoBook.getTitle(),
-                    kakaoBook.getAuthor(),
-                    kakaoBook.getDescription(),
-                    kakaoBook.getImage(),
-                    BookUtil.extractIsbn(kakaoBook.getIsbn())
-            );
+            return Book.builder()
+                    .title(kakaoBook.getTitle())
+                    .author(kakaoBook.getAuthor())
+                    .description(kakaoBook.getDescription())
+                    .image(kakaoBook.getImage())
+                    .isbn(BookUtil.extractIsbn(kakaoBook.getIsbn()))
+                    .favoriteCount(0) // DB에 처음 저장됐을 때 기본값 부여
+                    .build();
         } else {
             NaverDTO naverBook = objectMapper.convertValue(item, NaverDTO.class);
-            return new Book(
-                    naverBook.getTitle(),
-                    naverBook.getAuthor(),
-                    naverBook.getDescription(),
-                    naverBook.getImage(),
-                    naverBook.getIsbn()
-            );
+            return Book.builder()
+                    .title(naverBook.getTitle())
+                    .author(naverBook.getAuthor())
+                    .description(naverBook.getDescription())
+                    .image(naverBook.getImage())
+                    .isbn(naverBook.getIsbn())
+                    .favoriteCount(0) // DB에 처음 저장됐을 때 기본값 부여
+                    .build();
         }
     }
 
