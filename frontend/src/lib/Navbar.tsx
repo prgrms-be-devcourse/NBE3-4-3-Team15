@@ -29,6 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ accessToken }) => {
 
       if (response.ok) {
         setIsLoggedIn(false); // 로그아웃 상태로 변경
+        window.location.href = "/";
       } else {
         alert("로그아웃 실패");
       }
