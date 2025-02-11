@@ -22,12 +22,21 @@ export default function ClientPage() {
     setSearchQuery(e.target.value);
   };
 
+  const clickButton = (e) => {
+    movePage(e.target.value);
+  };
+
+  const movePage = (pageNum) => {
+    console.log(pageNum);
+    router.push(`/book?query=${query}&page=${pageNum}`);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       // enter 했을 때의 코드 작성
       // if(e.keyCode === 13) 도 사용가능하다.
       setQuery(searchQuery);
-      router.push(`/book?query=${query}&page=1`);
+      movePage(1);
     }
   };
 
@@ -41,38 +50,55 @@ export default function ClientPage() {
 
   const [lastPage, setLastPage] = useState(0);
 
-  const search = async () => {
-    try {
-      const response = await client.GET("/book", {
-        params: {
-          query: {
-            query,
-            page,
-          },
-        },
-      });
+  const [curPageGroup, setCurPageGroup] = useState(1);
 
-      const data = response.data?.data;
+  const [start, setStart] = useState(1);
 
-      setBooks(data.content);
-
-      let pagelist = [];
-
-      for (let i = 0; i < data.totalPages; i++) {
-        pagelist.push(i + 1);
-      }
-
-      setPages(pagelist);
-      setLastPage(data.totalPages);
-      setCurPage(page);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [end, setEnd] = useState(10);
 
   useEffect(() => {
+    const search = async () => {
+      try {
+        const response = await client.GET("/book", {
+          params: {
+            query: {
+              query,
+              page: page - 1,
+            },
+          },
+        });
+
+        const data = response.data?.data;
+
+        setBooks(data.content);
+
+        let pagelist = [];
+
+        setStart(
+          page % 10 == 0
+            ? 1 + Math.floor((page - 1) / 10) * 10
+            : 1 + Math.floor(page / 10) * 10
+        );
+
+        setEnd(
+          data.totalPages / 10 < Math.floor((page - 1) / 10) + 1
+            ? data.totalPages
+            : (Math.floor((page - 1) / 10) + 1) * 10
+        );
+
+        for (let i = start; i <= end; i++) {
+          pagelist.push(i);
+        }
+
+        setPages(pagelist);
+        setLastPage(data.totalPages);
+        setCurPage(page);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     search();
-  }, [query, page]);
+  }, [query, page, start, end]);
 
   return (
     <div>
@@ -109,6 +135,7 @@ export default function ClientPage() {
           left: "20px",
           overflow: "auto",
           height: "90vh",
+          width: "100%",
         }}
       >
         {books.map((book) => (
@@ -127,9 +154,10 @@ export default function ClientPage() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "50px 50px 850px 50px 100px",
+                  gridGap: "25px",
                 }}
               >
-                <img src={book.image} alt="" style={{ height: "50px" }} />
+                <img src={book.image} alt="" style={{ height: "85px" }} />
                 <span>제목: </span>
                 <span>{book.title}</span>
                 <span>작가: </span>
@@ -139,35 +167,44 @@ export default function ClientPage() {
           </Link>
         ))}
       </div>
-      <div style={{ position: "fixed", bottom: "0", left: "45%" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-end",
+          height: "100vh",
+        }}
+      >
         <ul className="pagination">
-          <Link href={`?query=${query}&page=1`}>
-            <li>
-              <button
-                className="btn btn-sm btn-primary"
-                disabled={curPage == 1}
-              >
-                Previous
-              </button>
-            </li>
-          </Link>
+          <li>
+            <button
+              className="btn btn-sm btn-primary"
+              disabled={start == 1}
+              onClick={clickButton}
+              value={start - 1}
+            >
+              Previous
+            </button>
+          </li>
+
           {pages.map((page) => (
             <Link key={page} href={`?query=${query}&page=${page}`}>
               <li>
-                <button className="btn btn-sm">{page}</button>
+                <button className="btn btn-sm ml-3">{page}</button>
               </li>
             </Link>
           ))}
-          <Link href={`?query=${query}&page=${lastPage}`}>
-            <li>
-              <button
-                className="btn btn-sm btn-primary"
-                disabled={lastPage == curPage}
-              >
-                Last
-              </button>
-            </li>
-          </Link>
+
+          <li>
+            <button
+              className="btn btn-sm btn-primary ml-3"
+              disabled={lastPage == end || start / 10 == end / 10}
+              onClick={clickButton}
+              value={end + 1}
+            >
+              Next
+            </button>
+          </li>
         </ul>
       </div>
     </div>
