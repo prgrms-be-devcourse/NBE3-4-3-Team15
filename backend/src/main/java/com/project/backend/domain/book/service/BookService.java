@@ -85,14 +85,15 @@ public class BookService {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
         }
 
-        List<BookDTO> allBooks = new ArrayList<>();
+        List<Book> allBooks = new ArrayList<>();
 
         allBooks.addAll(requestApi(query, "naver", 1));
         allBooks.addAll(requestApi(query, "naver", 100));
         allBooks.addAll(requestApi(query, "kakao", 0));
 
+        saveBooks(allBooks);
 
-        List<BookDTO> uniqueBooks = removeDuplicateBooks(allBooks);
+        List<BookDTO> uniqueBooks = searchBookDB(query);
 
         Pageable pageable = PageRequest.of(page, size);
         int start = page * size;
@@ -107,6 +108,41 @@ public class BookService {
         return new PageImpl<>(pagedBooks, pageable, uniqueBooks.size());
     }
 
+    public void saveBooks(List<Book> allBooks) {
+        bookRepository.saveAll(removeDuplicateBooks(allBooks));
+    }
+
+
+    public List<BookDTO> searchBookDB(String query) {
+        List<Book> books = bookRepository.findByTitleOrAuthor(query);
+        return books.stream()
+                .limit(400) // 최대 400개만 반환
+                .map(book -> new BookDTO(
+                        book.getId(),
+                        book.getTitle(),
+                        book.getAuthor(),
+                        book.getDescription(),
+                        book.getImage(),
+                        book.getIsbn(),
+                        book.getFavoriteCount()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public BookDTO searchDetailBooks(Long id) {
+        Optional<Book> bookOptional = bookRepository.findById(id);
+
+        return bookOptional.map(book -> new BookDTO(
+                book.getId(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getDescription(),
+                book.getImage(),
+                book.getIsbn(),
+                book.getFavoriteCount()
+        )).orElseThrow(() -> new RuntimeException("책을 찾을 수 없습니다. ID: " + id));
+    }
+
     /**
      * -- Api 요청 메소드 --
      * 네이버 도서와 카카오 도서 Api 요청을 통합한 메서드
@@ -119,7 +155,7 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 10일 --
      */
-    private List<BookDTO> requestApi(String query, String apiType, int naverStart) {
+    private List<Book> requestApi(String query, String apiType, int naverStart) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         String url;
@@ -151,7 +187,7 @@ public class BookService {
         }
 
         return listData.stream()
-                .map(item -> convertToBookDTO(item, apiType))
+                .map(item -> convertToBook(item, apiType))
                 .collect(Collectors.toList());
     }
 
@@ -159,47 +195,48 @@ public class BookService {
      * -- 중복 도서 제거 메소드 --
      * ISBN이 동일한 도서가 있을 경우 하나만 남긴다.
      *
-     * @param --List<BookDTO> books 중복이 포함된 도서 리스트--
-     * @return List<BookDTO> 중복 제거된 도서 리스트
+     * @param books 중복이 포함된 도서 리스트
+     *  * @return 중복 제거된 도서 리스트
      * @author 정재익
      * @since 2월 5일
      */
-    private List<BookDTO> removeDuplicateBooks(List<BookDTO> books) {
-        Set<String> Isbns = new HashSet<>();
+    private List<Book> removeDuplicateBooks(List<Book> books) {
+        Set<String> isbns = new HashSet<>();
         return books.stream()
-                .filter(book -> Isbns.add(book.getIsbn()))
+                .filter(book -> isbns.add(book.getIsbn()))
                 .toList();
     }
 
     /**
-     * -- BookDTO 변환 메소드 --
-     * 데이터를 BookDTO로 변환
+     * -- Book 변환 메소드 --
      *
      * @param -- Object item 데이터 --
      * @param -- String apiType 네이버와 카카오 구분 --
-     * @return BookDTO
+     * @return Book
      * @author 정재익
      * @since 2월 7일
      */
-    private BookDTO convertToBookDTO(Object item, String apiType) {
+    private Book convertToBook(Object item, String apiType) {
         if ("kakao".equalsIgnoreCase(apiType)) {
             KakaoDTO kakaoBook = objectMapper.convertValue(item, KakaoDTO.class);
-            return new BookDTO(
-                    kakaoBook.getTitle(),
-                    kakaoBook.getAuthor(),
-                    kakaoBook.getDescription(),
-                    kakaoBook.getImage(),
-                    BookUtil.extractIsbn(kakaoBook.getIsbn())
-            );
+            return Book.builder()
+                    .title(kakaoBook.getTitle())
+                    .author(kakaoBook.getAuthor())
+                    .description(kakaoBook.getDescription())
+                    .image(kakaoBook.getImage())
+                    .isbn(BookUtil.extractIsbn(kakaoBook.getIsbn()))
+                    .favoriteCount(0) // DB에 처음 저장됐을 때 기본값 부여
+                    .build();
         } else {
             NaverDTO naverBook = objectMapper.convertValue(item, NaverDTO.class);
-            return new BookDTO(
-                    naverBook.getTitle(),
-                    naverBook.getAuthor(),
-                    naverBook.getDescription(),
-                    naverBook.getImage(),
-                    naverBook.getIsbn()
-            );
+            return Book.builder()
+                    .title(naverBook.getTitle())
+                    .author(naverBook.getAuthor())
+                    .description(naverBook.getDescription())
+                    .image(naverBook.getImage())
+                    .isbn(naverBook.getIsbn())
+                    .favoriteCount(0) // DB에 처음 저장됐을 때 기본값 부여
+                    .build();
         }
     }
 
@@ -221,23 +258,11 @@ public class BookService {
     @Transactional
     public boolean favoriteBook(BookDTO bookDto, String username) {
 
-        if (!bookRepository.existsByIsbn(bookDto.getIsbn())) {
-            bookRepository.save(Book.builder()
-                    .title(bookDto.getTitle())
-                    .author(bookDto.getAuthor())
-                    .description(bookDto.getDescription())
-                    .image(bookDto.getImage())
-                    .isbn(bookDto.getIsbn())
-                    .favoriteCount(bookDto.getFavoriteCount())
-                    .build());
-        }
-
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
 
-        FavoriteId favoriteId = new FavoriteId(member.getId(), bookRepository.findByIsbn(bookDto.getIsbn()).getId());
-
         Book book = bookRepository.findByIsbn(bookDto.getIsbn());
+        FavoriteId favoriteId = new FavoriteId(member.getId(), book.getId());
 
         if (favoriteRepository.existsById(favoriteId)) {
             favoriteRepository.deleteById(favoriteId); // 먼저 favorite 테이블에서 삭제

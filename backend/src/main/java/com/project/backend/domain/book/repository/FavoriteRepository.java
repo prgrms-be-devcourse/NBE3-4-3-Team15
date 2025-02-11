@@ -31,7 +31,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, FavoriteId> 
      * @author -- 김남우 --
      * @since -- 2월 10일 --
      */
-    @Query("SELECT new com.project.backend.domain.book.dto.BookDTO(b.title, b.author, b.description, b.image, b.isbn, b.favoriteCount) " +
+    @Query("SELECT new com.project.backend.domain.book.dto.BookDTO(b.id, b.title, b.author, b.description, b.image, b.isbn, b.favoriteCount) " +
             "FROM Favorite f " +
             "JOIN f.book b " +
             "WHERE f.member.id = :memberId")

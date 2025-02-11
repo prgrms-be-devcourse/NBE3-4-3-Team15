@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * -- 책 저장소 --
  *
@@ -57,4 +59,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Modifying
     @Query("DELETE FROM Book b WHERE b.favoriteCount = 0")
     void deleteBooksZeroFavoriteCount();
+
+
+    @Query("SELECT b FROM Book b WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Book> findByTitleOrAuthor(@Param("keyword") String keyword);
 }
