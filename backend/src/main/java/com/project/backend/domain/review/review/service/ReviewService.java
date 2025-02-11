@@ -1,8 +1,14 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.follow.dto.FollowResponseDto;
+import com.project.backend.domain.follow.service.FollowService;
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.member.service.MemberService;
+import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -30,6 +36,9 @@ import java.util.stream.Collectors;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final NotificationService notificationService;
+    private final FollowService followService;
 
     /**
      * 리뮤 전체 조회
@@ -98,14 +107,29 @@ public class ReviewService {
      * @since 25.01.27
      */
     public void write(ReviewsDTO reviewsDTO) {
-        reviewRepository.save(Review.builder()
+        Review review =reviewRepository.save(Review.builder()
                         .userId(reviewsDTO.getUserId())
                         .bookId(reviewsDTO.getBookId())
-                        .userId(reviewsDTO.getUserId())
+
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
                     .build());
+
+        MemberDto memberDto = memberService.getMemberById(reviewsDTO.getUserId());   //리뷰 작성자
+        List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
+
+
+        for(FollowResponseDto followDto: followers){
+            MemberDto follower = memberService.getMyProfile(followDto.username());  // 리뷰 작성자를 팔로우 하는 팔로워
+            NotificationDTO notificationDTO = NotificationDTO.builder()
+                    .memberId(follower.getId())
+                    .reviewId(review.getId())
+                    .isCheck(false)
+                    .content("리뷰가 작성되었습니다.")
+                    .build();
+            notificationService.create(notificationDTO);
+        }
 
     }
 

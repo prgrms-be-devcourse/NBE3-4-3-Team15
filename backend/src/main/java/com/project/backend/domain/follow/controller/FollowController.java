@@ -33,6 +33,8 @@ public class FollowController {
     public ResponseEntity<GenericResponse<String>> followOrUnfollow(
             @PathVariable("id") String username,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        System.out.println(username);
         String message = followService.followOrUnfollow(userDetails.getUsername(), username);
 
         return ResponseEntity.ok(GenericResponse.of(message));
