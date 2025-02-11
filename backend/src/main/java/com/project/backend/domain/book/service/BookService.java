@@ -181,10 +181,10 @@ public class BookService {
      * @author 정재익
      * @since 2월 7일
      */
-    private BookDTO convertToBookDTO(Object item, String apiType) {
+    private Book convertToBookDTO(Object item, String apiType) {
         if ("kakao".equalsIgnoreCase(apiType)) {
             KakaoDTO kakaoBook = objectMapper.convertValue(item, KakaoDTO.class);
-            return new BookDTO(
+            return new Book(
                     kakaoBook.getTitle(),
                     kakaoBook.getAuthor(),
                     kakaoBook.getDescription(),
@@ -193,7 +193,7 @@ public class BookService {
             );
         } else {
             NaverDTO naverBook = objectMapper.convertValue(item, NaverDTO.class);
-            return new BookDTO(
+            return new Book(
                     naverBook.getTitle(),
                     naverBook.getAuthor(),
                     naverBook.getDescription(),
@@ -221,23 +221,11 @@ public class BookService {
     @Transactional
     public boolean favoriteBook(BookDTO bookDto, String username) {
 
-        if (!bookRepository.existsByIsbn(bookDto.getIsbn())) {
-            bookRepository.save(Book.builder()
-                    .title(bookDto.getTitle())
-                    .author(bookDto.getAuthor())
-                    .description(bookDto.getDescription())
-                    .image(bookDto.getImage())
-                    .isbn(bookDto.getIsbn())
-                    .favoriteCount(bookDto.getFavoriteCount())
-                    .build());
-        }
-
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
 
-        FavoriteId favoriteId = new FavoriteId(member.getId(), bookRepository.findByIsbn(bookDto.getIsbn()).getId());
-
         Book book = bookRepository.findByIsbn(bookDto.getIsbn());
+        FavoriteId favoriteId = new FavoriteId(member.getId(), book.getId());
 
         if (favoriteRepository.existsById(favoriteId)) {
             favoriteRepository.deleteById(favoriteId); // 먼저 favorite 테이블에서 삭제
