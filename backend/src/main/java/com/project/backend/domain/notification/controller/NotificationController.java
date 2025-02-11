@@ -3,9 +3,15 @@ package com.project.backend.domain.notification.controller;
 
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -87,4 +93,12 @@ public class NotificationController {
                 "삭제 성공"
         );
     }
+
+
+//    @Operation(summary = "sse세션 연결")
+//    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public ResponseEntity<SseEmitter> subscribe(@AuthenticationPrincipal CustomUserDetails userDetails,
+//                                                @RequestHeader(value= "Last-Event-ID",required = false, defaultValue = "") String lastEventId){
+////        return ResponseEntity.of(notificationService.subscribe(userDetails.getName(),lastEventId));
+//    }
 }
