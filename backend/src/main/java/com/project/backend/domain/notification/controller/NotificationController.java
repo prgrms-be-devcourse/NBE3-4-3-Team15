@@ -97,10 +97,10 @@ public class NotificationController {
     }
 
 
-//    @Operation(summary = "sse세션 연결")
-//    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-//    public ResponseEntity<SseEmitter> subscribe(@AuthenticationPrincipal CustomUserDetails userDetails,
-//                                                @RequestHeader(value= "Last-Event-ID",required = false, defaultValue = "") String lastEventId){
-////        return ResponseEntity.of(notificationService.subscribe(userDetails.getName(),lastEventId));
-//    }
+    @Operation(summary = "sse세션 연결")
+    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public ResponseEntity<SseEmitter> subscribe(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                @RequestHeader(value= "Last-Event-ID",required = false, defaultValue = "") String lastEventId){
+        return ResponseEntity.of(notificationService.subscribe(userDetails.getName(),lastEventId));
+    }
 }
