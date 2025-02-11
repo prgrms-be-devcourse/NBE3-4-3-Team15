@@ -16,10 +16,10 @@ type MineDto = components["schemas"]["MineDto"];
 export default function Mine() {
   const [userProfile, setUserProfile] = useState<MineDto | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [password, setPassword] = useState(""); // 비밀번호 상태
-
-  console.log(password);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 변경 모달 상태
+  const [currentPassword, setCurrentPassword] = useState(""); // 비밀번호 상태
+  const [newPassword, setNewPassword] = useState(""); // 새 비밀번호 상태
 
   // 회원 정보 조회
   const getUserProfile = async () => {
@@ -59,18 +59,47 @@ export default function Mine() {
     }
   };
 
-  const quit = async () => {
+  //비밀번호 변경 모달 상태 변경
+  const passwordEdit = () => {
+    setIsPasswordModalOpen(!isPasswordModalOpen);
+  };
+
+  // 비밀번호 변경 요청
+  const changePassword = async () => {
     try {
-      if (!confirm("정말 탈퇴하시겠습니까?")) return;
-      await client.DELETE("/members/mine", {
+      await client.PUT("/members/mine/password", {
         body: {
-          password: password,
+          currentPassword: currentPassword,
+          newPassword: newPassword,
         },
       });
 
-      alert("탈퇴 완료되었습니다.");
-      setPassword("");
-      window.location.href = "/";
+      alert("비밀번호가 변경되었습니다.");
+      setIsPasswordModalOpen(false);
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (error) {
+      console.error("비밀번호 변경에 실패하였습니다.", error);
+      alert("비밀번호 변경에 실패하였습니다.");
+    }
+  };
+
+  //회원 탈퇴 요청
+  const quit = async () => {
+    try {
+      if (!confirm("정말 탈퇴하시겠습니까?")) return;
+      const response = await client.DELETE("/members/mine", {
+        body: {
+          password: currentPassword,
+        },
+      });
+      if (response.response.ok) {
+        alert("탈퇴 완료되었습니다.");
+        setCurrentPassword("");
+        window.location.href = "/";
+      } else {
+        alert("비밀번호가 맞지 않습니다.");
+      }
     } catch (error) {
       console.error("탈퇴에 실패하였습니다.", error);
       alert("탈퇴에 실패하였습니다.");
@@ -188,17 +217,35 @@ export default function Mine() {
                 <td style={{ textAlign: "end" }}>
                   {isEditing ? (
                     <>
-                      <button className="btn btn-primary mt-2" onClick={modify}>
-                        저장
-                      </button>
-                      <button className="btn btn-primary mt-2" onClick={edit}>
-                        취소
-                      </button>
+                      <div style={{ display: "flex", gap: "5px" }}>
+                        <button
+                          className="btn btn-primary mt-2"
+                          onClick={modify}
+                        >
+                          저장
+                        </button>
+                        <button className="btn btn-primary mt-2" onClick={edit}>
+                          취소
+                        </button>
+                      </div>
                     </>
                   ) : (
-                    <button className="btn btn-secondary mt-2" onClick={edit}>
-                      수정
-                    </button>
+                    <>
+                      <div style={{ display: "flex", gap: "5px" }}>
+                        <button
+                          className="btn btn-secondary mt-2"
+                          onClick={edit}
+                        >
+                          정보 수정
+                        </button>
+                        <button
+                          className="btn btn-secondary mt-2"
+                          onClick={passwordEdit}
+                        >
+                          비밀번호 변경
+                        </button>
+                      </div>
+                    </>
                   )}
                 </td>
               </tr>
@@ -229,13 +276,133 @@ export default function Mine() {
             e.currentTarget.style.transform = "scale(1)";
             e.currentTarget.style.boxShadow = "0 4px 15px rgba(255, 0, 0, 0.5)";
           }}
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsDeleteModalOpen(true)}
         >
           회원 탈퇴
         </button>
         <Modal
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
+          isOpen={isPasswordModalOpen}
+          onRequestClose={() => setIsPasswordModalOpen(false)}
+          style={{
+            content: {
+              top: "50%",
+              left: "50%",
+              right: "auto",
+              bottom: "auto",
+              marginRight: "-50%",
+              transform: "translate(-50%, -50%)",
+              padding: "30px",
+              border: "none",
+              borderRadius: "15px",
+              backgroundColor: "#f9f9f9",
+              color: "#333",
+              boxShadow: "0 8px 30px rgba(0, 0, 0, 0.2)",
+            },
+          }}
+          ariaHideApp={false}
+        >
+          <h2
+            style={{
+              textAlign: "center",
+              marginBottom: "20px",
+              fontSize: "1.5rem",
+              fontWeight: "600",
+            }}
+          >
+            🔒 비밀번호 변경
+          </h2>
+          <input
+            type="password"
+            placeholder="현재 비밀번호"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "15px",
+              marginBottom: "15px",
+              borderRadius: "8px",
+              border: "1px solid #4CAF50",
+              backgroundColor: "#ffffff",
+              color: "#333",
+              transition: "border 0.3s",
+            }}
+            onFocus={(e) =>
+              (e.currentTarget.style.border = "1px solid #66BB6A")
+            }
+            onBlur={(e) => (e.currentTarget.style.border = "1px solid #4CAF50")}
+          />
+          <input
+            type="password"
+            placeholder="새 비밀번호"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "15px",
+              marginBottom: "20px",
+              borderRadius: "8px",
+              border: "1px solid #4CAF50",
+              backgroundColor: "#ffffff",
+              color: "#333",
+              transition: "border 0.3s",
+            }}
+            onFocus={(e) =>
+              (e.currentTarget.style.border = "1px solid #66BB6A")
+            }
+            onBlur={(e) => (e.currentTarget.style.border = "1px solid #4CAF50")}
+          />
+          <button
+            className="btn btn-primary"
+            onClick={changePassword}
+            style={{
+              backgroundColor: "#4CAF50",
+              color: "#fff",
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              width: "100%",
+              marginBottom: "10px",
+              transition: "background-color 0.3s, transform 0.2s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = "#388E3C";
+              e.currentTarget.style.transform = "scale(1.05)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = "#4CAF50";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            비밀번호 변경
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setIsPasswordModalOpen(false)}
+            style={{
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "5px",
+              backgroundColor: "#ccc",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              width: "100%",
+              transition: "background-color 0.3s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = "#bbb";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = "#ccc";
+            }}
+          >
+            취소
+          </button>
+        </Modal>
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onRequestClose={() => setIsDeleteModalOpen(false)}
           style={{
             content: {
               top: "50%",
@@ -265,8 +432,8 @@ export default function Mine() {
           <input
             type="password"
             placeholder="비밀번호를 입력하세요"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
             style={{
               width: "100%",
               padding: "15px",
@@ -293,17 +460,17 @@ export default function Mine() {
               transition: "background-color 0.3s",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = "#ff1a1a"; // 마우스 오버 시 색상 변경
+              e.currentTarget.style.backgroundColor = "#ff1a1a";
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "#ff4d4d"; // 마우스 아웃 시 원래 색상
+              e.currentTarget.style.backgroundColor = "#ff4d4d";
             }}
           >
             탈퇴하기
           </button>
           <button
             className="btn btn-secondary"
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => setIsDeleteModalOpen(false)}
             style={{
               padding: "10px 20px",
               border: "none",
