@@ -1,9 +1,14 @@
 package com.project.backend.domain.review.review.service;
 
 
+import com.project.backend.domain.follow.dto.FollowResponseDto;
+import com.project.backend.domain.follow.service.FollowService;
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
+import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -11,13 +16,9 @@ import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,9 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final NotificationService notificationService;
+    private final FollowService followService;
+
 
     /**
      * 리뮤 전체 조회
@@ -46,13 +50,17 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public List<ReviewsDTO> findAll(int page,int size) {
-        Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC,"createdAt"));
+    public Page<ReviewsDTO> findAll(int page,int size) {
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by(Sort.Direction.DESC,"createdAt"));
 
-
-        return reviewRepository.findAll(pageable).stream()
+        Page<Review> pages = reviewRepository.findAll(pageable);
+        List<ReviewsDTO> reviewsDTOList = pages.getContent()
+                .stream()
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
+        Page<ReviewsDTO> reviewsDTOPage = new PageImpl<>(reviewsDTOList,pageable,pages.getTotalElements());
+
+        return reviewsDTOPage;
 
     }
 
@@ -66,15 +74,18 @@ public class ReviewService {
      * @author 이광석
      * @since 25.02.07
      */
-    public List<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
+    public Page<ReviewsDTO> getBookIdReviews(Long bookId, Integer page, Integer size) {
 
-        Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"createdAt"));
+        Pageable pageable = PageRequest.of(page-1,size,Sort.by(Sort.Direction.DESC,"createdAt"));
 
-        Page<Review> reviewPage = reviewRepository.findAllByBookId(bookId,pageable);
-        List<ReviewsDTO> reviewsDTOS = reviewPage.stream()
+        Page<Review> pages = reviewRepository.findAllByBookId(bookId,pageable);
+        List<ReviewsDTO> reviewsDTOList = reviewRepository.findAllByBookId(bookId,pageable)
+                .stream()
                 .map(ReviewsDTO::new)
                 .collect(Collectors.toList());
-        return reviewsDTOS;
+        Page<ReviewsDTO> reviewsDTOPage = new PageImpl<>(reviewsDTOList,pageable,pages.getTotalElements());
+
+        return reviewsDTOPage;
 
     }
 
@@ -96,15 +107,32 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
+
     public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
-        reviewRepository.save(Review.builder()
+
+
+        Review review =reviewRepository.save(Review.builder()
                         .userId(myId(userDetails))
                         .bookId(reviewsDTO.getBookId())
-                        .userId(reviewsDTO.getUserId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
                     .build());
+
+        MemberDto memberDto = memberService.getMemberById(myId(userDetails));   //리뷰 작성자
+        List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
+
+
+        for(FollowResponseDto followDto: followers){
+            MemberDto follower = memberService.getMyProfile(followDto.username());  // 리뷰 작성자를 팔로우 하는 팔로워
+            NotificationDTO notificationDTO = NotificationDTO.builder()
+                    .memberId(follower.getId())
+                    .reviewId(review.getId())
+                    .isCheck(false)
+                    .content("리뷰가 작성되었습니다.")
+                    .build();
+            notificationService.create(notificationDTO);
+        }
 
     }
 

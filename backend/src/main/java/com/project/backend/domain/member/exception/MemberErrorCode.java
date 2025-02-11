@@ -14,6 +14,7 @@ public enum MemberErrorCode {
     PASSWORD_LENGTH(HttpStatus.BAD_REQUEST, "PASSWORD_LENGTH", "비밀번호는 8자리 이상이어야 합니다."),
     EXISTING_USERNAME(HttpStatus.CONFLICT, "EXISTING_USERNAME", "이미 존재하는 아이디 입니다."),
     NON_EXISTING_USERNAME(HttpStatus.NOT_FOUND, "NON_EXISTING_USERNAME", "존재하지 않는 사용자 입니다."),
+    NON_EXISTING_USERID(HttpStatus.NOT_FOUND,"NON_EXISTING_USERiD","존재하지 않는 사용자 입니다."),
     INCORRECT_PASSWORD(HttpStatus.UNAUTHORIZED, "INCORRECT_PASSWORD", "비밀번호가 맞지 않습니다."),
     NO_AUTHORIZED(HttpStatus.UNAUTHORIZED, "NO_AUTHORIZED", "인증정보가 없습니다."),
     INCORRECT_AUTHORIZED(HttpStatus.UNAUTHORIZED, "INCORRECT_AUTHORIZED", "인증정보가 올바르지 않습니다."),

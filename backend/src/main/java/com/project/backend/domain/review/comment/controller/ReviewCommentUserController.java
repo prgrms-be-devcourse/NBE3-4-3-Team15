@@ -6,9 +6,9 @@ import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,12 +31,18 @@ public class ReviewCommentUserController {
      * @since 25.02.06
      */
     @GetMapping("/review/comments")
-    public GenericResponse<List<ReviewCommentDto>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public  ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
 
         List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userDetails);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
+//=======
+//    @GetMapping("/review/comments/{userId}")
+//    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@PathVariable("userId")Long userId){
+//        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
+//        return ResponseEntity.ok(GenericResponse.of(
+//>>>>>>> main
                 commentDtos,
                 "User 댓글 조회 성공"
-        );
+        ));
     }
 }

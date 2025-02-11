@@ -116,11 +116,15 @@ public class ReviewCommentService {
 
         ReviewComment newReviewComment = reviewCommentRepository.save(reviewComment);
 
+        createCommentNotification(newReviewComment,review,reviewCommentDto);
 
+        return new ReviewCommentDto(reviewComment);
+    }
 
+    public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .memberId(review.getUserId())
-                .reviewComment(newReviewComment.getId())
+                .reviewComment(reviewComment.getId())
                 .isCheck(false)
                 .build();
 
@@ -133,9 +137,8 @@ public class ReviewCommentService {
         }
 
         notificationService.create(notificationDTO);
-
-        return new ReviewCommentDto(reviewComment);
     }
+
 
     /**
      * 댓글 수정
@@ -150,14 +153,10 @@ public class ReviewCommentService {
     public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto, CustomUserDetails userDetails) {
 
 
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment reviewComment = findCommentById(commentId);
 
         authorityCheck(userDetails,reviewComment);
+
         reviewComment.setComment(reviewCommentDto.getComment());
         reviewCommentRepository.save(reviewComment);
 
@@ -215,13 +214,9 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public Boolean recommend(Long commentId,CustomUserDetails userDetails) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment reviewComment = findCommentById(commentId);
         Member member = memberRepository.findByUsername(userDetails.getUsername())
+
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
@@ -253,12 +248,7 @@ public class ReviewCommentService {
      * @since 25.02.03
      */
     public ReviewCommentDto findById(Long commentId) {
-        ReviewComment reviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-        ));
+        ReviewComment reviewComment = findCommentById(commentId);
 
         return new ReviewCommentDto(reviewComment);
     }
@@ -273,16 +263,20 @@ public class ReviewCommentService {
      * @author 이광석
      */
     public List<ReviewCommentDto> findReplies(Long commentId) {
-        ReviewComment parent = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()->new ReviewException(
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getStatus(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getErrorCode(),
-                        ReviewErrorCode.COMMENT_NOT_FOUND.getMessage()
-                ));
+        ReviewComment parent = findCommentById(commentId);
+
         List<ReviewCommentDto> sons = reviewCommentRepository.findByParent(parent);
         return sons;
     }
 
+    /**
+     * 댓글 목록 조회
+     * @param commentId
+     * @return ReviewComment
+     *
+     * @author 이광석
+     * @since 20.05.07
+     */
     private ReviewComment findCommentById (Long commentId){
         return reviewCommentRepository.findById(commentId)
                 .orElseThrow(()->new ReviewException(

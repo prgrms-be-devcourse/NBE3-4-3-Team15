@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,38 +36,38 @@ public class ReviewCommentController {
     /**
      * 리뷰 코멘트 목록 조회
      * @param -- reviewId -- 리뷰 id
-     * @return -- GenericResponse<List<ReviewCommentDto>>
+     * @return --  ResponseEntity<GenericResponse<List<ReviewCommentDto>>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @GetMapping
     @Operation(summary = "리뷰 댓글 목록 조회")
-    public GenericResponse<List<ReviewCommentDto>> getComments(@PathVariable("reviewId") Long reviewId){
+    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getComments(@PathVariable("reviewId") Long reviewId){
 
         List<ReviewCommentDto> reviewCommentDtoList = reviewCommentService.findComment(reviewId);
-        return GenericResponse.of(
+        return ResponseEntity.ok( GenericResponse.of(
                 reviewCommentDtoList
                 ,"리뷰 코멘트 목록 조회 성공"
-        );
+        ));
     }
 
     /**
      * 대댓글 조회
      * @param commentId
-     * @return GenericResponse<List<ReviewCommentDto>>
+     * @return ResponseEntity<GenericResponse<List<ReviewCommentDto>>>
      *
      * @author 이광석
      * @since 25.02.05
      */
     @GetMapping("/{commentId}")
     @Operation(summary = "대댓글 조회")
-    public GenericResponse<List<ReviewCommentDto>> getReplies(@PathVariable("commentId") Long commentId){
+    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getReplies(@PathVariable("commentId") Long commentId){
         List<ReviewCommentDto> replies = reviewCommentService.findReplies(commentId);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
                 replies,
                 "대댓글 목록 조회 성공"
-        );
+        ));
     }
 
     /**
@@ -79,12 +80,17 @@ public class ReviewCommentController {
      */
     @GetMapping("/review/comments")
     @Operation(summary = "댓글 검색")
-    public GenericResponse<List<ReviewCommentDto>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
         List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userDetails);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
+//=======
+//    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@PathVariable("userId")Long userId){
+//        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
+//        return ResponseEntity.ok(GenericResponse.of(
+//>>>>>>> main
                 commentDtos,
                 "User 댓글 조회 성공"
-        );
+        ));
     }
 
 
@@ -93,24 +99,29 @@ public class ReviewCommentController {
      *리뷰 코멘트 생성
      * @param reviewId
      * @param reviewCommentDto
-     * @return GenericResponse<ReviewCommentDto>
+     * @return ResponseEntity<GenericResponse<ReviewCommentDto>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
     @PostMapping
     @Operation(summary = "리뷰 댓글 생성")
-    public GenericResponse<ReviewCommentDto> postComment(@PathVariable("reviewId") Long reviewId,
+
+    public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
                                             @Valid @RequestBody ReviewCommentDto reviewCommentDto,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails){
+//=======
+//    public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
+//                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto){
+//>>>>>>> main
 
 
        ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,userDetails);
 
-       return GenericResponse.of(
+       return ResponseEntity.ok(GenericResponse.of(
                newReviewCommentDto,
                "리뷰 코맨트 생성 성공"
-       );
+       ));
     }
 
     /**
@@ -118,7 +129,7 @@ public class ReviewCommentController {
      * @param reviewId
      * @param commentId
      * @param reviewCommentDto
-     * @return GenericResponse<ReviewCommentDto>
+     * @return ResponseEntity<GenericResponse<ReviewCommentDto>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -126,23 +137,30 @@ public class ReviewCommentController {
     @PutMapping("/{id}")
     @Operation(summary = "리뷰 댓글 수정")
     @Transactional
-    public GenericResponse<ReviewCommentDto> putComment(@PathVariable("reviewId") Long reviewId,
+    public ResponseEntity<GenericResponse<ReviewCommentDto>> putComment(@PathVariable("reviewId") Long reviewId,
                                                          @PathVariable("id") Long commentId,
                                                         @RequestBody ReviewCommentDto reviewCommentDto,
                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
             ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto,userDetails);
 
-            return GenericResponse.of(
+//    public ResponseEntity<GenericResponse<ReviewCommentDto>> putComment(@PathVariable("reviewId") Long reviewId,
+//                                             @PathVariable("id") Long commentId,
+//                                             @RequestBody ReviewCommentDto reviewCommentDto){
+//
+//            ReviewCommentDto newReviewCommentDto=reviewCommentService.modify(reviewId, commentId, reviewCommentDto);
+//>>>>>>> main
+
+            return ResponseEntity.ok(GenericResponse.of(
                     newReviewCommentDto,
                     "코멘트 수정 성공"
-            );
+            ));
     }
 
     /**
      * 리뷰 코메트 삭제
      * @param reviewId
      * @param commentId
-     * @return GenericResponse<ReviewCommentDto>
+     * @return ResponseEntity<GenericResponse<ReviewCommentDto>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -150,15 +168,22 @@ public class ReviewCommentController {
     @DeleteMapping("/{id}")
     @Transactional
     @Operation(summary = "리뷰 댓글 삭제")
-    public GenericResponse<ReviewCommentDto> delete(@PathVariable("reviewId") Integer reviewId,
+
+    public ResponseEntity<GenericResponse<ReviewCommentDto>> delete(@PathVariable("reviewId") Integer reviewId,
                                                     @PathVariable("id") Long commentId,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
 
         ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId,userDetails);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
+//=======
+//    public ResponseEntity<GenericResponse<ReviewCommentDto>> delete(@PathVariable("reviewId") Integer reviewId,
+//                                         @PathVariable("id") Long commentId){
+//       ReviewCommentDto newReviewCommentDto = reviewCommentService.delete(commentId);
+//        return ResponseEntity.ok(GenericResponse.of(
+//>>>>>>> main
                 newReviewCommentDto,
                 "리뷰 코멘트 삭제 성공"
-        );
+        ));
     }
 
     /**
@@ -173,22 +198,23 @@ public class ReviewCommentController {
      */
     @PutMapping("/{id}/recommend/{memberId}")
     @Operation(summary = "리뷰 댓글 추천")
-    public GenericResponse<ReviewCommentDto> recommendComment(@PathVariable("reviewId") Long reviewId,
+    public ResponseEntity<GenericResponse<ReviewCommentDto>> recommendComment(@PathVariable("reviewId") Long reviewId,
                                                    @PathVariable("id") Long commentId,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails){
        boolean result = reviewCommentService.recommend(commentId, userDetails);
        ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
-        if(result){
-            return GenericResponse.of(
-                    reviewCommentDto,
-                    "리뷰 코멘트 추천 성공"
-            );
-        }else{
-            return GenericResponse.of(
-                    reviewCommentDto,
-                    "리뷰 코멘츠 추천 취소 성공"
-            );
-        }
+       String message = result ? "리뷰 코멘트 추천 성공" : "리뷰 코멘트 추천 취소 성공";
+        return ResponseEntity.ok(GenericResponse.of(reviewCommentDto, message));
+//=======
+//                                                   @PathVariable("memberId") Long memberId){
+//
+//        boolean isRecommended = reviewCommentService.recommend(commentId, memberId);
+//        ReviewCommentDto reviewCommentDto = reviewCommentService.findById(commentId);
+//
+//        String message = isRecommended ? "리뷰 코멘트 추천 성공" : "리뷰 코멘트 추천 취소 성공";
+//
+//        return ResponseEntity.ok(GenericResponse.of(reviewCommentDto, message));
+//>>>>>>> main
     }
 
 
