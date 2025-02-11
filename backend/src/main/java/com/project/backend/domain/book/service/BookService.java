@@ -4,16 +4,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.backend.domain.book.dto.BookDTO;
 import com.project.backend.domain.book.dto.KakaoDTO;
 import com.project.backend.domain.book.dto.NaverDTO;
+import com.project.backend.domain.book.entity.Book;
+import com.project.backend.domain.book.entity.Favorite;
 import com.project.backend.domain.book.exception.BookErrorCode;
 import com.project.backend.domain.book.exception.BookException;
+import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.book.util.BookUtil;
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.exception.MemberErrorCode;
+import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -191,68 +202,6 @@ public class BookService {
             );
         }
     }
-}
-
-//    /**
-//     * -- 책 리스트를 DB에 저장하는 메소드 --
-//     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
-//     *
-//     * @param -- ㅣist<NaverBookVO.Item> items --
-//     * @return -- List<Book>
-//     * @author -- 정재익 --
-//     * @since -- 2월 3일 --
-//     */
-//    private List<Book> saveBooks(List<NaverBookVO.Item> items) {
-//        List<Book> newBooks = items.stream()
-//                .map(item -> modelMapper.map(item, Book.class))
-//                .filter(book -> !bookRepository.existsByIsbn(book.getIsbn()))
-//                .toList();
-//
-//        return bookRepository.saveAll(newBooks);
-//    }
-
-/**
- * -- 책을 찜하거나 찜취소하는 메소드 --
- * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
- * Favorite DB에 저장
- * 책이 받은 찜한 수를 Book DB에 최신화
- *
- * @param -- favoriteDTO --
- * @param -- userDetail --
- * @return --GenericResponse<String>--
- * @author -- 정재익 --
- * @since -- 2월 3일 --
- */
-//    @Transactional
-//    public GenericResponse<String> favoriteBook(FavoriteDTO favoriteDTO, @AuthenticationPrincipal UserDetails userDetails) {
-//        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-//        Long memberId = customUserDetails.getId();
-//
-//        FavoriteId favoriteId = new FavoriteId(userDetails.getUsername(), favoriteDTO.getBookId());
-//
-//        Book book = bookRepository.findById(favoriteDTO.getBookId())
-//                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
-//
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
-//
-//        if (favoriteRepository.existsById(favoriteId)) {
-//            favoriteRepository.deleteById(favoriteId);
-//            book.setFavoriteCount(book.getFavoriteCount() - 1);
-//            bookRepository.save(book);
-//            return GenericResponse.of("찜이 취소되었습니다.");
-//        } else {
-//            Favorite favorite = modelMapper.map(favoriteDTO, Favorite.class);
-//            favorite.setId(favoriteId);
-//            favorite.setBook(book);
-//            favorite.setMember(member);
-//            favoriteRepository.save(favorite);
-//            book.setFavoriteCount(book.getFavoriteCount() + 1);
-//            bookRepository.save(book);
-//
-//            return GenericResponse.of("해당 도서를 찜 목록에 추가하였습니다.");
-//        }
-//    }
 
     /**
      * -- 도서 찜, 찜취소 메소드 --
@@ -319,3 +268,64 @@ public class BookService {
         }
     }
 }
+
+//    /**
+//     * -- 책 리스트를 DB에 저장하는 메소드 --
+//     * 책을 구분하는 고유값인 isbn데이터를 이용하여 이미 존재하는 책은 DB에 저장하지 않음
+//     *
+//     * @param -- ㅣist<NaverBookVO.Item> items --
+//     * @return -- List<Book>
+//     * @author -- 정재익 --
+//     * @since -- 2월 3일 --
+//     */
+//    private List<Book> saveBooks(List<NaverBookVO.Item> items) {
+//        List<Book> newBooks = items.stream()
+//                .map(item -> modelMapper.map(item, Book.class))
+//                .filter(book -> !bookRepository.existsByIsbn(book.getIsbn()))
+//                .toList();
+//
+//        return bookRepository.saveAll(newBooks);
+//    }
+
+/**
+ * -- 책을 찜하거나 찜취소하는 메소드 --
+ * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
+ * Favorite DB에 저장
+ * 책이 받은 찜한 수를 Book DB에 최신화
+ *
+ * @param -- favoriteDTO --
+ * @param -- userDetail --
+ * @return --GenericResponse<String>--
+ * @author -- 정재익 --
+ * @since -- 2월 3일 --
+ */
+//    @Transactional
+//    public GenericResponse<String> favoriteBook(FavoriteDTO favoriteDTO, @AuthenticationPrincipal UserDetails userDetails) {
+//        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+//        Long memberId = customUserDetails.getId();
+//
+//        FavoriteId favoriteId = new FavoriteId(userDetails.getUsername(), favoriteDTO.getBookId());
+//
+//        Book book = bookRepository.findById(favoriteDTO.getBookId())
+//                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+//
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
+//
+//        if (favoriteRepository.existsById(favoriteId)) {
+//            favoriteRepository.deleteById(favoriteId);
+//            book.setFavoriteCount(book.getFavoriteCount() - 1);
+//            bookRepository.save(book);
+//            return GenericResponse.of("찜이 취소되었습니다.");
+//        } else {
+//            Favorite favorite = modelMapper.map(favoriteDTO, Favorite.class);
+//            favorite.setId(favoriteId);
+//            favorite.setBook(book);
+//            favorite.setMember(member);
+//            favoriteRepository.save(favorite);
+//            book.setFavoriteCount(book.getFavoriteCount() + 1);
+//            bookRepository.save(book);
+//
+//            return GenericResponse.of("해당 도서를 찜 목록에 추가하였습니다.");
+//        }
+//    }
