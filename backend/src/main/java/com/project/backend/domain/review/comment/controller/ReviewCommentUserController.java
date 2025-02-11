@@ -4,6 +4,7 @@ import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
 import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,11 +28,11 @@ public class ReviewCommentUserController {
      * @since 25.02.06
      */
     @GetMapping("/review/comments/{userId}")
-    public GenericResponse<List<ReviewCommentDto>> getUserComment(@PathVariable("userId")Long userId){
+    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@PathVariable("userId")Long userId){
         List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
                 commentDtos,
                 "User 댓글 조회 성공"
-        );
+        ));
     }
 }

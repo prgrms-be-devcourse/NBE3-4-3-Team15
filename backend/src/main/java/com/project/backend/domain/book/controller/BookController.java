@@ -8,12 +8,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * -- 도서 컨트롤러 --
@@ -33,42 +33,24 @@ public class BookController {
     /**
      * -- 도서 검색 --
      * api의 정보를 바탕으로 도서를 검색
-     * 작가 검색, 제목 검색 기능
+     * 작가, 제목을 통합 검색
      *
      * @param -- query(검색어)
-     * @param -- searchBy(title = 제목검색, author = 작가검색) --
-     * @param -- page 시작 페이지 --
+     * @param -- page 페이지 --
      * @param -- size 한 페이지에 보여주는 책 수량 --
-     * @return -- GenericResponse<List<BookDTO>> --
+     * @return -- ResponseEntity<GenericResponse<Page<BookDTO>>> --
      * @author -- 정재익 --
-     * @since -- 2월 7일 --
+     * @since -- 2월 10일 --
      */
     @GetMapping
     @Operation(summary = "도서 검색")
-    public GenericResponse<List<BookDTO>> searchBooks(
+    public ResponseEntity<GenericResponse<Page<BookDTO>>> searchBooks(
             @RequestParam(name = "query") String query,
-            @RequestParam(name = "searchBy", defaultValue = "title") String searchBy,
-            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        List<BookDTO> books = bookService.searchBooks(query, searchBy.equalsIgnoreCase("author"), page, size);
-
-        return GenericResponse.of(books);
-    }
-
-    /**
-     * -- 도서 상세 검색 --
-     * 책의 상세 정보 조회
-     *
-     * @param -- isbn --
-     * @return -- GenericResponse<BookDTO> --
-     * @author -- 정재익 --
-     * @since -- 2월 5일 --
-     */
-    @GetMapping("/{isbn}")
-    @Operation(summary = "도서 상세 검색")
-    public GenericResponse<BookDTO> searchBookDetail(@PathVariable(name = "isbn") String isbn) {
-        return GenericResponse.of(bookService.searchBookDetail(isbn));
+        Page<BookDTO> books = bookService.searchBooks(query, page, size);
+        return ResponseEntity.ok(GenericResponse.of(books));
     }
 
     /**
@@ -82,12 +64,13 @@ public class BookController {
      * @author -- 정재익 --
      * @since -- 2월 3일 --
      */
+
 //    @PostMapping("/{id}/favorite")
 //    @Operation(summary = "도서 찜 하기")
 //    public GenericResponse<String> favoriteBook(@Valid @RequestBody FavoriteDTO favoriteDto, @AuthenticationPrincipal UserDetails userDetails) {
 //        return bookService.favoriteBook(favoriteDto, userDetails);
 //    }
-//
+
 //    /**
 //     * -- 찜한 책 목록을 확인하는 메소드 --
 //     * 로그인한 사용자의 정보를 @AuthenticationPrincipal을 통해 가져와 favoriteRepository에서 찜한 책 목록 조회
