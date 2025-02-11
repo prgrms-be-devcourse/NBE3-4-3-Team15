@@ -2,8 +2,6 @@ package com.project.backend.domain.book.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.backend.domain.book.dto.BookDTO;
-import com.project.backend.domain.book.dto.KakaoDTO;
-import com.project.backend.domain.book.dto.NaverDTO;
 import com.project.backend.domain.book.entity.Book;
 import com.project.backend.domain.book.entity.Favorite;
 import com.project.backend.domain.book.exception.BookErrorCode;
@@ -18,7 +16,6 @@ import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
@@ -49,9 +46,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final FavoriteRepository favoriteRepository;
     private final MemberRepository memberRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Value("${naver.client-id}")
     private String clientId;
@@ -108,15 +103,48 @@ public class BookService {
         return new PageImpl<>(pagedBooks, pageable, uniqueBooks.size());
     }
 
+    /**
+     * -- db 저장 메소드 --
+     * isbn을 통해 중복검사
+     *
+     * @param -- List<Book> 책 목록 --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
     public void saveBooks(List<Book> allBooks) {
-        bookRepository.saveAll(removeDuplicateBooks(allBooks));
+
+        List<Book> uniqueBooks = BookUtil.removeDuplicateBooks(allBooks);
+
+        Set<String> existingIsbns = new HashSet<>(
+                bookRepository.findByIsbnIn(
+                        uniqueBooks.stream().map(Book::getIsbn).toList()
+                ).stream().map(Book::getIsbn).toList()
+        );
+
+        List<Book> booksToSave = uniqueBooks.stream()
+                .filter(book -> !existingIsbns.contains(book.getIsbn()))
+                .toList();
+
+        if (booksToSave.isEmpty()) {
+            return;
+        }
+
+        bookRepository.saveAll(booksToSave);
     }
 
-
+    /**
+     * -- DB에서 관련 검색 데이터를 찾는 메소드 --
+     * 책과 작가에 검색어가 포함되는 데이터를 최대 400개 까지 가져오는 메소드
+     *
+     * @param -- query (검색어) --
+     * @return -- List<BookDTO> --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
     public List<BookDTO> searchBookDB(String query) {
         List<Book> books = bookRepository.findByTitleOrAuthor(query);
         return books.stream()
-                .limit(400) // 최대 400개만 반환
+                .limit(400)
                 .map(book -> new BookDTO(
                         book.getId(),
                         book.getTitle(),
@@ -128,7 +156,14 @@ public class BookService {
                 ))
                 .collect(Collectors.toList());
     }
-
+    /**
+     * -- 도서 상세 검색 메소드 --
+     *
+     * @param -- id 책 아이디--
+     * @return -- BookDTO --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
     public BookDTO searchDetailBooks(Long id) {
         Optional<Book> bookOptional = bookRepository.findById(id);
 
@@ -187,58 +222,10 @@ public class BookService {
         }
 
         return listData.stream()
-                .map(item -> convertToBook(item, apiType))
+                .map(item -> BookUtil.convertToBook(item, apiType, objectMapper))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * -- 중복 도서 제거 메소드 --
-     * ISBN이 동일한 도서가 있을 경우 하나만 남긴다.
-     *
-     * @param books 중복이 포함된 도서 리스트
-     *  * @return 중복 제거된 도서 리스트
-     * @author 정재익
-     * @since 2월 5일
-     */
-    private List<Book> removeDuplicateBooks(List<Book> books) {
-        Set<String> isbns = new HashSet<>();
-        return books.stream()
-                .filter(book -> isbns.add(book.getIsbn()))
-                .toList();
-    }
-
-    /**
-     * -- Book 변환 메소드 --
-     *
-     * @param -- Object item 데이터 --
-     * @param -- String apiType 네이버와 카카오 구분 --
-     * @return Book
-     * @author 정재익
-     * @since 2월 7일
-     */
-    private Book convertToBook(Object item, String apiType) {
-        if ("kakao".equalsIgnoreCase(apiType)) {
-            KakaoDTO kakaoBook = objectMapper.convertValue(item, KakaoDTO.class);
-            return Book.builder()
-                    .title(kakaoBook.getTitle())
-                    .author(kakaoBook.getAuthor())
-                    .description(kakaoBook.getDescription())
-                    .image(kakaoBook.getImage())
-                    .isbn(BookUtil.extractIsbn(kakaoBook.getIsbn()))
-                    .favoriteCount(0) // DB에 처음 저장됐을 때 기본값 부여
-                    .build();
-        } else {
-            NaverDTO naverBook = objectMapper.convertValue(item, NaverDTO.class);
-            return Book.builder()
-                    .title(naverBook.getTitle())
-                    .author(naverBook.getAuthor())
-                    .description(naverBook.getDescription())
-                    .image(naverBook.getImage())
-                    .isbn(naverBook.getIsbn())
-                    .favoriteCount(0) // DB에 처음 저장됐을 때 기본값 부여
-                    .build();
-        }
-    }
 
     /**
      * -- 도서 찜, 찜취소 메소드 --

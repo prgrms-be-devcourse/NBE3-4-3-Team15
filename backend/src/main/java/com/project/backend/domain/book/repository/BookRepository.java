@@ -18,8 +18,8 @@ import java.util.List;
  */
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
-    boolean existsByIsbn(String isbn);
     Book findByIsbn(String isbn);
+    List<Book> findByIsbnIn(List<String> isbn);
 
     /**
      * -- 도서의 찜 개수 업데이트 --
@@ -61,6 +61,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     void deleteBooksZeroFavoriteCount();
 
 
+    /**
+     * -- 검색어와 관련이 있는 작가와 DB를 반환 --
+     *
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
     @Query("SELECT b FROM Book b WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Book> findByTitleOrAuthor(@Param("keyword") String keyword);
