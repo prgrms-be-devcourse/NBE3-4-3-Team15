@@ -1,11 +1,17 @@
 package com.project.backend.domain.book.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.backend.domain.book.dto.BookDTO;
 import com.project.backend.domain.book.dto.KakaoDTO;
 import com.project.backend.domain.book.dto.NaverDTO;
 import com.project.backend.domain.book.entity.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,6 +90,30 @@ public class BookUtil {
                     .favoriteCount(0)
                     .build();
         }
+    }
+
+    /**
+     * -- 페이징 처리 메소드 --
+     *
+     * @param -- page 페이지 수--
+     * @param -- size 페이지 마다 표시되는 책 수--
+     * @param -- bookList 중복을 제거한 bookList --
+     * @return -- Page<BookDTO> --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
+    public static Page<BookDTO> pagingBooks(int page, int size, List<BookDTO> bookList) {
+        Pageable pageable = PageRequest.of(page, size);
+        int start = page * size;
+
+        if (start >= bookList.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, bookList.size());
+        }
+
+        int end = Math.min(start + size, bookList.size());
+        List<BookDTO> pagedBooks = bookList.subList(start, end);
+
+        return new PageImpl<>(pagedBooks, pageable, bookList.size());
     }
 
     /**
