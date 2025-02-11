@@ -143,8 +143,16 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴")
     public ResponseEntity<GenericResponse<String>> delete(
             @RequestBody @Valid PasswordDto passwordDto,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response) {
         memberService.delete(userDetails.getUsername(), passwordDto.getPassword());
+
+        // 회원 탈퇴 후 쿠키에서 JWT 삭제
+        Cookie cookie = new Cookie("accessToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
 
         return ResponseEntity.ok(GenericResponse.of("회원 탈퇴가 완료되었습니다."));
     }

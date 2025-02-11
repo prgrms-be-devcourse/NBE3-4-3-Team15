@@ -1,5 +1,7 @@
 package com.project.backend.domain.member.service;
 
+import com.project.backend.domain.book.repository.BookRepository;
+import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.dto.MineDto;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
@@ -28,6 +32,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final FavoriteRepository favoriteRepository;
+    private final BookRepository bookRepository;
 
     /**
      * 회원가입 처리
@@ -63,6 +69,26 @@ public class MemberService {
     }
 
     /**
+     * 로그인 (JWT 발급)
+     * @param loginDto 로그인 요청 DTO(아이디, 비밀번호 포함)
+     * @return JWT 토큰 (로그인 성공 시 반환)
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
+     *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
+     * @author 이원재
+     * @since 25. 2. 6.
+     */
+    public String login(LoginDto loginDto) {
+        Member member = memberRepository.findByUsername(loginDto.getUsername())
+                .orElseThrow(()->new MemberException(NON_EXISTING_USERNAME));
+
+        if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) { // 암호화된 비밀번호 비교
+            throw new MemberException(INCORRECT_PASSWORD);
+        }
+
+        return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
+    }
+
+    /**
      * 내 정보 조회
      *
      * @param username 현재 로그인한 사용자의 아이디
@@ -94,53 +120,14 @@ public class MemberService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
 
-        member.setEmail(mineDto.getEmail());
-        member.setGender(mineDto.getGender());
-        member.setNickname(mineDto.getNickname());
-        member.setBirth(mineDto.getBirth());
+        member.updateMemberInfo(
+                mineDto.getEmail(),
+                mineDto.getGender(),
+                mineDto.getNickname(),
+                mineDto.getBirth()
+        );
 
         return new MemberDto(member);
-    }
-
-    /**
-     * 회원 탈퇴
-     * @param username 현재 로그인한 사용자 아이디
-     * @param password 입력된 비밀번호
-     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
-     *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
-     * @author 이원재
-     * @since 25. 2. 6.
-     */
-    @Transactional
-    public void delete(String username, String password) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
-
-        if(!passwordEncoder.matches(password, member.getPassword())) {
-            throw new MemberException(INCORRECT_PASSWORD);
-        }
-
-        memberRepository.delete(member);
-    }
-
-    /**
-     * 로그인 (JWT 발급)
-     * @param loginDto 로그인 요청 DTO(아이디, 비밀번호 포함)
-     * @return JWT 토큰 (로그인 성공 시 반환)
-     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
-     *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
-     * @author 이원재
-     * @since 25. 2. 6.
-     */
-    public String login(LoginDto loginDto) {
-        Member member = memberRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(()->new MemberException(NON_EXISTING_USERNAME));
-
-        if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) { // 암호화된 비밀번호 비교
-            throw new MemberException(INCORRECT_PASSWORD);
-        }
-        
-        return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
     }
 
     /**
@@ -163,8 +150,52 @@ public class MemberService {
                     if (passwordChangeDto.getNewPassword().equals(passwordChangeDto.getCurrentPassword())) {
                         throw new MemberException(SAME_AS_OLD_PASSWORD);
                     }
-                    member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+                    member.updatePassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
                     return member;
                 })
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));}
+
+    /**
+     * 회원 탈퇴
+     * @param username 현재 로그인한 사용자 아이디
+     * @param password 입력된 비밀번호
+     * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
+     *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
+     * @author 이원재
+     * @since 25. 2. 6.
+     */
+    @Transactional
+    public void delete(String username, String password) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
+
+        if(!passwordEncoder.matches(password, member.getPassword())) {
+            throw new MemberException(INCORRECT_PASSWORD);
+        }
+
+        // 탈퇴 회원이 찜한 도서 찜 취소 처리 및 도서 테이블 데이터 UPDATE
+        List<Long> bookIds = favoriteRepository.findBookIdsByMemberId(member.getId()); // 탈퇴 회원이 찜한 도서 조회
+        favoriteRepository.deleteByMemberId(member.getId()); // 찜 취소
+        for (Long bookId : bookIds) { bookRepository.decreaseFavoriteCount(bookId); } // 찜 취소된 도서 favoriteCount 감소
+        bookRepository.deleteBooksZeroFavoriteCount(); // 찜 수가 0이라면 도서 테이블에서 삭제
+
+        memberRepository.delete(member);
+    }
+
+    /**
+     * ID 기반 member 조회
+     * @param memberId
+     * @return MemberID
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    public MemberDto getMemberById(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new MemberException(
+                        NON_EXISTING_USERID
+                ));
+
+        return new MemberDto(member);
+    }
 }

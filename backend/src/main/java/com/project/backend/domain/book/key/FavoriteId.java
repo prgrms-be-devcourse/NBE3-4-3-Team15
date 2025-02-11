@@ -2,7 +2,9 @@ package com.project.backend.domain.book.key;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,9 +17,10 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
+@Getter
 public class FavoriteId implements Serializable {
 
-    private String memberUsername;
+    private Long memberId;
     private Long bookId;
 
     /**
@@ -38,7 +41,7 @@ public class FavoriteId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FavoriteId that = (FavoriteId) o;
-        return Objects.equals(bookId, that.bookId) && Objects.equals(memberUsername, that.memberUsername);
+        return Objects.equals(bookId, that.bookId) && Objects.equals(memberId, that.memberId);
     }
 
     /**
@@ -53,6 +56,6 @@ public class FavoriteId implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(bookId, memberUsername);
+        return Objects.hash(bookId, memberId);
     }
 }

@@ -12,6 +12,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @ToString
 public class BookDTO {
 
@@ -30,4 +31,5 @@ public class BookDTO {
     @NonNull
     private String isbn;
 
+    private int favoriteCount;
 }
