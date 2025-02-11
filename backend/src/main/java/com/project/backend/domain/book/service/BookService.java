@@ -159,15 +159,15 @@ public class BookService {
      * -- 중복 도서 제거 메소드 --
      * ISBN이 동일한 도서가 있을 경우 하나만 남긴다.
      *
-     * @param --List<BookDTO> books 중복이 포함된 도서 리스트--
-     * @return List<BookDTO> 중복 제거된 도서 리스트
+     * @param books 중복이 포함된 도서 리스트
+     *  * @return 중복 제거된 도서 리스트
      * @author 정재익
      * @since 2월 5일
      */
-    private List<BookDTO> removeDuplicateBooks(List<BookDTO> books) {
-        Set<String> Isbns = new HashSet<>();
+    private List<Book> removeDuplicateBooks(List<Book> books) {
+        Set<String> isbns = new HashSet<>();
         return books.stream()
-                .filter(book -> Isbns.add(book.getIsbn()))
+                .filter(book -> isbns.add(book.getIsbn()))
                 .toList();
     }
 
