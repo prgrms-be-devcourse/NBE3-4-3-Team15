@@ -22,16 +22,32 @@ export default function Login() {
         body: {
           username: id,
           password1: password1,
-          password2: "",
-          email: "",
-          nickname: "",
+          password2: password2,
+          email: email,
+          nickname: nickname,
           gender: gender,
           birth: birth,
         },
       });
-      router.replace(`/`);
+
+      if (response.response.ok) {
+        router.replace("/");
+      } else if (!response.response.ok) {
+        const errorDetails = response.error.errorDetails;
+        let errorMeesage = "";
+        for (let i = 0; i < errorDetails.length; i++) {
+          errorMeesage +=
+            errorDetails[i].field == "password1"
+              ? "Password"
+              : errorDetails[i].field == "password2"
+              ? "Password 확인"
+              : errorDetails[i].field;
+          errorMeesage += "는 " + errorDetails[i].reason + "\n";
+        }
+        alert(errorMeesage);
+        router.replace("/");
+      }
     } catch (error) {
-      console.error("회워가입에 실패하였습니다.");
       alert("회원가입에 실패하였습니다.");
     }
   };
@@ -84,7 +100,7 @@ export default function Login() {
                   type="text"
                   className="border rounded"
                   value={email}
-                  onChange={(e) => setPassword1(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </td>
@@ -102,15 +118,33 @@ export default function Login() {
               </td>
             </tr>
             <tr>
-              <td>생년월일</td>
-              <td>
-                <input
-                  type="date"
-                  className="border rounded"
-                  value={birth}
-                  onChange={(e) => setBirth(e.target.value)}
-                  style={{ width: "198px" }}
-                />
+              <td>성별</td>
+              <td
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 90px)",
+                }}
+              >
+                <label style={{ margin: "auto" }}>
+                  <input
+                    type="radio"
+                    className="border rounded"
+                    value={0}
+                    checked={gender == 0}
+                    onChange={() => setGender(0)}
+                  />
+                  <span style={{ marginLeft: "10px" }}>남자</span>
+                </label>
+                <label style={{ margin: "auto" }}>
+                  <input
+                    type="radio"
+                    className="border rounded"
+                    value={1}
+                    checked={gender == 1}
+                    onChange={() => setGender(1)}
+                  />
+                  <span style={{ marginLeft: "10px" }}>여자</span>
+                </label>
               </td>
             </tr>
             <tr>
@@ -121,7 +155,7 @@ export default function Login() {
                   className="border rounded"
                   value={birth}
                   onChange={(e) => setBirth(e.target.value)}
-                  required
+                  style={{ width: "198px" }}
                 />
               </td>
             </tr>
