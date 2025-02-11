@@ -1,6 +1,7 @@
 package com.project.backend.domain.review.review.controller;
 
 
+import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.response.GenericResponse;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,50 +30,58 @@ public class ReviewController {
 
     /**
      * 리뷰 목록을 조회
-     * @return -- GenericResponse<List<ReviewsDTO>> - 리뷰 목록
+     * @return -- ResponseEntity<GenericResponse<List<ReviewsDTO>>> - 리뷰 목록
      *
      * @author -- 이광석
      * @since  -- 25.01.27
      */
     @GetMapping
     @Operation(summary = "리뷰 목록")
-    public GenericResponse<List<ReviewsDTO>> getReviews(@RequestParam(value="page",defaultValue = "0")int page,
-                                                        @RequestParam(value="size",defaultValue="10")int size){
-        List<ReviewsDTO> reviewsDTOS = reviewService.findAll(page,size);
-        return GenericResponse.of(
-                reviewsDTOS,
+    public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getReviews(@RequestParam(value="page",defaultValue = "1")int page,
+                                                                       @RequestParam(value="size",defaultValue="10")int size){
+        Page<ReviewsDTO> pages = reviewService.findAll(page,size);
+        return ResponseEntity.ok(GenericResponse.of(
+                pages,
                 "리뷰 목록 반환 성공"
-        );
+        ));
     }
 
     /**
      * 특정 유저의 리뷰 목록 조회
      * @param userId
-     * @return GenericResponse<List<ReviewsDTO>>
+     * @return ResponseEntity<GenericResponse<List<ReviewsDTO>>>
      *
      * @author 이광석
      * @since 25.02.06
      */
     @GetMapping("/{userId}")
     @Operation(summary = "특정 유저의 리뷰 목록 조회")
-    public GenericResponse<List<ReviewsDTO>> getUserReviews(@PathVariable("userId") Long userId){
+    public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getUserReviews(@PathVariable("userId") Long userId){
         List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userId);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
             reviewsDTOS,
                 "리뷰 목록 반환 성공"
-        );
+        ));
     }
 
+    /**
+     * bookId 기반 리뷰 검색
+     * @param bookId
+     * @param page
+     * @param size
+     * @return ResponseEntity<GenericResponse<List<ReviewsDTO>>>
+     *
+     */
     @GetMapping("/books/{bookId}")
-    public GenericResponse<List<ReviewsDTO>> getBookIdReviews(@PathVariable("bookId") Long bookId,
+    public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getBookIdReviews(@PathVariable("bookId") Long bookId,
                                                               @RequestParam(value = "page",defaultValue = "0") Integer page,
                                                               @RequestParam(value = "size",defaultValue = "10") Integer size){
-        List<ReviewsDTO> reviewsDTOS = reviewService.getBookIdReviews(bookId,page,size);
+        Page<ReviewsDTO> pages= reviewService.getBookIdReviews(bookId,page,size);
 
-        return GenericResponse.of(
-                reviewsDTOS,
+        return ResponseEntity.ok(GenericResponse.of(
+                pages,
                 "리뷰 조회 성공"
-        );
+        ));
     }
 
 
@@ -79,7 +90,7 @@ public class ReviewController {
      * 리뷰 추가
      *
      * @param -- ReviewsDTO(bookId,memberId,content,rating)
-     * @return -- GenericResponse<ReviewsDTO>
+     * @return -- ResponseEntity<GenericResponse<String>>
      *
      * @author -- 이광석
      * @since  -- 25.01.27
@@ -87,14 +98,14 @@ public class ReviewController {
     @PostMapping
     @Operation(summary = "리뷰 추가")
     @Transactional
-    public GenericResponse<String> postReview( @RequestBody ReviewsDTO reviewsDTO){
+    public ResponseEntity<GenericResponse<String>> postReview( @RequestBody ReviewsDTO reviewsDTO){
 
         reviewService.write(reviewsDTO);
 
 
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
                 "리뷰 추가 성공"
-        );
+        ));
     }
 
 
@@ -102,7 +113,7 @@ public class ReviewController {
      *리뷰 수정
      * @param -- ReviewsDTO(content,rating)
      * @param -- id - 수정할 리뷰
-     * @return -- GenericResponse<ReviewsDTO>
+     * @return -- ResponseEntity<GenericResponse<ReviewsDTO>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -110,20 +121,20 @@ public class ReviewController {
     @PutMapping("/{id}")
     @Operation(summary = "리뷰 수정")
     @Transactional
-    public GenericResponse<ReviewsDTO> putReviews( @RequestBody ReviewsDTO reviewsDTO,
+    public ResponseEntity<GenericResponse<ReviewsDTO>> putReviews( @RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("id") Long id){
         reviewService.modify(reviewsDTO,id);
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
                 reviewsDTO,
                 "리뷰 수정 성공"
-        );
+        ));
     }
 
 
     /**
      *리뷰 삭제
      * @param -- id - 삭제할 리뷰 id
-     * @return -- GenericResponse<ReviewsDTO>
+     * @return -- ResponseEntity<GenericResponse<ReviewsDTO>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -131,13 +142,13 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     @Operation(summary = "리뷰 삭제")
     @Transactional
-    public GenericResponse<ReviewsDTO> deleteReviews(@PathVariable("id") Long id){
+    public ResponseEntity<GenericResponse<ReviewsDTO>> deleteReviews(@PathVariable("id") Long id){
         ReviewsDTO review=  reviewService.delete(id);
 
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
                 review,
                 "리뷰 삭제 성공"
-        );
+        ));
     }
 
 
@@ -145,7 +156,7 @@ public class ReviewController {
      *리뷰 추천/추천 취소
      * @param -- reviewId -- 리뷰 id
      * @param -- memberId -- 추천인 id
-     * @return -- GenericResponse<ReviewsDTO>
+     * @return -- ResponseEntity<GenericResponse<ReviewsDTO>>
      *
      * @author -- 이광석
      * @since -- 25.01.17
@@ -153,7 +164,7 @@ public class ReviewController {
     @PutMapping("/{reviewId}/recommend/{memberId}")
     @Operation(summary = "리뷰 추천")
     @Transactional
-    public GenericResponse<ReviewsDTO> recommendReview(@PathVariable("reviewId") Long reviewId,
+    public ResponseEntity<GenericResponse<ReviewsDTO>> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @PathVariable("memberId") Long memberId){
         boolean result = reviewService.recommend(reviewId,memberId);
         ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
@@ -161,9 +172,9 @@ public class ReviewController {
 
 
         String message = result ?"리뷰 추천 성공" : "리뷰 추천 취소 성공";
-        return GenericResponse.of(
+        return ResponseEntity.ok(GenericResponse.of(
                 reviewsDTO,
                 message
-        );
+        ));
     }
 }

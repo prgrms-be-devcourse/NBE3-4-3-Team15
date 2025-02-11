@@ -4,6 +4,7 @@ spring:
   application:
     name: backend
 
+
   jpa:
     hibernate:
       ddl-auto: create
