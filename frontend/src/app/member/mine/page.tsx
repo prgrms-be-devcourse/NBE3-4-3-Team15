@@ -2,18 +2,27 @@
 
 import client from "@/lib/client";
 import React, { useState, useEffect } from "react";
-import { UserProfile, ApiResponse } from "@/lib/backend/schema.d"; // UserProfile 타입 import
+import type { components } from "@/lib/backend/schema";
 
+type MineDto = components["schemas"]["MineDto"];
+
+/**
+ * 회원 프로필 조회, 수정
+ *
+ * @author 손진영
+ * @since 2025.02.09
+ */
 export default function Mine() {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isEditing, setIsEditing] = useState(false); // 수정 모드 상태
+  const [userProfile, setUserProfile] = useState<MineDto | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // 회원 정보를 가져오는 함수
+  // 회원 정보 조회
   const getUserProfile = async () => {
     try {
       const response = await client.GET("/members/mine");
       if (response.data) {
-        setUserProfile(response.data.data); // 프로필 데이터 저장
+        const { email, nickname, gender, birth } = response.data.data;
+        setUserProfile({ email, nickname, gender, birth });
       }
     } catch (error) {
       console.error("회원 정보 조회에 실패하였습니다.", error);
@@ -21,46 +30,36 @@ export default function Mine() {
     }
   };
 
-  // 컴포넌트가 마운트될 때 사용자 프로필 가져오기
   useEffect(() => {
     getUserProfile();
   }, []);
 
-  // 컴포넌트가 마운트될 때 사용자 프로필 가져오기
-  useEffect(() => {
-    getUserProfile();
-  }, []);
-
-  // 수정 버튼 클릭 시 호출되는 함수
-  const handleEdit = () => {
+  // 수정 상태 저장
+  const edit = () => {
     setIsEditing(!isEditing);
   };
 
-  // 저장 버튼 클릭 시 호출되는 함수
-  const handleSave = async () => {
+  // 수정 요청
+  const modify = async () => {
     try {
-      // 여기서 API를 호출하여 수정된 데이터를 저장하는 코드를 추가하세요.
-      // 예: await client.PUT('/members/mine', userProfile);
+      await client.PUT("/members/mine", {
+        body: userProfile,
+      });
 
       alert("수정이 완료되었습니다.");
-      setIsEditing(false); // 수정 모드 종료
+      setIsEditing(false);
     } catch (error) {
       console.error("수정에 실패하였습니다.", error);
       alert("수정에 실패하였습니다.");
     }
   };
 
-  // 사용자 프로필이 로드되었을 때 화면에 표시
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <div style={{ margin: "auto" }}>
         {userProfile ? (
           <table>
             <tbody>
-              <tr>
-                <td>ID</td>
-                <td>{userProfile.id}</td>
-              </tr>
               <tr>
                 <td>Email</td>
                 <td>
@@ -103,18 +102,38 @@ export default function Mine() {
                 <td>성별</td>
                 <td>
                   {isEditing ? (
-                    <select
-                      value={userProfile.gender}
-                      onChange={(e) =>
-                        setUserProfile({
-                          ...userProfile,
-                          gender: parseInt(e.target.value),
-                        })
-                      }
-                    >
-                      <option value="0">남자</option>
-                      <option value="1">여자</option>
-                    </select>
+                    <>
+                      <label>
+                        <input
+                          type="radio"
+                          value="0"
+                          checked={userProfile.gender === 0}
+                          onChange={(e) =>
+                            setUserProfile({
+                              ...userProfile,
+                              gender: parseInt(e.target.value),
+                            })
+                          }
+                          required
+                        />
+                        남자
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          value="1"
+                          checked={userProfile.gender === 1}
+                          onChange={(e) =>
+                            setUserProfile({
+                              ...userProfile,
+                              gender: parseInt(e.target.value),
+                            })
+                          }
+                          required
+                        />
+                        여자
+                      </label>
+                    </>
                   ) : userProfile.gender === 0 ? (
                     "남자"
                   ) : (
@@ -146,24 +165,15 @@ export default function Mine() {
                 <td style={{ textAlign: "end" }}>
                   {isEditing ? (
                     <>
-                      <button
-                        className="btn btn-primary mt-2"
-                        onClick={handleSave}
-                      >
+                      <button className="btn btn-primary mt-2" onClick={modify}>
                         저장
                       </button>
-                      <button
-                        className="btn btn-primary mt-2"
-                        onClick={handleEdit}
-                      >
+                      <button className="btn btn-primary mt-2" onClick={edit}>
                         취소
                       </button>
                     </>
                   ) : (
-                    <button
-                      className="btn btn-secondary mt-2"
-                      onClick={handleEdit}
-                    >
+                    <button className="btn btn-secondary mt-2" onClick={edit}>
                       수정
                     </button>
                   )}

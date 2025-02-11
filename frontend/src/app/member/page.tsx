@@ -1,4 +1,3 @@
-//page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -117,7 +116,5 @@ const Login: React.FC = () => {
     </div>
   );
 };
-// displayName 설정
-Login.displayName = "Login";
 
 export default Login;
