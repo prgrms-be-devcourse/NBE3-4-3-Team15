@@ -2,7 +2,6 @@ package com.project.backend.global.config;
 
 import com.project.backend.global.jwt.JwtAuthentizationFilter;
 import com.project.backend.global.oauth.CustomOAuth2SuccessHandler;
-import com.project.backend.global.oauth.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -60,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/review/{reviewId}/comments").permitAll()
 
                         // 로그인 및 회원가입은 인증 없이 허용
-                        .requestMatchers("/members/login", "/members").permitAll()
+                        .requestMatchers("/members/login", "/members","members/{id}/followers", "members/{id}/followings").permitAll()
 
                         // h2-console, swagger 접근 허용
                         .requestMatchers(PathRequest.toH2Console()).permitAll()

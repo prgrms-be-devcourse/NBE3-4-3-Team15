@@ -3,6 +3,7 @@ package com.project.backend.domain.review.comment.service;
 
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
@@ -14,6 +15,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ public class ReviewCommentService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
+    private final MemberService memberService;
 
     /**
      * 리뷰 코멘트 목록 출력
@@ -60,14 +63,15 @@ public class ReviewCommentService {
 
     /**
      * userId기반 코멘트 검색
-     * @param userId
+     * @param userDetails
      * @return List<ReviewCommentDto>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    public List<ReviewCommentDto> findUserComment(Long userId) {
-        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(userId);
+    public List<ReviewCommentDto> findUserComment(CustomUserDetails userDetails) {
+        Member member = memberRepository.findByUsername(userDetails.getUsername()).get(); //memberservice로 변경
+        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(member.getId());
         return reviewCommentDtos;
     }
 
@@ -80,7 +84,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,CustomUserDetails userDetails) {  // 메소드가 너무 긴듯 분할 필요
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -89,7 +93,7 @@ public class ReviewCommentService {
                 ));
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
-                .userId(reviewCommentDto.getUserId())
+                .userId(myId(userDetails))
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
@@ -117,6 +121,15 @@ public class ReviewCommentService {
         return new ReviewCommentDto(reviewComment);
     }
 
+    /**
+     * 코멘트 관련 알람 생성 메소드
+     * @param reviewComment
+     * @param review
+     * @param reviewCommentDto
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
     public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .memberId(review.getUserId())
@@ -146,13 +159,14 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto, CustomUserDetails userDetails) {
 
 
         ReviewComment reviewComment = findCommentById(commentId);
+
+        authorityCheck(userDetails,reviewComment);
+
         reviewComment.setComment(reviewCommentDto.getComment());
-
-
         reviewCommentRepository.save(reviewComment);
 
         return new ReviewCommentDto(reviewComment);
@@ -161,50 +175,37 @@ public class ReviewCommentService {
     /**
      * 댓글 삭제
      * @param commentId
-     * @return RevieCommendDto - id,commend, userId
+     * @return ReviewCommendDto - id,commend, userId
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto delete(Long commentId) {
+    public ReviewCommentDto delete(Long reviewId,Long commentId,CustomUserDetails userDetails) {
         ReviewComment reviewComment = findCommentById(commentId);
 
-        if(reviewComment.getParent()!=null){
-            ReviewComment parent = reviewComment.getParent();
-
-            reviewCommentRepository.delete(reviewComment);
-
-            if(parent.isDelete()){
-                reviewCommentRepository.delete(parent);
-            }
-        }else{
-            if(reviewComment.getReplies().size()==0|| reviewComment.getReplies()==null){
-                reviewCommentRepository.delete(reviewComment);
-            }else{
-                reviewComment.setComment("해당 코멘트는 삭제되었습니다. ");
-                reviewComment.setUserId(null);
-                reviewComment.setDelete(true);
-                reviewCommentRepository.save(reviewComment);
-            }
+        if(reviewComment.getParent()!=null){ //대댓글인 경우
+            deleteReply(reviewComment,reviewId);
+        }else{ //댓글인 경우
+            deleteComment(reviewComment,reviewId);
         }
 
+
         return new ReviewCommentDto(reviewComment);
-
-
     }
 
     /**
      * 댓글 추천
      * @param commentId
-     * @param memberId
+     * @param userDetails
      * @return Boolean - 추천(true)/추천 취소(false)
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public Boolean recommend(Long commentId,Long memberId) {
+    public Boolean recommend(Long commentId,CustomUserDetails userDetails) {
         ReviewComment reviewComment = findCommentById(commentId);
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findByUsername(userDetails.getUsername())
+
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
@@ -275,4 +276,91 @@ public class ReviewCommentService {
     }
 
 
+    /**
+     * userDetails의 username 을 이용해서 userId 추출;
+     * @param userDetails
+     * @return Long
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private Long myId(CustomUserDetails userDetails){
+        return memberService.getMyProfile(userDetails.getUsername()).getId();
+    }
+
+
+    /**
+     * 코멘트 작성자와 현재 사용자가 같은지 확인
+     * @param userDetails
+     * @param comment
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    private void authorityCheck(CustomUserDetails userDetails, ReviewComment comment){
+        Member member = memberRepository.findById(comment.getUserId()).get(); // memberService로 변경 예정
+
+
+        if(!member.getUsername().equals(userDetails.getUsername()))
+        {
+            throw new ReviewException(
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
+                    ReviewErrorCode.UNAUTHORIZED_ACCESS.getMessage()
+            );
+        }
+
+    }
+
+    /**
+     * 코멘트 삭제 메소드
+     * @param comment
+     * @param reviewId
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    public void deleteComment(ReviewComment comment,Long reviewId){
+
+        Review review = reviewRepository.findById(reviewId).get();
+
+        review.getComments().remove(comment);
+
+        if(comment.getReplies().isEmpty()) {
+            reviewCommentRepository.delete(comment);
+            if(review.getComments().isEmpty()){
+                reviewService.reviewDelete(review);
+            }
+        }else{
+            comment.setDelete(true);
+            comment.setComment("해당 댓글은 삭제되었습니다");
+            reviewCommentRepository.save(comment);
+        }
+
+
+    }
+
+    /**
+     * 대댓글 삭제 메소드
+     * @param reply
+     * @param reviewId
+     *
+     * @author 이광석
+     * @since 25.02.11
+     */
+    public void deleteReply(ReviewComment reply,Long reviewId){
+
+        ReviewComment parent = reply.getParent();
+
+        parent.getReplies().remove(reply); // 부모 대댓글 리스트에서 대댓글 삭제
+
+        reviewCommentRepository.delete(reply); //대댓글 삭제
+
+
+        //reviewCommentRepository.save(parent);
+        if(parent.isDelete() && parent.getReplies().isEmpty()){
+            deleteComment(parent,reviewId);
+        }
+
+    }
 }

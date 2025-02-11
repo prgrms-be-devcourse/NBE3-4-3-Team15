@@ -1,5 +1,6 @@
 package com.project.backend.domain.member.entity;
 
+import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
@@ -18,7 +19,6 @@ import java.util.List;
  */
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,9 +42,26 @@ public class Member extends BaseEntity {
 
     private LocalDate birth;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "recommendMember")
     private List<Review> recommendReviews;
 
-    @ManyToMany
-    private List<ReviewComment> reviewComments;
+    @ManyToMany(mappedBy = "recommend")
+    private List<ReviewComment> recommendReviewComments;
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Follow> followers;
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Follow> followings;
+
+    public void updateMemberInfo(String email, int gender, String nickname, LocalDate birth) {
+        this.email = email;
+        this.gender = gender;
+        this.nickname = nickname;
+        this.birth = birth;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

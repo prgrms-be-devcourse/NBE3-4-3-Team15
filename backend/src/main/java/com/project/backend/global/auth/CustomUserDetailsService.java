@@ -1,7 +1,6 @@
 package com.project.backend.global.auth;
 
 import com.project.backend.domain.member.repository.MemberRepository;
-import com.project.backend.domain.member.entity.Member;
 import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -34,15 +33,11 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 사용자 정보 조회
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "username:" + username + " / 해당 사용자를 찾을 수 없습니다."));
-
-        // CustomUserDetails 객체를 반환(회원 정보, 권한 포함)
-        return new CustomUserDetails(
-                member.getUsername(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-        );
+        return memberRepository.findByUsername(username)
+                .map(member -> new CustomUserDetails(
+                        member.getUsername(),
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                ))
+                .orElseThrow(() -> new UsernameNotFoundException("username:" + username + " / 해당 사용자를 찾을 수 없습니다."));
     }
 }

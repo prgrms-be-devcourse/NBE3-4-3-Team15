@@ -173,8 +173,8 @@ export interface paths {
         get?: never;
         put?: never;
         /** 로그아웃 */
-        post: operations["logout"];
-        delete?: never;
+        post?: never;
+        delete: operations["logout"];
         options?: never;
         head?: never;
         patch?: never;
