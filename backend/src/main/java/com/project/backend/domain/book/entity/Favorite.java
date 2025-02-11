@@ -13,7 +13,6 @@ import lombok.*;
  */
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,11 +23,11 @@ public class Favorite {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("bookId")
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id", referencedColumnName = "id")
     private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("memberUsername")
-    @JoinColumn(name = "member_username", referencedColumnName = "username")
+    @MapsId("memberId")
+    @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 }
