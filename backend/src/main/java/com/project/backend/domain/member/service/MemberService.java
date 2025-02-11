@@ -179,4 +179,21 @@ public class MemberService {
                     return member;
                 })
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));}
+
+    /**
+     * ID 기반 member 조회
+     * @param memberId
+     * @return MemberID
+     *
+     * @author 이광석
+     * @since 25.02.10
+     */
+    public MemberDto getMemberById(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new MemberException(
+                        NON_EXISTING_USERID
+                ));
+
+        return new MemberDto(member);
+    }
 }
