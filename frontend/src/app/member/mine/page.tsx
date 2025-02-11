@@ -8,7 +8,7 @@ import type { components } from "@/lib/backend/schema";
 type MineDto = components["schemas"]["MineDto"];
 
 /**
- * 회원 프로필 조회, 수정, 탈퇴
+ * 회원 프로필 조회, 수정, 탈퇴 페이지
  *
  * @author 손진영
  * @since 2025.02.11

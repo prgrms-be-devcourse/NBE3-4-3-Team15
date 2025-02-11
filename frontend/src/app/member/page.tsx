@@ -2,10 +2,17 @@
 
 import React, { useState } from "react";
 
+/**
+ * 로그인 페이지
+ *
+ * @author 손진영
+ * @since 2025.02.11
+ */
 const Login: React.FC = () => {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
 
+  // 로그인 요청
   const login = async () => {
     try {
       const response = await fetch("http://localhost:8080/members/login", {
@@ -29,13 +36,7 @@ const Login: React.FC = () => {
     }
   };
 
-  /**
-   * 소셜 로그인
-   *
-   * @param provider
-   * @author 손진영
-   * @since 2025.02.09
-   */
+  // 소셜 로그인
   const handleSocialLogin = (provider) => {
     // Spring Boot OAuth2 로그인 엔드포인트로 리다이렉션
     const oauthUrl = `http://localhost:8080/oauth2/authorization/${provider}`;

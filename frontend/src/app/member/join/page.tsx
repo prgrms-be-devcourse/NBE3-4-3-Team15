@@ -4,6 +4,12 @@ import client from "@/lib/client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
+/**
+ * 회원가입 페이지
+ *
+ * @author 손진영
+ * @since 2025.02.11
+ */
 export default function join() {
   const router = useRouter();
   const [id, setId] = useState("");
@@ -14,6 +20,7 @@ export default function join() {
   const [gender, setGender] = useState(0);
   const [birth, setBirth] = useState("");
 
+  // 회원가입 요청
   const join = async () => {
     try {
       const response = await client.POST("/members", {
