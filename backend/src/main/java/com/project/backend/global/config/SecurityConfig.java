@@ -21,6 +21,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+
+
 /**
  * -- Security 설정 클래스 --
  *
@@ -56,7 +58,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig())) // CORS 설정 적용
                 .authorizeHttpRequests(auth -> auth
                         // GET 요청은 모두 허용(책 목록, 리뷰 조회 등)
-                        .requestMatchers(HttpMethod.GET, "/book", "/book/{isbn}","book/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/book","/book/{id}","/book/favorite").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review/{reviewId}/comments").permitAll()
 
