@@ -3,7 +3,10 @@ package com.project.backend.domain.book.entity;
 import com.project.backend.domain.book.key.FavoriteId;
 import com.project.backend.domain.member.entity.Member;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * -- 찜 엔티티 --
