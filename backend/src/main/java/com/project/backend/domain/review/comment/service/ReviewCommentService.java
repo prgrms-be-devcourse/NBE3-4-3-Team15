@@ -1,8 +1,10 @@
 package com.project.backend.domain.review.comment.service;
 
 
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
@@ -14,6 +16,7 @@ import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
+import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +41,9 @@ public class ReviewCommentService {
     private final ReviewService reviewService;
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final NotificationService notificationService;
+
 
     /**
      * 리뷰 코멘트 목록 출력
@@ -80,7 +85,9 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto) {
+    public ReviewCommentDto write(Long reviewId,
+                                  ReviewCommentDto reviewCommentDto,
+                                  CustomUserDetails userDetails) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -112,26 +119,50 @@ public class ReviewCommentService {
 
         ReviewComment newReviewComment = reviewCommentRepository.save(reviewComment);
 
-        createCommentNotification(newReviewComment,review,reviewCommentDto);
+
+
+        createCommentNotification(newReviewComment,review,reviewCommentDto,userDetails);
 
         return new ReviewCommentDto(reviewComment);
     }
 
-    public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
-        NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(review.getUserId())
-                .reviewComment(reviewComment.getId())
-                .isCheck(false)
-                .build();
+    /**
+     * 댓글 관련 알림 생성
+     * @param reviewComment
+     * @param review
+     * @param reviewCommentDto
+     *
+     * @author 이광석
+     * @since 25.02.23
+     */
+    public void createCommentNotification(ReviewComment reviewComment,
+                                          Review review,
+                                          ReviewCommentDto reviewCommentDto,
+                                          CustomUserDetails userDetails){
+        Long receiverId;
+        String content;
 
-
+        //댓글일 경우
         if(reviewCommentDto.getParentId()==null) {
-
-            notificationDTO.setContent("nick", "COMMENT");
-        }else{
-            notificationDTO.setContent("nick", "REPLY");
+            receiverId = review.getUserId();
+            content = userDetails.getUsername()+"님이 댓글을 작성했습니다.";
+        }
+        // 대댓글일 경우
+        else{
+           receiverId=reviewComment.getParent().getUserId();
+           content = userDetails.getUsername()+"님이 대댓글을 작성했습니다.";
         }
 
+        if(receiverId==memberService.getMyProfile(userDetails.getUsername()).getId()){
+            return;
+        }
+
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .memberId(receiverId)
+                .reviewComment(reviewComment.getId())
+                .isCheck(false)
+                .content(content)
+                .build();
         notificationService.create(notificationDTO);
     }
 

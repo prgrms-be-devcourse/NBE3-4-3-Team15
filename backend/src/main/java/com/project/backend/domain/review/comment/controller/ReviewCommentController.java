@@ -2,6 +2,7 @@ package com.project.backend.domain.review.comment.controller;
 
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.service.ReviewCommentService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,6 +11,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -99,10 +101,11 @@ public class ReviewCommentController {
     @PostMapping
     @Operation(summary = "리뷰 댓글 생성")
     public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
-                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto){
+                                                                         @Valid @RequestBody ReviewCommentDto reviewCommentDto,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
 
 
-       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto);
+       ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,userDetails);
 
        return ResponseEntity.ok(GenericResponse.of(
                newReviewCommentDto,

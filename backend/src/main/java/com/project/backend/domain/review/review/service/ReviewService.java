@@ -130,7 +130,6 @@ public class ReviewService {
                     .build();
             notificationService.create(notificationDTO);
         }
-
     }
 
     /**

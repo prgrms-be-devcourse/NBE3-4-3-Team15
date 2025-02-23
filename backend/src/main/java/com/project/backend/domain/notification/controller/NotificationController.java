@@ -97,6 +97,16 @@ public class NotificationController {
         ));
     }
 
+    @GetMapping
+    public ResponseEntity<GenericResponse<List<NotificationDTO>>> getMyNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
+        List<NotificationDTO> notificationDTOS =notificationService.getMyNotification(userDetails.getUsername());
+        return ResponseEntity.ok(GenericResponse.of(
+                notificationDTOS,
+                "알람 목록 반환 성공"
+        ));
+    }
+
+
     /**
      * sse 연결
      * @param userDetails

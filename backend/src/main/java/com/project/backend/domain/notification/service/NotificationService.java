@@ -1,6 +1,9 @@
 package com.project.backend.domain.notification.service;
 
 
+import com.project.backend.domain.follow.dto.FollowResponseDto;
+import com.project.backend.domain.follow.entity.Follow;
+import com.project.backend.domain.follow.service.FollowService;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 알람 서비스
@@ -27,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
+    private final FollowService followService;
 
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
@@ -41,33 +46,44 @@ public class NotificationService {
      */
     public SseEmitter subscribe(String username){
         Long userId = memberService.getMyProfile(username).getId();
-       SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
 
-       emitter.onCompletion(()->emitters.remove(userId));
-       emitter.onTimeout(()->emitters.remove(userId));
+        emitters.put(userId, emitter);
 
-       try{
+        emitter.onCompletion(()->emitters.remove(userId));
+        emitter.onTimeout(()->emitters.remove(userId));
+
+        try{
            emitter.send(SseEmitter.event()
                    .name("connect")
                    .data("SSE 연결 성공"));
-       }catch (IOException e){
+        }catch (IOException e){
            emitters.remove(userId);
            emitter.completeWithError(e);
-       }
+        }
 
-       return emitter;
+        return emitter;
     }
 
-    public void sendNotification(String username,String message){
-        Long userId = memberService.getMyProfile(username).getId();
-        SseEmitter emitter = emitters.get(userId);
+    /**
+     * 프론트로 알람 전달 메소드
+     * @param memberId
+     * @param message
+     *
+     * @author 이광석
+     * @since 25.02.23
+     */
+    public void sendNotification(Long memberId,String message){
+        SseEmitter emitter = emitters.get(memberId);
         if(emitter !=null){
             try{
+                System.out.println("알람 전달 성공");
                 emitter.send(SseEmitter.event()
                         .name("notification")
                         .data(message));
             }catch(IOException e){
-                emitters.remove(userId);
+                System.out.println("알람 전달 실패");
+                emitters.remove(memberId);
                 emitter.completeWithError(e);
             }
         }
@@ -77,6 +93,11 @@ public class NotificationService {
 
     /**
      * 알람 생성
+     * 팔로워들에게 알림 전달(내가 리뷰 작성시)
+     * 댓글 작성시 리뷰 작성자에게
+     * 대댓글 작성시 댓글 작성자에게
+     *
+     *
      * @param notificationDTO
      * @return NotificationDTO
      *
@@ -91,11 +112,8 @@ public class NotificationService {
                 .isCheck(notificationDTO.isCheck())
                 .content(notificationDTO.getContent())
                 .build();
-        Notification saveNotification  = notificationRepository.save(notification);
 
-        MemberDto memberDto = memberService.getMemberById(saveNotification.getMemberId());
-
-
+        sendNotification(notification.getMemberId(),notification.getContent());
         return new NotificationDTO(notificationRepository.save(notification));
     }
 
@@ -138,6 +156,8 @@ public class NotificationService {
     }
 
 
+
+
     /**
      * Notification 탐색
      * @param notificationId
@@ -157,4 +177,20 @@ public class NotificationService {
     }
 
 
+    /**
+     * member기반 알림 리스트 출력
+     * @param username
+     * @return List<NotificationDTO>
+     *
+     * @author 이광석
+     * @since 25.02.23
+     */
+    public List<NotificationDTO> getMyNotification(String username) {
+        Long userId = memberService.getMyProfile(username).getId();
+        List<Notification> notifications = notificationRepository.findAllByMemberId(userId);
+        List<NotificationDTO> notificationDTOS = notifications.stream()
+                .map(notification -> new NotificationDTO(notification))
+                .collect(Collectors.toList());
+        return notificationDTOS;
+    }
 }
