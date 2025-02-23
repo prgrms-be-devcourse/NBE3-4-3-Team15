@@ -1,6 +1,9 @@
 package com.project.backend.domain.notification.service;
 
 
+import com.project.backend.domain.member.dto.MemberDto;
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
@@ -8,8 +11,13 @@ import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 알람 서비스
@@ -18,6 +26,54 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final MemberService memberService;
+
+    private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
+    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+
+    /**
+     * SSE 연결 메소드
+     * @param username
+     * @return emitter
+     *
+     * @author 이광석
+     * @since 25.02.23
+     */
+    public SseEmitter subscribe(String username){
+        Long userId = memberService.getMyProfile(username).getId();
+       SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+
+       emitter.onCompletion(()->emitters.remove(userId));
+       emitter.onTimeout(()->emitters.remove(userId));
+
+       try{
+           emitter.send(SseEmitter.event()
+                   .name("connect")
+                   .data("SSE 연결 성공"));
+       }catch (IOException e){
+           emitters.remove(userId);
+           emitter.completeWithError(e);
+       }
+
+       return emitter;
+    }
+
+    public void sendNotification(String username,String message){
+        Long userId = memberService.getMyProfile(username).getId();
+        SseEmitter emitter = emitters.get(userId);
+        if(emitter !=null){
+            try{
+                emitter.send(SseEmitter.event()
+                        .name("notification")
+                        .data(message));
+            }catch(IOException e){
+                emitters.remove(userId);
+                emitter.completeWithError(e);
+            }
+        }
+    }
+
+
 
     /**
      * 알람 생성
@@ -35,6 +91,9 @@ public class NotificationService {
                 .isCheck(notificationDTO.isCheck())
                 .content(notificationDTO.getContent())
                 .build();
+        Notification saveNotification  = notificationRepository.save(notification);
+
+        MemberDto memberDto = memberService.getMemberById(saveNotification.getMemberId());
 
 
         return new NotificationDTO(notificationRepository.save(notification));
@@ -96,4 +155,6 @@ public class NotificationService {
                 );
 
     }
+
+
 }
