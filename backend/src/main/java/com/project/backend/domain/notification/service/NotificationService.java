@@ -11,6 +11,7 @@ import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
+import com.project.backend.domain.notification.repository.EmitterRepository;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,9 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
     private final FollowService followService;
+    private final EmitterRepository emitterRepository;
 
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     /**
      * SSE 연결 메소드
@@ -45,20 +46,20 @@ public class NotificationService {
      * @since 25.02.23
      */
     public SseEmitter subscribe(String username){
-        Long userId = memberService.getMyProfile(username).getId();
+        Long memberId = memberService.getMyProfile(username).getId();
         SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
 
-        emitters.put(userId, emitter);
+        emitterRepository.save(memberId,emitter);
 
-        emitter.onCompletion(()->emitters.remove(userId));
-        emitter.onTimeout(()->emitters.remove(userId));
+        emitter.onCompletion(()->emitterRepository.deleteBy(memberId));
+        emitter.onTimeout(()->emitterRepository.deleteBy(memberId));
 
         try{
            emitter.send(SseEmitter.event()
                    .name("connect")
                    .data("SSE 연결 성공"));
         }catch (IOException e){
-           emitters.remove(userId);
+           emitterRepository.deleteBy(memberId);
            emitter.completeWithError(e);
         }
 
@@ -74,7 +75,7 @@ public class NotificationService {
      * @since 25.02.23
      */
     public void sendNotification(Long memberId,String message){
-        SseEmitter emitter = emitters.get(memberId);
+        SseEmitter emitter = emitterRepository.findById(memberId);
         if(emitter !=null){
             try{
                 System.out.println("알람 전달 성공");
@@ -83,7 +84,7 @@ public class NotificationService {
                         .data(message));
             }catch(IOException e){
                 System.out.println("알람 전달 실패");
-                emitters.remove(memberId);
+                emitterRepository.deleteBy(memberId);
                 emitter.completeWithError(e);
             }
         }

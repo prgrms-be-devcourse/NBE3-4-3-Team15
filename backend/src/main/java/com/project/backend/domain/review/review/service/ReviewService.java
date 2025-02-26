@@ -106,19 +106,18 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public void write(ReviewsDTO reviewsDTO) {
+    public void write(ReviewsDTO reviewsDTO,String username) {
+        MemberDto memberDto = memberService.getMyProfile(username);
         Review review =reviewRepository.save(Review.builder()
-                        .userId(reviewsDTO.getUserId())
+                        .userId(memberDto.getId())
                         .bookId(reviewsDTO.getBookId())
-
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
                         .recommendMember(new HashSet<>())
                     .build());
 
-        MemberDto memberDto = memberService.getMemberById(reviewsDTO.getUserId());   //리뷰 작성자
-        List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
 
+        List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
 
         for(FollowResponseDto followDto: followers){
             MemberDto follower = memberService.getMyProfile(followDto.username());  // 리뷰 작성자를 팔로우 하는 팔로워

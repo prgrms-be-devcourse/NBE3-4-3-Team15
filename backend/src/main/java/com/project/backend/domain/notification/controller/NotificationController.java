@@ -39,7 +39,8 @@ public class NotificationController {
      * @since  25.02.06
      */
     @PostMapping
-    public ResponseEntity<GenericResponse<NotificationDTO>> createNotification(@RequestBody NotificationDTO notificationDTO){
+    public ResponseEntity<GenericResponse<NotificationDTO>> createNotification(@RequestBody NotificationDTO notificationDTO
+                                                                               ){
         NotificationDTO newNotificationDTO = notificationService.create(notificationDTO);
         return ResponseEntity.ok(GenericResponse.of(
                 newNotificationDTO,

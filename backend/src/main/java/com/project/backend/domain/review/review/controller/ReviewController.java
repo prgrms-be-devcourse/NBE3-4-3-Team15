@@ -4,6 +4,7 @@ package com.project.backend.domain.review.review.controller;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
+import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -98,9 +100,10 @@ public class ReviewController {
     @PostMapping
     @Operation(summary = "리뷰 추가")
     @Transactional
-    public ResponseEntity<GenericResponse<String>> postReview( @RequestBody ReviewsDTO reviewsDTO){
+    public ResponseEntity<GenericResponse<String>> postReview(@RequestBody ReviewsDTO reviewsDTO,
+                                                              @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        reviewService.write(reviewsDTO);
+        reviewService.write(reviewsDTO,userDetails.getUsername());
 
 
         return ResponseEntity.ok(GenericResponse.of(

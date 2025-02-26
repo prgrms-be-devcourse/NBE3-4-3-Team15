@@ -9,6 +9,7 @@ import com.project.backend.domain.member.dto.PasswordChangeDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
+import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
