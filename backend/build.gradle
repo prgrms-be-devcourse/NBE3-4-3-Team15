@@ -46,6 +46,10 @@ dependencies {
 
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	//rebbitMQ 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 }
 
 tasks.named('test') {
