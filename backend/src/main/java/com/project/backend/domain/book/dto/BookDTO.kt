@@ -7,10 +7,11 @@ package com.project.backend.domain.book.dto
  * @since -- 1월 27일 --
  */
 data class BookDTO(
-    val id: Long,
+    val id: Long?,
     val title: String?,
     val author: String?,
     val description: String?,
     val image: String?,
-    val isbn: String,
-    var favoriteCount: Int = 0)
+    val isbn: String?,
+    val ranking: Int?,
+    var favoriteCount: Int? = 0)

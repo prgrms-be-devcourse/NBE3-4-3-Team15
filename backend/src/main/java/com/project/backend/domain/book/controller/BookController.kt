@@ -23,6 +23,26 @@ import org.springframework.web.bind.annotation.*
 class BookController(private val bookService: BookService) {
 
     /**
+     * -- 베스트셀러 검색 --
+     * DB에서 yes24의 실시간 베스트셀러 정보 가져옴
+     * 랭킹 1위부터 100까지 있음 1위 부터 정렬되어 반환
+     *
+     * @param -- page 페이지 --
+     * @param -- size 한 페이지에 보여주는 책 수량 --
+     * @return -- ResponseEntity<GenericResponse<Page<BookDTO>>> --
+     * @author -- 정재익 --
+     * @since -- 3월 01일 --
+     */
+    @GetMapping
+    @Operation(summary = "베스트셀러")
+    fun mainPage(@RequestParam(name = "page") page: Int = 0,
+                 @RequestParam(name = "size") size: Int = 20
+    ): ResponseEntity<GenericResponse<Page<BookDTO>>> {
+        val bestSellers = bookService.searchBestSellersDB(page, size)
+        return ResponseEntity.ok(GenericResponse.of(bestSellers))
+    }
+
+    /**
      * -- 도서 검색 --
      * api의 정보를 바탕으로 도서를 검색
      * 작가, 제목을 통합 검색

@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.stereotype.Component
 
 /**
@@ -42,7 +41,7 @@ object BookUtil {
      */
     fun removeDuplicateBooks(books: List<BookDTO>): List<BookDTO> {
         val isbns = mutableSetOf<String>()
-        return books.filter { isbns.add(it.isbn) }
+        return books.filter { isbns.add(it.isbn?: "없음") }
     }
 
 
@@ -52,6 +51,7 @@ object BookUtil {
      * @param -- page 페이지 수--
      * @param -- size 페이지 마다 표시되는 책 수--
      * @param -- bookList 중복을 제거한 bookList --
+     *
      * @return -- Page<BookDTO> --
      * @author -- 정재익 --
      * @since -- 2월 11일 --
@@ -73,6 +73,6 @@ object BookUtil {
      * @since -- 2월 11일 --
      */
     fun entityToDTO(book: Book) = book.run {
-        BookDTO(id!!, title, author, description, image, isbn, favoriteCount)
+        BookDTO(id!!, title, author, description, image, isbn, ranking, favoriteCount)
     }
 }

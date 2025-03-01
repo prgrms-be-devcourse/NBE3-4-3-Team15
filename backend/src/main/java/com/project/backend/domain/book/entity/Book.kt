@@ -10,7 +10,7 @@ import jakarta.persistence.*
  * @since -- 1월 27일 --
  */
 @Entity
-data class Book(
+class Book(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -19,13 +19,13 @@ data class Book(
     @JsonProperty("title")
     val title: String,
 
-    @Column(length = 100)
+    @Column(columnDefinition = "TEXT")
     @JsonProperty("author")
-    val author: String,
+    var author: String,
 
     @Column(columnDefinition = "TEXT")
     @JsonProperty("description")
-    val description: String,
+    var description: String,
 
     @Column(columnDefinition = "TEXT")
     @JsonProperty("image")
@@ -35,5 +35,7 @@ data class Book(
     @JsonProperty("isbn")
     val isbn: String,
 
-    val favoriteCount: Int
+    var ranking: Int?,
+
+    val favoriteCount: Int? = 0
 )
