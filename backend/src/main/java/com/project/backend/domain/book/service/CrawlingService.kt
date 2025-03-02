@@ -6,6 +6,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
 import org.springframework.stereotype.Service
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,21 +17,51 @@ import java.util.*
  * @since -- 3월 01일 --
  */
 @Service
-class CrawlingService(private val bookService: BookService) {
+class CrawlingService(private val bookService: BookService, private val redisHash: RedisHash) {
+
 
     /**
-     * -- 베스트셀러 크롤링 메소드 --
-
+     * -- 크롤링 전체 통제 메서드 --
+     * Redis에 저장한 이전 해시값과 현재 해시값을 비교해 페이지가 바뀌었는지 검사
+     * 바뀌지 않았으면 크롤링 실행
+     *
      * @author -- 정재익 --
-     * @since -- 3월 01일 --
+     * @since -- 3월 02일 --
      */
     fun main() = runBlocking {
-        printWithThread("크롤링 시작")
-        val bestSellerMaps = getBestSellerMaps()
-        val bestSellerBookDTOs = getBestSellerBookDTOs(bestSellerMaps)
-        bookService.saveBestsellers(bestSellerBookDTOs)
-        printWithThread("크롤링 완료")
+        val targetUrl = "https://www.yes24.com/Product/Category/RealTimeBestSeller?categoryNumber=001"
+
+        val doc = Jsoup.connect(targetUrl).get()
+        val currentHash = getPageHash(doc)
+        val previousHash = redisHash.loadPreviousHash(targetUrl)
+
+        if (previousHash != currentHash) {
+            printWithThread("크롤링 시작")
+            val bestSellerMaps = getBestSellerMaps(doc)
+            val bestSellerBookDTOs = getBestSellerBookDTOs(bestSellerMaps)
+            bookService.saveBestsellers(bestSellerBookDTOs)
+
+            redisHash.saveHash(targetUrl, currentHash)
+            printWithThread("크롤링 완료")
+        } else {
+            printWithThread("페이지 변경 없음, 크롤링 생략")
+        }
     }
+
+    /**
+     * -- html을 해싱하는 메서드 --
+     * @param -- doc 문서 --
+     * @return -- String 해시 값--
+     * @author -- 정재익 --
+     * @since -- 3월 02일 --
+     */
+    private fun getPageHash(doc: Document): String {
+        val html = doc.html()
+        return MessageDigest.getInstance("MD5")
+            .digest(html.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+    }
+
 
     /**
      * -- 베스트셀러 목록 순위와 링크를 가져오는 메소드 --
@@ -40,11 +71,9 @@ class CrawlingService(private val bookService: BookService) {
      * @author -- 정재익 --
      * @since -- 3월 01일 --
      */
-    private fun getBestSellerMaps(): Map<Int, String> {
-        val targetUrl = "https://www.yes24.com/Product/Category/RealTimeBestSeller?categoryNumber=001"
+    private fun getBestSellerMaps(doc: Document): Map<Int, String> {
         val baseUrl = "https://www.yes24.com"
 
-        val doc: Document = Jsoup.connect(targetUrl).get()
         val bestSellerLinks =
             doc.select("#yesBestList > li > div > div.item_info > div.info_row.info_name > a.gd_name").eachAttr("href")
 
@@ -87,10 +116,17 @@ class CrawlingService(private val bookService: BookService) {
         val doc: Document = Jsoup.connect(link).get()
 
         val title = doc.selectFirst("#yDetailTopWrap > div.topColRgt > div.gd_infoTop > div > h2")?.text() ?: "제목 없음"
-        val author = doc.selectFirst("#yDetailTopWrap > div.topColRgt > div.gd_infoTop > span.gd_pubArea > span.gd_auth > a:nth-child(1)")?.text() ?: "저자 없음"
-        val image = doc.selectFirst("#yDetailTopWrap > div.topColLft > div > div.gd_3dGrp.gdImgLoadOn > div > span.gd_img > em > img")?.attr("src") ?: "이미지 없음"
-        val isbn = doc.selectFirst("#infoset_specific > div.infoSetCont_wrap > div > table > tbody > tr:nth-child(3) > td")?.text() ?: "ISBN 없음"
-        val rawDescription = doc.selectFirst("#infoset_introduce > div.infoSetCont_wrap > div.infoWrap_txt")?.text() ?: "설명 없음"
+        val author =
+            doc.selectFirst("#yDetailTopWrap > div.topColRgt > div.gd_infoTop > span.gd_pubArea > span.gd_auth > a:nth-child(1)")
+                ?.text() ?: "저자 없음"
+        val image =
+            doc.selectFirst("#yDetailTopWrap > div.topColLft > div > div.gd_3dGrp.gdImgLoadOn > div > span.gd_img > em > img")
+                ?.attr("src") ?: "이미지 없음"
+        val isbn =
+            doc.selectFirst("#infoset_specific > div.infoSetCont_wrap > div > table > tbody > tr:nth-child(3) > td")
+                ?.text() ?: "ISBN 없음"
+        val rawDescription =
+            doc.selectFirst("#infoset_introduce > div.infoSetCont_wrap > div.infoWrap_txt")?.text() ?: "설명 없음"
         val description = Jsoup.clean(rawDescription, Safelist.none()).trim()
 
         return BookDTO(

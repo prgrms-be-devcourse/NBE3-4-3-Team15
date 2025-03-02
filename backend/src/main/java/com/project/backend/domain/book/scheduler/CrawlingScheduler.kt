@@ -1,4 +1,4 @@
-package com.example.demo.scheduler
+package com.project.backend.domain.book.scheduler
 
 import com.project.backend.domain.book.service.CrawlingService
 import org.springframework.scheduling.annotation.Scheduled
