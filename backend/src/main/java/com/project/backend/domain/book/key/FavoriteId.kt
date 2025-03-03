@@ -1,12 +1,7 @@
-package com.project.backend.domain.book.key;
+package com.project.backend.domain.book.key
 
-import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.Objects;
+import jakarta.persistence.Embeddable
+import java.io.Serializable
 
 /**
  * -- Favorite의 복합키를 관리하는 클래스 --
