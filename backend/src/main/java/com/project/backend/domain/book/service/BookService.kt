@@ -172,15 +172,15 @@ class BookService(
 
     /**
      * -- 통합 검색 메소드 --
-     * 책과 작가에 검색어가 포함되는 데이터를 최대 200개 까지 가져오는 메소드
+     * 검색어를 기반으로 제목과 설명을 조사하여 관련된 책을 최대 200개까지 반환하는 메소드
      *
      * @param -- query (검색어) --
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
-     * @since -- 3월 01일 --
+     * @since -- 3월 03일 --
      */
     fun searchBooksDB(query: String): List<BookDTO> {
-        return bookRepository.findByTitleOrAuthor(query)
+        return bookRepository.searchFullText(query)
             .take(200)
             .map { BookUtil.entityToDTO(it) }
     }

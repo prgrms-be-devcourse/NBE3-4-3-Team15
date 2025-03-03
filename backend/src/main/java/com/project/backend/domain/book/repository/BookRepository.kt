@@ -27,18 +27,19 @@ interface BookRepository : JpaRepository<Book, Long> {
     fun findExistingIsbns(@Param("isbns") isbns: List<String>): List<String>
 
     /**
-     * -- 검색어와 관련이 있는 작가와 제목을 반환 --
+     * -- 전문검색 인덱싱을 n-gram분석 알고리즘으로 구현하여 제목과 설명에서 단어를 뽑아내어 검색어와 관련있는 책을 반환하는 메서드 --
      *
-     * @param -- keyword 검색어 --
-     * @return -- List<Book> 작가와 제목과 관련있는 책 리스트 --
+     * @return -- List<Book> 검색어 결과 --
+     *
      * @author -- 정재익 --
-     * @since -- 3월 01일 --
+     * @since -- 3월 03일 --
      */
     @Query(
-        "SELECT b FROM Book b WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                "OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))"
+        value = "SELECT * FROM book " +
+                "WHERE MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE)",
+        nativeQuery = true
     )
-    fun findByTitleOrAuthor(@Param("keyword") keyword: String): List<Book>
+    fun searchFullText(@Param("keyword") keyword: String): List<Book>
 
     /**
      * -- isbn을 가진 Book 반환 --
