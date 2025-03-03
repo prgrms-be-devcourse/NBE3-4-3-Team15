@@ -1,18 +1,14 @@
-package com.project.backend.domain.book.entity;
+package com.project.backend.domain.book.entity
 
-import com.project.backend.domain.book.key.FavoriteId;
-import com.project.backend.domain.member.entity.Member;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.project.backend.domain.book.key.FavoriteId
+import com.project.backend.domain.member.entity.Member
+import jakarta.persistence.*
 
 /**
  * -- 찜 엔티티 --
  *
- * @author -- 정재익 --
- * @since -- 1월 27일 --
+ * @author -- 김남우 --
+ * @since -- 3월 3일 --
  */
 @Entity
 @Getter
