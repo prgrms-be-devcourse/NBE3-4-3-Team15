@@ -20,7 +20,7 @@ import java.util.List
  * @since -- 3월 3일 --
  */
 @Repository
-public interface FavoriteRepository extends JpaRepository<Favorite, FavoriteId> {
+interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
     /**
      * -- 특정 회원이 찜한 도서 목록 조회 --
      *
