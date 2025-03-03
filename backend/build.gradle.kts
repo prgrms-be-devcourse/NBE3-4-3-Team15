@@ -35,6 +35,8 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
     implementation("redis.clients:jedis:4.3.1")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
 
     // ✅ API 문서화 (Swagger)
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1")

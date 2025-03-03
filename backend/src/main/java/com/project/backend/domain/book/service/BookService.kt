@@ -5,11 +5,10 @@ import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.dto.KakaoDTO
 import com.project.backend.domain.book.dto.NaverDTO
 import com.project.backend.domain.book.entity.Book
-import com.project.backend.domain.book.entity.Keyword
 import com.project.backend.domain.book.exception.BookErrorCode
 import com.project.backend.domain.book.exception.BookException
 import com.project.backend.domain.book.repository.BookRepository
-import com.project.backend.domain.book.repository.KeywordRepository
+import com.project.backend.domain.book.repository.KeywordRedisRepository
 import com.project.backend.domain.book.util.BookUtil
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -35,7 +34,7 @@ import org.springframework.web.client.RestTemplate
 class BookService(
     private val bookRepository: BookRepository,
     private val objectMapper: ObjectMapper,
-    private val keywordRepository: KeywordRepository,
+    private val keywordRedisRepository: KeywordRedisRepository,
     @Value("\${naver.client-id}") val clientId: String,
     @Value("\${naver.client-secret}") val clientSecret: String,
     @Value("\${naver.book-search-url}") val naverUrl: String,
@@ -47,18 +46,19 @@ class BookService(
 
     /**
      * -- 도서 검색 메소드 --
-     * 1. DB에 도서 검색
-     * 2. 관련 도서가 200건이 안될시 API 요청
-     * 3. 처음엔 소량을 요청하고 그래도 200권이 안되면 수량을 늘려 요청
-     * 4. 3회까지 요청하고도 200권이 안되면 요청 종료
-     * 5. Page<BookDto>로 변환하여 반환
+     * 1. 입력된 적이 있는 검색어 인지 Redis 이용 판단
+     * 2. 입력된 적이 있으면 DB 기반 통합 검색 시행
+     * 3. 입력된 적이 없을 경우 DB 기반 통합 검색 시행하고 데이터가 200건보다 적을경우만 API 요청
+     * 4. 처음엔 소량을 요청하고 그래도 200권이 안되면 수량을 늘려 요청
+     * 5. 3회까지 요청하고도 200권이 안되면 요청 종료
+     * 6. Page<BookDto>로 변환하여 반환
      *
      * @param -- query(검색어)
      * @param -- page 페이지 --
      * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- Page<BookDTO> --
      * @author -- 정재익 --
-     * @since -- 3월 01일 --
+     * @since -- 3월 03일 --
      */
     @Transactional
     fun searchBooks(query: String?, page: Int, size: Int): Page<BookDTO> {
@@ -68,12 +68,11 @@ class BookService(
 
         var bookList = searchBooksDB(query)
 
-        if (keywordRepository.existsByKeyword(query)) {
+        if (keywordRedisRepository.existsByKeyword(query)) {
             return BookUtil.pagingBooks(page, size, bookList)
         }
 
-        keywordRepository.save(Keyword(query))
-
+        keywordRedisRepository.saveKeyword(query)
 
         var start = 0
         val end = 3
