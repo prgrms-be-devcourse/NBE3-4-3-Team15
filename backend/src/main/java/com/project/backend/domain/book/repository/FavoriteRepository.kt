@@ -30,11 +30,13 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
      * @author -- 김남우 --
      * @since -- 3월 3일 --
      */
-    @Query("SELECT new com.project.backend.domain.book.dto.BookDTO(b.id, b.title, b.author, b.description, b.image, b.isbn, b.favoriteCount) " +
-            "FROM Favorite f " +
-            "JOIN f.book b " +
-            "WHERE f.member.id = :memberId")
-    Page<BookDTO> findFavoriteBooksByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+    @Query(
+        ("SELECT new com.project.backend.domain.book.dto.BookDTO(b.id, b.title, b.author, b.description, b.image, b.isbn, b.favoriteCount) " +
+                "FROM Favorite f " +
+                "JOIN f.book b " +
+                "WHERE f.member.id = :memberId")
+    )
+    fun findFavoriteBooksByMemberId(@Param("memberId") memberId: Long?, pageable: Pageable?): Page<BookDTO?>?
 
     /**
      * -- 특정 회원의 찜 목록 삭제 --
