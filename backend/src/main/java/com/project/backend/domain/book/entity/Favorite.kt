@@ -11,22 +11,18 @@ import jakarta.persistence.*
  * @since -- 3월 3일 --
  */
 @Entity
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Favorite {
+class Favorite(
 
     @EmbeddedId
-    private FavoriteId id;
+    val id: FavoriteId,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("bookId")
     @JoinColumn(name = "book_id", referencedColumnName = "id")
-    private Book book;
+    val book: Book,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("memberId")
     @JoinColumn(name = "member_id", referencedColumnName = "id")
-    private Member member;
-}
+    val member: Member
+)
