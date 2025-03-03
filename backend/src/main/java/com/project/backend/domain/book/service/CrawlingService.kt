@@ -22,8 +22,8 @@ class CrawlingService(private val bookService: BookService, private val redisHas
 
     /**
      * -- 크롤링 전체 통제 메서드 --
-     * Redis에 저장한 이전 해시값과 현재 해시값을 비교해 페이지가 바뀌었는지 검사
-     * 바뀌지 않았으면 크롤링 실행
+     * Redis에 저장한 이전 해시값과 현재 해시값을 비교해 베스트셀러가 바뀌었는지 검사
+     * 바뀌지 않았으면 상세페이지 크롤링 실행
      *
      * @author -- 정재익 --
      * @since -- 3월 02일 --
@@ -32,33 +32,35 @@ class CrawlingService(private val bookService: BookService, private val redisHas
         val targetUrl = "https://www.yes24.com/Product/Category/RealTimeBestSeller?categoryNumber=001"
 
         val doc = Jsoup.connect(targetUrl).get()
-        val currentHash = getPageHash(doc)
-        val previousHash = redisHash.loadPreviousHash(targetUrl)
+        val bestSellerMaps = getBestSellerMaps(doc)
+        val currentHash = getMapHash(bestSellerMaps)
+        val previousHash = redisHash.loadPreviousHash()
+        println("Current hash: $currentHash")
+        println("Previous hash: $previousHash")
 
         if (previousHash != currentHash) {
             printWithThread("크롤링 시작")
-            val bestSellerMaps = getBestSellerMaps(doc)
             val bestSellerBookDTOs = getBestSellerBookDTOs(bestSellerMaps)
             bookService.saveBestsellers(bestSellerBookDTOs)
-
-            redisHash.saveHash(targetUrl, currentHash)
+            redisHash.saveHash(currentHash)
             printWithThread("크롤링 완료")
         } else {
-            printWithThread("페이지 변경 없음, 크롤링 생략")
+            printWithThread("베스트셀러 변경 없음, 크롤링 생략")
         }
     }
 
     /**
-     * -- html을 해싱하는 메서드 --
-     * @param -- doc 문서 --
+     * -- Map을 해싱하는 메서드 --
+     * @param -- map 베스트셀러 순위와 링크가 담김 --
      * @return -- String 해시 값--
      * @author -- 정재익 --
-     * @since -- 3월 02일 --
+     * @since -- 3월 03일 --
      */
-    private fun getPageHash(doc: Document): String {
-        val html = doc.html()
-        return MessageDigest.getInstance("MD5")
-            .digest(html.toByteArray())
+    fun getMapHash(map: Map<Int, String>): String {
+        val mapString = map.toSortedMap().entries.joinToString { "${it.key}:${it.value}" }
+
+        return MessageDigest.getInstance("SHA-256")
+            .digest(mapString.toByteArray())
             .joinToString("") { "%02x".format(it) }
     }
 

@@ -13,29 +13,28 @@ import redis.clients.jedis.Jedis
 @Component
 class RedisHash {
     private val jedis = Jedis("localhost", 6379)
+    private val HASH_KEY = "best_seller_hash"
 
     /**
      * -- 사이트와 해시값을 저장하는 메소드 --
      *
-     * @param --url 사이트 주소 --
-     * @param -- 해시 값 --
+     * @param -- hash 저장할 해시 값 --
      *
      * @author -- 정재익 --
      * @since -- 3월 02일 --
      */
-    fun saveHash(url: String, hash: String) {
-        jedis.set(url, hash)
+    fun saveHash(hash: String) {
+        jedis.set(HASH_KEY, hash)
     }
 
     /**
      * -- 저장된 해시값을 반환하는 메소드 --
      *
-     * @param --url 사이트 주소 --
-     * @return --String 해시 값 --
+     * @return 저장된 해시값, 없을 경우 빈 문자열 반환
      * @author -- 정재익 --
      * @since -- 3월 02일 --
      */
-    fun loadPreviousHash(url: String): String {
-        return jedis.get(url)
+    fun loadPreviousHash(): String {
+        return jedis.get(HASH_KEY) ?: ""
     }
 }
