@@ -48,7 +48,7 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
     @Modifying
     @Transactional
     @Query("DELETE FROM Favorite f WHERE f.member.id = :memberId")
-    void deleteByMemberId(@Param("memberId") Long memberId);
+    fun deleteByMemberId(@Param("memberId") memberId: Long)
 
     /**
      * -- 특정 회원이 찜한 도서 ID 목록 조회 --
