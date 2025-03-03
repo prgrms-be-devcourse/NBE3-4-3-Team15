@@ -6,8 +6,8 @@ import java.io.Serializable
 /**
  * -- Favorite의 복합키를 관리하는 클래스 --
  *
- * @author -- 정재익 --
- * @since -- 1월 27일 --
+ * @author -- 김남우 --
+ * @since -- 3월 3일 --
  */
 @NoArgsConstructor
 @AllArgsConstructor
