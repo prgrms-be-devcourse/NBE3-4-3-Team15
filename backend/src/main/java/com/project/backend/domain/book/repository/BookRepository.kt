@@ -98,4 +98,15 @@ interface BookRepository : JpaRepository<Book, Long> {
     @Modifying
     @Query("UPDATE Book b SET b.favoriteCount = b.favoriteCount - 1 WHERE b.id = :bookId AND b.favoriteCount > 0")
     fun decreaseFavoriteCount(@Param("bookId") bookId: Long?)
+
+    /**
+     * -- 찜 개수가 0인 도서 삭제 --
+     *
+     * @author -- 김남우 --
+     * @since -- 3월 3일 --
+     */
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Book b WHERE b.favoriteCount = 0")
+    fun deleteBooksZeroFavoriteCount()
 }
