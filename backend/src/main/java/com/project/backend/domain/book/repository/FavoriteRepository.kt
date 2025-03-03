@@ -59,5 +59,5 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
      * @since -- 3월 3일 --
      */
     @Query("SELECT f.book.id FROM Favorite f WHERE f.member.id = :memberId")
-    List<Long> findBookIdsByMemberId(@Param("memberId") Long memberId);
+    fun findBookIdsByMemberId(@Param("memberId") memberId: Long): List<Long>
 }
