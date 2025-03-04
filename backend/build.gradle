@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.jetbrains.kotlin.jvm'
 }
 
 group = 'com.project'
@@ -52,6 +53,7 @@ dependencies {
 
 	// perplexity 사용하기 위함
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 tasks.named('test') {

@@ -1,12 +1,8 @@
 package com.project.backend.domain.chatbot.service;
 
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.util.Map;
 
@@ -26,6 +22,8 @@ public class ChatbotService {
 
     /**
      *
+     * Perplexity api
+     *
      * @param message
      * @return
      *
@@ -33,12 +31,12 @@ public class ChatbotService {
      * @since 25. 2. 25.
      */
     public Map<Object, Object> generate(String message){
-        return Map.of("generation", this.chatModel.call(message));
-    }
+        // TODO. 1. DB로 연결해서 하는 로직 추가
 
-    public Flux<ChatResponse> generateStream(String message){
-        Prompt prompt = new Prompt(new UserMessage(message));
-        return this.chatModel.stream(prompt);
+        // TODO. 2. 프롬프트 추가
+
+
+        return Map.of("generation", this.chatModel.call(message));
     }
 
 }
