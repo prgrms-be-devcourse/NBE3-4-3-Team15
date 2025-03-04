@@ -1,27 +1,19 @@
 package com.project.backend.domain.notification.service;
 
 
-import com.project.backend.domain.follow.dto.FollowResponseDto;
-import com.project.backend.domain.follow.entity.Follow;
-import com.project.backend.domain.follow.service.FollowService;
-import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
-import com.project.backend.domain.notification.repository.EmitterRepository;
+import com.project.backend.global.rabbitmq.dto.MessageDto;
+import com.project.backend.global.rabbitmq.service.RabbitMQService;
 import com.project.backend.domain.notification.repository.NotificationRepository;
+import com.project.backend.global.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -32,63 +24,10 @@ import java.util.stream.Collectors;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
-    private final FollowService followService;
-    private final EmitterRepository emitterRepository;
+    private final SseService sseservice;
+    private final RabbitMQService rabbitMQService;
 
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
-
-    /**
-     * SSE 연결 메소드
-     * @param username
-     * @return emitter
-     *
-     * @author 이광석
-     * @since 25.02.23
-     */
-    public SseEmitter subscribe(String username){
-        Long memberId = memberService.getMyProfile(username).getId();
-        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-
-        emitterRepository.save(memberId,emitter);
-
-        emitter.onCompletion(()->emitterRepository.deleteBy(memberId));
-        emitter.onTimeout(()->emitterRepository.deleteBy(memberId));
-
-        try{
-           emitter.send(SseEmitter.event()
-                   .name("connect")
-                   .data("SSE 연결 성공"));
-        }catch (IOException e){
-           emitterRepository.deleteBy(memberId);
-           emitter.completeWithError(e);
-        }
-
-        return emitter;
-    }
-
-    /**
-     * 프론트로 알람 전달 메소드
-     * @param memberId
-     * @param message
-     *
-     * @author 이광석
-     * @since 25.02.23
-     */
-    public void sendNotification(Long memberId,String message){
-        SseEmitter emitter = emitterRepository.findById(memberId);
-        if(emitter !=null){
-            try{
-                System.out.println("알람 전달 성공");
-                emitter.send(SseEmitter.event()
-                        .name("notification")
-                        .data(message));
-            }catch(IOException e){
-                System.out.println("알람 전달 실패");
-                emitterRepository.deleteBy(memberId);
-                emitter.completeWithError(e);
-            }
-        }
-    }
 
 
 
@@ -114,7 +53,12 @@ public class NotificationService {
                 .content(notificationDTO.getContent())
                 .build();
 
-        sendNotification(notification.getMemberId(),notification.getContent());
+
+        MessageDto newMessage = new MessageDto(notification.getMemberId(),notification.getContent()); //producer에 전달한 message 생성
+
+
+        rabbitMQService.sendMessage(notification.getMemberId(),newMessage);//producer
+
         return new NotificationDTO(notificationRepository.save(notification));
     }
 
@@ -194,4 +138,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
         return notificationDTOS;
     }
+
+
+
 }

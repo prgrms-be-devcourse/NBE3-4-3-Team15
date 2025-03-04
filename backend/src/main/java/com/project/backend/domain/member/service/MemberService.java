@@ -9,8 +9,9 @@ import com.project.backend.domain.member.dto.PasswordChangeDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
-import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.global.jwt.JwtUtil;
+import com.project.backend.global.rabbitmq.service.RabbitMQService;
+import com.project.backend.global.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,8 @@ public class MemberService {
     private final JwtUtil jwtUtil;
     private final FavoriteRepository favoriteRepository;
     private final BookRepository bookRepository;
+    private final SseService sseService;
+    private final RabbitMQService rabbitMQService;
 
     /**
      * 회원가입 처리
@@ -77,6 +80,11 @@ public class MemberService {
      *                         INCORRECT_PASSWORD: 입력된 비밀번호가 올바르지 않은 경우
      * @author 이원재
      * @since 25. 2. 6.
+     *
+     *
+     * createMemberQueue + subscribeSse 추가
+     * @author 이광석
+     * @since 25.03.02
      */
     public String login(LoginDto loginDto) {
         Member member = memberRepository.findByUsername(loginDto.getUsername())
@@ -85,6 +93,10 @@ public class MemberService {
         if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) { // 암호화된 비밀번호 비교
             throw new MemberException(INCORRECT_PASSWORD);
         }
+
+        sseService.subscribeSse(member.getId());//Sse 구독
+        rabbitMQService.createMemberQueue(member.getId()); //rabbitmq를 위한 큐 생성
+        rabbitMQService.dynamicRabbitListener(member.getId());
 
         return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
     }

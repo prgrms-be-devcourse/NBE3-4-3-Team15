@@ -108,19 +108,7 @@ public class NotificationController {
     }
 
 
-    /**
-     * sse 연결
-     * @param userDetails
-     * @return SseEmitter
-     *
-     * @author 이광석
-     * @since 25.02.23
-     */
-    @Operation(summary = "sse세션 연결")
-    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@AuthenticationPrincipal CustomUserDetails userDetails){
-        return notificationService.subscribe(userDetails.getUsername());
-    }
+
 
 
 }

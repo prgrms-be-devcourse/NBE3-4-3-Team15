@@ -1,4 +1,4 @@
-package com.project.backend.domain.notification.repository;
+package com.project.backend.global.sse.rapository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
