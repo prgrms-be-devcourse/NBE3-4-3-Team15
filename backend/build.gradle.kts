@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
+    id("io.freefair.lombok") version "8.6"
     kotlin("plugin.jpa") version "1.9.25"
 }
 
@@ -56,6 +57,11 @@ dependencies {
 
     // ✅ 개발 편의 기능
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    implementation ("org.projectlombok:lombok:1.18.30")
+    annotationProcessor ("org.projectlombok:lombok:1.18.30")
+
+    testImplementation ("org.junit.jupiter:junit-jupiter:5.9.2")
+    testAnnotationProcessor ("org.projectlombok:lombok:1.18.30")
 
     // ✅ 테스트 관련 라이브러리
     testImplementation("org.springframework.boot:spring-boot-starter-test")
