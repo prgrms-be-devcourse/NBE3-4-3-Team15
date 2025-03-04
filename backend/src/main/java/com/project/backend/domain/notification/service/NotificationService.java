@@ -1,11 +1,8 @@
 package com.project.backend.domain.notification.service;
 
 
-<<<<<<< HEAD
+
 import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
-=======
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
@@ -14,11 +11,9 @@ import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.global.rabbitmq.dto.MessageDto;
 import com.project.backend.global.rabbitmq.service.RabbitMQService;
 import com.project.backend.domain.notification.repository.NotificationRepository;
-<<<<<<< HEAD
 import com.project.backend.global.authority.CustomUserDetails;
-=======
+
 import com.project.backend.global.sse.service.SseService;
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,15 +28,13 @@ import java.util.stream.Collectors;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
-<<<<<<< HEAD
-=======
+
     private final SseService sseservice;
     private final RabbitMQService rabbitMQService;
 
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
 
 
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 
     /**
      * 알람 생성
@@ -157,7 +150,7 @@ public class NotificationService {
             );
         }
     }
-=======
+    /**
      * member기반 알림 리스트 출력
      * @param username
      * @return List<NotificationDTO>
@@ -176,5 +169,4 @@ public class NotificationService {
 
 
 
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 }

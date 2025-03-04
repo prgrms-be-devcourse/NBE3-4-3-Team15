@@ -108,19 +108,11 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-<<<<<<< HEAD
 
-    public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
-
-
-        Review review =reviewRepository.save(Review.builder()
-                        .userId(myId(userDetails))
-=======
     public void write(ReviewsDTO reviewsDTO,String username) {
         MemberDto memberDto = memberService.getMyProfile(username);
         Review review =reviewRepository.save(Review.builder()
                         .userId(memberDto.getId())
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
                         .bookId(reviewsDTO.getBookId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
@@ -128,11 +120,7 @@ public class ReviewService {
                         .isDelete(false)
                     .build());
 
-<<<<<<< HEAD
-        MemberDto memberDto = memberService.getMemberById(myId(userDetails));   //리뷰 작성자
-        List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
-=======
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
+
 
         List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
 
@@ -309,5 +297,7 @@ public class ReviewService {
     }
 
 
+
+    
 
 }

@@ -25,8 +25,8 @@ public class RabbitMQService {
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
 
-//    @Value("${rabbitmq.queue.name")
-//    private String
+    @Value("${rabbitmq.queue.name")
+    private String queueName;
 
     private final RabbitTemplate rabbitTemplate;
     private final RabbitAdmin rabbitAdmin;
@@ -77,7 +77,7 @@ public class RabbitMQService {
 
 
     public String createMemberQueue(Long memberId){
-        String queueName = routingKey+memberId;
+        String queueName =this.queueName +memberId;
 
         Queue userQueue = QueueBuilder.durable(queueName)
 //                .autoDelete()

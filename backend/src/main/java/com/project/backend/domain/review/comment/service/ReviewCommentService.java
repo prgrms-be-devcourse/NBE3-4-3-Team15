@@ -43,7 +43,6 @@ public class ReviewCommentService {
     private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final NotificationService notificationService;
-    private final MemberService memberService;
 
 
     /**
@@ -87,13 +86,10 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-<<<<<<< HEAD
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,CustomUserDetails userDetails) {  // 메소드가 너무 긴듯 분할 필요
-=======
+
     public ReviewCommentDto write(Long reviewId,
                                   ReviewCommentDto reviewCommentDto,
                                   CustomUserDetails userDetails) {
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -143,17 +139,7 @@ public class ReviewCommentService {
      * @param reviewCommentDto
      *
      * @author 이광석
-<<<<<<< HEAD
-     * @since 25.02.10
-     */
-    public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
-        NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(review.getUserId())
-                .reviewComment(reviewComment.getId())
-                .isCheck(false)
-                .build();
 
-=======
      * @since 25.02.23
      */
     public void createCommentNotification(ReviewComment reviewComment,
@@ -162,7 +148,6 @@ public class ReviewCommentService {
                                           CustomUserDetails userDetails){
         Long receiverId;
         String content;
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 
         //댓글일 경우
         if(reviewCommentDto.getParentId()==null) {
