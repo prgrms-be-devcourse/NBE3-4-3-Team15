@@ -1,6 +1,6 @@
 package com.project.backend.domain.member.entity;
 
-import com.project.backend.domain.challenge.entity.Challenge;
+import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
@@ -43,9 +43,7 @@ public class Member extends BaseEntity {
 
     private LocalDate birth;
 
-    @ManyToOne
-    @JoinColumn(name = "challenge_id")
-    private Challenge challenge;
+    private long deposit;
 
     @ManyToMany(mappedBy = "recommendMember")
     private List<Review> recommendReviews;
@@ -58,6 +56,9 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Follow> followings;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Entry> entries;
 
     public void updateMemberInfo(String email, int gender, String nickname, LocalDate birth) {
         this.email = email;
