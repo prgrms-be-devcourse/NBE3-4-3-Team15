@@ -31,7 +31,7 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
      * @since -- 3월 3일 --
      */
     @Query(
-        ("SELECT new com.project.backend.domain.book.dto.BookDTO(b.id, b.title, b.author, b.description, b.image, b.isbn, b.favoriteCount) " +
+        ("SELECT new com.project.backend.domain.book.dto.BookDTO(b.id, b.title, b.author, b.description, b.image, b.isbn, b.ranking, b.favoriteCount) " +
                 "FROM Favorite f " +
                 "JOIN f.book b " +
                 "WHERE f.member.id = :memberId")
