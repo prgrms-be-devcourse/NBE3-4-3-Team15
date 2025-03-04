@@ -2,10 +2,6 @@ package com.project.backend.domain.book.util
 
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.entity.Book
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 
 /**
@@ -42,26 +38,6 @@ object BookUtil {
     fun removeDuplicateBooks(books: List<BookDTO>): List<BookDTO> {
         val isbns = mutableSetOf<String>()
         return books.filter { isbns.add(it.isbn) }
-    }
-
-
-    /**
-     * -- 페이징 처리 메소드 --
-     * 책 수량을 초과하는 페이지에서는 빈 리스트 반환
-     *
-     * @param -- page 페이지 수--
-     * @param -- size 페이지 마다 표시되는 책 수--
-     * @param -- bookList 중복을 제거한 bookList --
-     * @return -- Page<BookDTO> --
-     * @author -- 정재익 --
-     * @since -- 3월 04일 --
-     */
-    fun pagingBooks(page: Int, size: Int, bookList: List<BookDTO>): Page<BookDTO> {
-        val pageable: Pageable = PageRequest.of(page, size)
-        val start = page * size
-        val pagedBooks = if (start < bookList.size) bookList.subList(start, start + size.coerceAtMost(bookList.size - start)) else emptyList()
-
-        return PageImpl(pagedBooks, pageable, bookList.size.toLong())
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.project.backend.domain.book.repository
 
 import com.project.backend.domain.book.entity.Book
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -28,23 +30,29 @@ interface BookRepository : JpaRepository<Book, Long> {
 
     /**
      * -- 전문검색 인덱싱을 n-gram분석 알고리즘으로 구현하여 제목과 설명에서 단어를 뽑아내어 검색어와 관련있는 책을 반환하는 메서드 --
-     * 책은 최대 300개까지 반환함
      *
+     * @param -- ketword 검색어 --
      * @return -- List<Book> 검색어 결과와 관련된 책 리스트  --
      *
      * @author -- 정재익 --
      * @since -- 3월 04일 --
      */
     @Query(
-        value = """
+    value = """
         SELECT * FROM book 
         WHERE MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
         ORDER BY MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE) DESC
-        LIMIT 300
     """,
-        nativeQuery = true
+    countQuery = """
+        SELECT COUNT(*) FROM book 
+        WHERE MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+    """,
+    nativeQuery = true
     )
-    fun searchFullText(@Param("keyword") keyword: String): List<Book>
+    fun searchFullText(
+        @Param("keyword") keyword: String,
+        pageable: Pageable
+    ): Page<Book>
 
     /**
      * -- isbn을 가진 Book 반환 --
@@ -58,12 +66,13 @@ interface BookRepository : JpaRepository<Book, Long> {
 
     /**
      * -- 베스트셀러를 1위부터 반환 --
+     * @param -- pageable --
+     * @return -- List<Book> 베스트셀러 리스트 --
      *
-     * @return -- List<Book> 베스트셀러리스트 --
      * @author -- 정재익 --
-     * @since -- 3월 1일 --
+     * @since -- 3월 04일 --
      */
-    fun findByRankingIsNotNullOrderByRankingAsc(): List<Book>
+    fun findByRankingIsNotNullOrderByRankingAsc(pageable: Pageable): Page<Book>
 
     /**
      * -- DB의 베스트셀러 랭킹 초기화 --

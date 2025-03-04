@@ -11,6 +11,8 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 /**
@@ -41,6 +43,7 @@ class BookService(
      * @param -- page 페이지 --
      * @param -- size 한 페이지에 보여주는 책 수량 --
      * @return -- Page<BookDTO> --
+     *
      * @author -- 정재익 --
      * @since -- 3월 03일 --
      */
@@ -50,10 +53,10 @@ class BookService(
             throw BookException(BookErrorCode.QUERY_EMPTY)
         }
 
-        var bookList = searchBooksDB(query)
+        var bookList = searchBooksDB(query, page, size)
 
         if (redisRepository.existKeyword(query)) {
-            return BookUtil.pagingBooks(page, size, bookList)
+            return searchBooksDB(query, page, size)
         }
 
         redisRepository.saveKeyword(query)
@@ -80,14 +83,14 @@ class BookService(
                 }
             }
             saveBooks(apiBooks)
-            bookList = searchBooksDB(query)
+            bookList = searchBooksDB(query, page, size)
 
             if (bookList.size >= 300) {
                 break
             }
             start++
         }
-        return BookUtil.pagingBooks(page, size, bookList)
+        return searchBooksDB(query, page, size)
     }
 
     /**
@@ -95,13 +98,16 @@ class BookService(
      * 검색어를 기반으로 제목과 설명을 조사하여 관련된 책을 반환하는 메소드
      *
      * @param -- query (검색어) --
+     * @param -- page 페이지--
+     * @param -- size 페이지에 보이는 수량--
      * @return -- List<BookDTO> --
+     *
      * @author -- 정재익 --
      * @since -- 3월 04일 --
      */
-    fun searchBooksDB(query: String): List<BookDTO> {
-        return bookRepository.searchFullText(query)
-            .map { BookUtil.entityToDTO(it) }
+    fun searchBooksDB(query: String, page: Int, size: Int): Page<BookDTO> {
+        val pageable: Pageable = PageRequest.of(page, size)
+        return bookRepository.searchFullText(query, pageable).map { BookUtil.entityToDTO(it) }
     }
 
     /**
@@ -109,6 +115,7 @@ class BookService(
      *
      * @param -- id 책 아이디--
      * @return -- BookDTO --
+     *
      * @author -- 정재익 --
      * @since -- 2월 11일 --
      */
@@ -124,13 +131,14 @@ class BookService(
      * @param -- page 페이지--
      * @param -- size 페이지에 보이는 수량--
      * @return -- Page<BookDTO> --
+     *
      * @author -- 정재익 --
      * @since -- 3월 01일 --
      */
     fun searchBestSellersDB(page: Int, size: Int): Page<BookDTO> {
-        val bestSellers = bookRepository.findByRankingIsNotNullOrderByRankingAsc()
-            .map { BookUtil.entityToDTO(it) }
-        return BookUtil.pagingBooks(page, size, bestSellers)
+        val pageable: Pageable = PageRequest.of(page, size)
+        val bestSellersPage = bookRepository.findByRankingIsNotNullOrderByRankingAsc(pageable)
+        return bestSellersPage.map { BookUtil.entityToDTO(it) }
     }
 
     /**
@@ -138,7 +146,6 @@ class BookService(
      * isbn을 통해 중복검사
      * 대량의 데이터가 들어올시에는 1000개씩 쪼개서 받아들임
      * DB 무결성 유지를 위해 isbn이 존재하지 않는 책들은 db에 저장하지 않음
-     *
      *
      * @param -- List<Book> 중복이 제거되지 않은 책 목록 --
      * @author -- 정재익 --
