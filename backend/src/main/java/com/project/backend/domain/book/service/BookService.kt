@@ -1,28 +1,17 @@
 package com.project.backend.domain.book.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.project.backend.domain.book.dto.BookDTO
-import com.project.backend.domain.book.dto.KakaoDTO
-import com.project.backend.domain.book.dto.NaverDTO
 import com.project.backend.domain.book.entity.Book
 import com.project.backend.domain.book.exception.BookErrorCode
 import com.project.backend.domain.book.exception.BookException
 import com.project.backend.domain.book.repository.BookRepository
-import com.project.backend.domain.book.repository.KeywordRedisRepository
+import com.project.backend.domain.book.repository.RedisRepository
 import com.project.backend.domain.book.util.BookUtil
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.domain.Page
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
-import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 
 /**
  * -- 도서 서비스 클래스 --
@@ -33,13 +22,8 @@ import org.springframework.web.client.RestTemplate
 @Service
 class BookService(
     private val bookRepository: BookRepository,
-    private val objectMapper: ObjectMapper,
-    private val keywordRedisRepository: KeywordRedisRepository,
-    @Value("\${naver.client-id}") val clientId: String,
-    @Value("\${naver.client-secret}") val clientSecret: String,
-    @Value("\${naver.book-search-url}") val naverUrl: String,
-    @Value("\${kakao.key}") val kakaoKey: String,
-    @Value("\${kakao.url}") val kakaoUrl: String
+    private val redisRepository: RedisRepository,
+    private val apiClientService: ApiClientService,
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
@@ -47,10 +31,10 @@ class BookService(
     /**
      * -- 도서 검색 메소드 --
      * 1. 입력된 적이 있는 검색어 인지 Redis 이용 판단
-     * 2. 입력된 적이 있으면 DB 기반 통합 검색 시행
-     * 3. 입력된 적이 없을 경우 DB 기반 통합 검색 시행하고 데이터가 200건보다 적을경우만 API 요청
-     * 4. 처음엔 소량을 요청하고 그래도 200권이 안되면 수량을 늘려 요청
-     * 5. 3회까지 요청하고도 200권이 안되면 요청 종료
+     * 2. 입력된 적이 있으면 DB 기반 통합 검색만 시행
+     * 3. 입력된 적이 없을 경우 DB 기반 통합 검색 시행하고 데이터가 300건보다 적을경우만 API 요청
+     * 4. 처음엔 소량을 요청하고 그래도 300권이 안되면 수량을 늘려 요청
+     * 5. 3회까지 요청하고도 300권이 안되면 요청 종료
      * 6. Page<BookDto>로 변환하여 반환
      *
      * @param -- query(검색어)
@@ -61,44 +45,44 @@ class BookService(
      * @since -- 3월 03일 --
      */
     @Transactional
-    fun searchBooks(query: String?, page: Int, size: Int): Page<BookDTO> {
-        if (query.isNullOrBlank()) {
+    fun searchBooks(query: String, page: Int, size: Int): Page<BookDTO> {
+        if (query.isBlank()) {
             throw BookException(BookErrorCode.QUERY_EMPTY)
         }
 
         var bookList = searchBooksDB(query)
 
-        if (keywordRedisRepository.existsByKeyword(query)) {
+        if (redisRepository.existKeyword(query)) {
             return BookUtil.pagingBooks(page, size, bookList)
         }
 
-        keywordRedisRepository.saveKeyword(query)
+        redisRepository.saveKeyword(query)
 
         var start = 0
         val end = 3
-        while (bookList.size < 200 && start < end) {
+        while (bookList.size < 300 && start < end) {
 
             val apiBooks = mutableListOf<BookDTO>()
 
             when (start) {
                 0 -> {
-                    apiBooks += requestApi(query, "naver", 1, 0)
-                    apiBooks += requestApi(query, "kakao", 0, 2)
+                    apiBooks += apiClientService.requestApi(query, "naver", 1, 0)
+                    apiBooks += apiClientService.requestApi(query, "kakao", 0, 2)
                 }
 
                 1 -> {
-                    apiBooks += requestApi(query, "naver", 100, 0)
-                    apiBooks += requestApi(query, "kakao", 0, 4)
+                    apiBooks += apiClientService.requestApi(query, "naver", 100, 0)
+                    apiBooks += apiClientService.requestApi(query, "kakao", 0, 4)
                 }
 
                 2 -> {
-                    apiBooks += requestApi(query, "kakao", 0, 10)
+                    apiBooks += apiClientService.requestApi(query, "kakao", 0, 10)
                 }
             }
             saveBooks(apiBooks)
             bookList = searchBooksDB(query)
 
-            if (bookList.size >= 200) {
+            if (bookList.size >= 300) {
                 break
             }
             start++
@@ -107,80 +91,16 @@ class BookService(
     }
 
     /**
-     * -- Api 요청 메소드 --
-     * 네이버 도서와 카카오 도서 Api 요청을 통합한 메서드
-     *
-     * @param -- query 검색어 --
-     * @param -- apiType 요청하는 Api 종류 --
-     * @param -- naverStart 네이버 api 검색 시작 위치 --
-     * @param -- kakaoPage 카카오 api 검색 페이지 수 --
-     *
-     * @return -- List<BookDTO> --
-     * @author -- 정재익 --
-     * @since -- 3월 01일 --
-     */
-    private fun requestApi(query: String, apiType: String, naverStart: Int, kakaoPage: Int): List<BookDTO> {
-        val restTemplate = RestTemplate(SimpleClientHttpRequestFactory())
-        val (headers, url, responseKey) = getApiRequestParams(query, apiType, naverStart, kakaoPage)
-
-        val entity = HttpEntity<String>(headers)
-        val response: ResponseEntity<Map<String, Any>> = restTemplate.exchange(
-            url, HttpMethod.GET, entity, object : ParameterizedTypeReference<Map<String, Any>>() {}
-        )
-
-        val rawData = (response.body?.get(responseKey) as? List<*>)?.filterNotNull()
-            ?: throw BookException(BookErrorCode.BOOK_NOT_FOUND)
-
-        return rawData.map { convertToBook(it, apiType) }
-    }
-
-    /**
-     * -- Api 설정 메소드 --
-     * 네이버 도서와 카카오 도서 종류에 따라 다른 http헤더와 주소값을 반환한다
-     *
-     * @param -- query 검색어 --
-     * @param -- apiType 요청하는 Api 종류 --
-     * @param -- naverStart 네이버 api 검색 시작 위치 --
-     * @param -- kakaoPage 카카오 api 검색 페이지 수 --
-     *
-     * @return -- Triple<HttpHeaders, String, String> --
-     * @author -- 정재익 --
-     * @since -- 3월 01일 --
-     */
-    private fun getApiRequestParams(
-        query: String,
-        apiType: String,
-        naverStart: Int,
-        kakaoPage: Int
-    ): Triple<HttpHeaders, String, String> {
-        val headers = HttpHeaders()
-
-        return when (apiType.lowercase()) {
-            "kakao" -> {
-                headers["Authorization"] = "KakaoAK $kakaoKey"
-                Triple(headers, "$kakaoUrl?query=$query&target=author&page=$kakaoPage&size=50", "documents")
-            }
-
-            else -> {
-                headers["X-Naver-Client-Id"] = clientId
-                headers["X-Naver-Client-Secret"] = clientSecret
-                Triple(headers, "$naverUrl?query=$query&display=100&start=$naverStart", "items")
-            }
-        }
-    }
-
-    /**
-     * -- 통합 검색 메소드 --
-     * 검색어를 기반으로 제목과 설명을 조사하여 관련된 책을 최대 200개까지 반환하는 메소드
+     * -- 도서 통합 검색 메소드--
+     * 검색어를 기반으로 제목과 설명을 조사하여 관련된 책을 반환하는 메소드
      *
      * @param -- query (검색어) --
      * @return -- List<BookDTO> --
      * @author -- 정재익 --
-     * @since -- 3월 03일 --
+     * @since -- 3월 04일 --
      */
     fun searchBooksDB(query: String): List<BookDTO> {
         return bookRepository.searchFullText(query)
-            .take(200)
             .map { BookUtil.entityToDTO(it) }
     }
 
@@ -199,7 +119,7 @@ class BookService(
     }
 
     /**
-     * -- 베스트셀러 검색 메소드 --
+     * -- 베스트셀러 반환 메소드 --
      *
      * @param -- page 페이지--
      * @param -- size 페이지에 보이는 수량--
@@ -216,28 +136,21 @@ class BookService(
     /**
      * -- db 저장 메소드 --
      * isbn을 통해 중복검사
+     * 대량의 데이터가 들어올시에는 1000개씩 쪼개서 받아들임
+     * DB 무결성 유지를 위해 isbn이 존재하지 않는 책들은 db에 저장하지 않음
+     *
      *
      * @param -- List<Book> 중복이 제거되지 않은 책 목록 --
      * @author -- 정재익 --
-     * @since -- 2월 11일 --
+     * @since -- 3월 04일 --
      */
     @Transactional
     fun saveBooks(books: List<BookDTO>) {
-        val uniqueBooks = BookUtil.removeDuplicateBooks(books)
-        val existingIsbns = bookRepository.findExistingIsbns(uniqueBooks.mapNotNull { it.isbn }).toSet()
-
+        val uniqueBooks = BookUtil.removeDuplicateBooks(books).filter { it.isbn.isNotBlank() }
+        val existingIsbns = bookRepository.findExistingIsbns(uniqueBooks.map { it.isbn }).toSet()
 
         val booksToSave = uniqueBooks.filterNot { existingIsbns.contains(it.isbn) }.map { dto ->
-            Book(
-                id = null,
-                title = dto.title ?: "제목 정보가 없습니다",
-                author = dto.author ?: "작가 정보가 없습니다",
-                description = dto.description ?: "설명 정보가 없습니다",
-                image = dto.image ?: "이미지 파일이 없습니다",
-                isbn = dto.isbn ?: "isbn 정보가 없습니다",
-                ranking = null,
-                favoriteCount = dto.favoriteCount
-            )
+            Book(null, dto.title, dto.author, dto.description, dto.image, dto.isbn, null, dto.favoriteCount)
         }
         if (booksToSave.isNotEmpty()) {
             booksToSave.chunked(1000).forEach { batch ->
@@ -251,6 +164,7 @@ class BookService(
     /**
      * -- 베스트셀러 db 저장 메소드 --
      * isbn을 통해 중복검사 이미 존재하는 책들은 순위만 수정되고 나머지는 이어받음
+     * DB 무결성 유지를 위해 isbn이 존재하지 않는 책들은 db에 저장하지 않음
      * 존재하지 않는 책들은 새로 저장됨
      *
      * @param -- List<Book> 중복이 제거되지 않은 베스트셀러 목록 --
@@ -260,56 +174,23 @@ class BookService(
     @Transactional
     fun saveBestsellers(books: List<BookDTO>) {
         bookRepository.resetAllRankings()
-        books.forEach { dto ->
-            val existingBook = bookRepository.findByIsbn(dto.isbn ?: "")
 
-            if (existingBook != null) {
-                existingBook.ranking = dto.ranking
-                entityManager.merge(existingBook)
-            } else {
-                val book = Book(
-                    id = null,
-                    title = dto.title ?: "제목 정보가 없습니다",
-                    author = dto.author ?: "작가 정보가 없습니다",
-                    description = dto.description ?: "설명 정보가 없습니다",
-                    image = dto.image ?: "이미지 파일이 없습니다",
-                    isbn = dto.isbn ?: "ISBN 정보가 없습니다",
-                    ranking = dto.ranking,
-                    favoriteCount = 0
-                )
-                entityManager.persist(book)
+        books.filter { it.isbn.isNotBlank() }
+            .forEach { dto ->
+                val existingBook = bookRepository.findByIsbn(dto.isbn)
+
+                if (existingBook != null) {
+                    existingBook.ranking = dto.ranking
+                    entityManager.merge(existingBook)
+                } else {
+                    val book = Book(null, dto.title, dto.author, dto.description, dto.image, dto.isbn, dto.ranking, 0)
+                    entityManager.persist(book)
+                }
             }
-        }
         entityManager.flush()
         entityManager.clear()
     }
 
-    /**
-     * -- BookDTO 변환 메소드 --
-     * api 응답 데이터를 BookDTO로 변환한다
-     *
-     * @param -- item api 응답 데이터 --
-     * @param -- String apiType 네이버와 카카오 구분 --
-     * @return BookDTO
-     * @author 정재익
-     * @since 2월 18일
-     */
-    private fun convertToBook(item: Any, apiType: String): BookDTO {
-        val bookDto = when (apiType.lowercase()) {
-            "kakao" -> objectMapper.convertValue(item, KakaoDTO::class.java)
-            else -> objectMapper.convertValue(item, NaverDTO::class.java)
-        }
-        return BookDTO(
-            id = 0L,
-            title = bookDto.title,
-            author = bookDto.author,
-            description = bookDto.description,
-            image = bookDto.image,
-            isbn = bookDto.isbn,
-            ranking = null,
-            favoriteCount = 0
-        )
-    }
 
 //
 //    /**

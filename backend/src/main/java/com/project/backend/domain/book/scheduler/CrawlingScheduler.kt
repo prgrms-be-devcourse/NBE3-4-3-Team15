@@ -1,6 +1,7 @@
 package com.project.backend.domain.book.scheduler
 
 import com.project.backend.domain.book.service.CrawlingService
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class CrawlingScheduler(private val crawlingService: CrawlingService) {
+    private val logger = LoggerFactory.getLogger(CrawlingScheduler::class.java)
 
     /**
      * -- 크롤링 스케줄러 --
@@ -23,8 +25,8 @@ class CrawlingScheduler(private val crawlingService: CrawlingService) {
      */
     @Scheduled(cron = "0 10 * * * *")
     fun scheduledCrawling() {
-        println("크롤링 시작: ${java.time.LocalDateTime.now()}")
+        logger.info("크롤링 시작: ${java.time.LocalDateTime.now()}")
         crawlingService.main()
-        println("크롤링 완료: ${java.time.LocalDateTime.now()}")
+        logger.info("크롤링 완료: ${java.time.LocalDateTime.now()}")
     }
 }

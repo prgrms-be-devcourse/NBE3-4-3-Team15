@@ -28,15 +28,20 @@ interface BookRepository : JpaRepository<Book, Long> {
 
     /**
      * -- 전문검색 인덱싱을 n-gram분석 알고리즘으로 구현하여 제목과 설명에서 단어를 뽑아내어 검색어와 관련있는 책을 반환하는 메서드 --
+     * 책은 최대 300개까지 반환함
      *
-     * @return -- List<Book> 검색어 결과 --
+     * @return -- List<Book> 검색어 결과와 관련된 책 리스트  --
      *
      * @author -- 정재익 --
-     * @since -- 3월 03일 --
+     * @since -- 3월 04일 --
      */
     @Query(
-        value = "SELECT * FROM book " +
-                "WHERE MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE)",
+        value = """
+        SELECT * FROM book 
+        WHERE MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+        ORDER BY MATCH(title, description) AGAINST(:keyword IN NATURAL LANGUAGE MODE) DESC
+        LIMIT 300
+    """,
         nativeQuery = true
     )
     fun searchFullText(@Param("keyword") keyword: String): List<Book>
