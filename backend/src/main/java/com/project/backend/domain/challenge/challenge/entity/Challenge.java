@@ -1,6 +1,6 @@
-package com.project.backend.domain.challenge.entity;
+package com.project.backend.domain.challenge.challenge.entity;
 
-import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,11 +36,17 @@ public class Challenge extends BaseEntity {
 
     private LocalDateTime endDate;
 
-    // 0: 대기, 1: 시작, 2: 종료
-    private int status;
+    @Enumerated(EnumType.STRING)
+    private ChallengeStatus status;
 
-    private int totalDeposit;
+    private long totalDeposit;
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Member> members;
+    private List<Entry> entries;
+
+    public enum ChallengeStatus {
+        WAITING,
+        STARTED,
+        ENDED
+    }
 }

@@ -1,16 +1,13 @@
-package com.project.backend.domain.challenge.controller;
+package com.project.backend.domain.challenge.challenge.controller;
 
-import com.project.backend.domain.challenge.service.ChallengeService;
+import com.project.backend.domain.challenge.challenge.service.ChallengeService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  *
@@ -30,10 +27,11 @@ public class ChallengeController {
     @Transactional
     public ResponseEntity<GenericResponse<Void>> join(
             @PathVariable long id,
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestBody long deposit
             ) {
 
-        challengeService.join(id, user);
+        challengeService.join(id, user, deposit);
 
         return ResponseEntity.ok(GenericResponse.of("성공"));
     }

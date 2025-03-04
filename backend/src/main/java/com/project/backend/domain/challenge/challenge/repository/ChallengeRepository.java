@@ -1,6 +1,6 @@
-package com.project.backend.domain.challenge.repository;
+package com.project.backend.domain.challenge.challenge.repository;
 
-import com.project.backend.domain.challenge.entity.Challenge;
+import com.project.backend.domain.challenge.challenge.entity.Challenge;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

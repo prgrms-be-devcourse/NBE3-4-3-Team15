@@ -1,4 +1,4 @@
-package com.project.backend.domain.challenge.exception;
+package com.project.backend.domain.challenge.challenge.exception;
 
 
 import com.project.backend.global.response.GenericResponse;
