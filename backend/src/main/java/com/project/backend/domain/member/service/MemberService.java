@@ -20,7 +20,6 @@ import java.util.List;
 import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
 /**
- *
  * 회원 Service
  *
  * @author 손진영
@@ -70,6 +69,7 @@ public class MemberService {
 
     /**
      * 로그인 (JWT 발급)
+     *
      * @param loginDto 로그인 요청 DTO(아이디, 비밀번호 포함)
      * @return JWT 토큰 (로그인 성공 시 반환)
      * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
@@ -78,8 +78,7 @@ public class MemberService {
      * @since 25. 2. 6.
      */
     public String login(LoginDto loginDto) {
-        Member member = memberRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(()->new MemberException(NON_EXISTING_USERNAME));
+        Member member = getMemberByUsername(loginDto.getUsername());
 
         if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) { // 암호화된 비밀번호 비교
             throw new MemberException(INCORRECT_PASSWORD);
@@ -98,9 +97,8 @@ public class MemberService {
      * @since 25. 1. 27.
      */
     public MemberDto getMyProfile(String username) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
-        
+        Member member = getMemberByUsername(username);
+
         return new MemberDto(member);
     }
 
@@ -108,17 +106,15 @@ public class MemberService {
      * 회원 정보 수정
      *
      * @param username 현재 로그인한 사용자의 아이디
-     * @param mineDto 변경할 회원 정보 DTO
+     * @param mineDto  변경할 회원 정보 DTO
      * @return MemberDto 수정된 회원 정보 DTO
      * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않은 경우.
-     *
      * @author 손진영
      * @since 25. 1. 28.
      */
     @Transactional
     public MemberDto modify(String username, MineDto mineDto) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
+        Member member = getMemberByUsername(username);
 
         member.updateMemberInfo(
                 mineDto.getEmail(),
@@ -132,7 +128,8 @@ public class MemberService {
 
     /**
      * 비밀번호 변경
-     * @param username 현재 로그인한 사용자의 아이디
+     *
+     * @param username          현재 로그인한 사용자의 아이디
      * @param passwordChangeDto 비밀번호 변경 요청 DTO (현재 비밀번호, 새 비밀번호 포함)
      * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
      *                         INCORRECT_PASSWORD: 현재 비밀번호가 올바르지 않은 경우
@@ -142,21 +139,20 @@ public class MemberService {
      */
     @Transactional
     public void changePassword(String username, PasswordChangeDto passwordChangeDto) {
-        memberRepository.findByUsername(username)
-                .map(member -> {
-                    if (!passwordEncoder.matches(passwordChangeDto.getCurrentPassword(), member.getPassword())) {
-                        throw new MemberException(INCORRECT_PASSWORD);
-                    }
-                    if (passwordChangeDto.getNewPassword().equals(passwordChangeDto.getCurrentPassword())) {
-                        throw new MemberException(SAME_AS_OLD_PASSWORD);
-                    }
-                    member.updatePassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
-                    return member;
-                })
-                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));}
+        Member member = getMemberByUsername(username);
+
+        if (!passwordEncoder.matches(passwordChangeDto.getCurrentPassword(), member.getPassword())) {
+            throw new MemberException(INCORRECT_PASSWORD);
+        }
+        if (passwordChangeDto.getNewPassword().equals(passwordChangeDto.getCurrentPassword())) {
+            throw new MemberException(SAME_AS_OLD_PASSWORD);
+        }
+        member.updatePassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+    }
 
     /**
      * 회원 탈퇴
+     *
      * @param username 현재 로그인한 사용자 아이디
      * @param password 입력된 비밀번호
      * @throws MemberException NON_EXISTING_ID: 해당 아이디의 회원이 존재하지 않는 경우
@@ -166,17 +162,18 @@ public class MemberService {
      */
     @Transactional
     public void delete(String username, String password) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
+        Member member = getMemberByUsername(username);
 
-        if(!passwordEncoder.matches(password, member.getPassword())) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new MemberException(INCORRECT_PASSWORD);
         }
 
         // 탈퇴 회원이 찜한 도서 찜 취소 처리 및 도서 테이블 데이터 UPDATE
         List<Long> bookIds = favoriteRepository.findBookIdsByMemberId(member.getId()); // 탈퇴 회원이 찜한 도서 조회
         favoriteRepository.deleteByMemberId(member.getId()); // 찜 취소
-        for (Long bookId : bookIds) { bookRepository.decreaseFavoriteCount(bookId); } // 찜 취소된 도서 favoriteCount 감소
+        for (Long bookId : bookIds) {
+            bookRepository.decreaseFavoriteCount(bookId);
+        } // 찜 취소된 도서 favoriteCount 감소
         bookRepository.deleteBooksZeroFavoriteCount(); // 찜 수가 0이라면 도서 테이블에서 삭제
 
         memberRepository.delete(member);
@@ -184,18 +181,31 @@ public class MemberService {
 
     /**
      * ID 기반 member 조회
+     *
      * @param memberId
      * @return MemberID
-     *
      * @author 이광석
      * @since 25.02.10
      */
-    public MemberDto getMemberById(Long memberId){
+    public MemberDto getMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(()->new MemberException(
+                .orElseThrow(() -> new MemberException(
                         NON_EXISTING_USERID
                 ));
 
         return new MemberDto(member);
+    }
+
+    /**
+     * Username 기반 member 조회
+     *
+     * @param username
+     * @return MemberUsername
+     * @author 손진영
+     * @since 25.03.04
+     */
+    public Member getMemberByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
     }
 }

@@ -1,5 +1,6 @@
 package com.project.backend.domain.member.entity;
 
+import com.project.backend.domain.challenge.entity.Challenge;
 import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
@@ -41,6 +42,10 @@ public class Member extends BaseEntity {
     private String nickname;
 
     private LocalDate birth;
+
+    @ManyToOne
+    @JoinColumn(name = "challenge_id")
+    private Challenge challenge;
 
     @ManyToMany(mappedBy = "recommendMember")
     private List<Review> recommendReviews;
