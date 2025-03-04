@@ -36,7 +36,7 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
                 "JOIN f.book b " +
                 "WHERE f.member.id = :memberId")
     )
-    fun findFavoriteBooksByMemberId(@Param("memberId") memberId: Long?, pageable: Pageable?): Page<BookDTO?>?
+    fun findFavoriteBooksByMemberId(@Param("memberId") memberId: Long, pageable: Pageable): Page<BookDTO>
 
     /**
      * -- 특정 회원의 찜 목록 삭제 --
