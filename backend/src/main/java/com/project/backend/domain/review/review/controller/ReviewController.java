@@ -1,6 +1,7 @@
 package com.project.backend.domain.review.review.controller;
 
 
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.authority.CustomUserDetails;
@@ -27,6 +28,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
     private final ReviewService reviewService;
+    private final MemberService memberService;
 
 
     /**
@@ -60,7 +62,8 @@ public class ReviewController {
 
     public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails){
 
-        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userDetails);
+        Long memberId = reviewService.myId(userDetails);
+        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(memberId);
         return ResponseEntity.ok(GenericResponse.of(
             reviewsDTOS,
                 "리뷰 목록 반환 성공"
@@ -106,7 +109,8 @@ public class ReviewController {
 
     public ResponseEntity<GenericResponse<String>>postReview( @RequestBody ReviewsDTO reviewsDTO,
                                                @AuthenticationPrincipal CustomUserDetails userDetails){
-        reviewService.write(userDetails,reviewsDTO);
+        Long memberId = reviewService.myId(userDetails);
+        reviewService.write(memberId,reviewsDTO);
 
 
 
@@ -131,7 +135,10 @@ public class ReviewController {
     public ResponseEntity<GenericResponse<ReviewsDTO>> putReviews( @RequestBody ReviewsDTO reviewsDTO,
                                              @PathVariable("reviewId") Long reviewId,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails){
-        reviewService.modify(reviewsDTO,reviewId,userDetails);
+        reviewService.authorityCheck(userDetails,reviewId);
+        Long memberId = reviewService.myId(userDetails);
+
+        reviewService.modify(reviewsDTO,reviewId,memberId);
         return ResponseEntity.ok(GenericResponse.of(
                 reviewsDTO,
                 "리뷰 수정 성공"
@@ -153,7 +160,10 @@ public class ReviewController {
 
     public ResponseEntity<GenericResponse<ReviewsDTO>> deleteReviews(@PathVariable("reviewId") Long id,
                                                      @AuthenticationPrincipal CustomUserDetails userDetails){
-        ReviewsDTO review=  reviewService.delete(id,userDetails);
+        reviewService.authorityCheck(userDetails,id);
+        Long memberId = reviewService.myId(userDetails);
+
+        ReviewsDTO review=  reviewService.delete(id,memberId);
         return ResponseEntity.ok(GenericResponse.of(
                 review,
                 "리뷰 삭제 성공"
@@ -176,8 +186,8 @@ public class ReviewController {
 
     public ResponseEntity<GenericResponse<ReviewsDTO>> recommendReview(@PathVariable("reviewId") Long reviewId,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
-
-        boolean result = reviewService.recommend(reviewId,userDetails);
+        Long memberId = reviewService.myId(userDetails);
+        boolean result = reviewService.recommend(reviewId,memberId);
 
         ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
 
