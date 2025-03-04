@@ -1,6 +1,6 @@
 package com.project.backend.domain.member.service;
 
-import com.project.backend.domain.book.repository.BookRepository;
+import com.project.backend.domain.book.repository.BookRepository2;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
@@ -33,7 +33,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final FavoriteRepository favoriteRepository;
-    private final BookRepository bookRepository;
+    private final BookRepository2 bookRepository;
 
     /**
      * 회원가입 처리

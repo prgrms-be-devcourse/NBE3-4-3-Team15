@@ -55,7 +55,7 @@ class BookController(private val bookService: BookService) {
      * @author -- 정재익 --
      * @since -- 3월 04일 --
      */
-    @GetMapping
+    @GetMapping("/search")
     @Operation(summary = "도서 검색")
     fun searchBooks(
         @RequestParam(name = "query") query: String,
@@ -83,50 +83,4 @@ class BookController(private val bookService: BookService) {
         return ResponseEntity.ok(GenericResponse.of(detailBook))
     }
 
-//    /**
-//     * 도서 찜하기,취소하기 기능
-//     *
-//     * @param -- isbn --
-//     * @param -- 프론트에 있는 bookdto
-//     * @param -- customUserDetails 로그인한 사용자 정보 --
-//     * @return -- GenericResponse<String>
-//     * @author -- 정재익, 김남우 --
-//     * @since -- 2월 9일 --
-//     */
-//    @PostMapping("/{isbn}/favorite")
-//    @Operation(summary = "도서 찜하기 / 찜취소하기")
-//    public ResponseEntity<GenericResponse<String>> favoriteBook(
-//    @PathVariable(name = "isbn") String isbn,
-//    @RequestBody BookDTO bookDto,
-//    @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-//
-//        bookDto.setIsbn(isbn);
-//        boolean isFavorited = bookService.favoriteBook(bookDto, customUserDetails.getUsername());
-//
-//        return isFavorited
-//        ? ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of("찜한 도서가 추가되었습니다."))
-//        : ResponseEntity.ok(GenericResponse.of("찜한 도서가 취소되었습니다."));
-//    }
-//
-//    /**
-//     * -- 찜 도서 목록 확인 메소드 --
-//     * 로그인한 사용자의 정보를 통해 favoriteRepository에서 찜한 도서 목록 조회
-//     *
-//     * @param customUserDetails 로그인한 사용자 정보
-//     * @param page 페이지 번호 (기본값: 0)
-//     * @param size 페이지 크기 (기본값: 10)
-//     * @return GenericResponse<Page<BookDTO>>
-//     * @author 김남우
-//     * @since 2월 10일
-//     */
-//    @GetMapping("/favorite")
-//    @Operation(summary = "도서 찜 목록")
-//    public ResponseEntity<GenericResponse<Page<BookDTO>>> getFavoriteBooks(
-//    @AuthenticationPrincipal CustomUserDetails customUserDetails,
-//    @RequestParam(name = "page", defaultValue = "1") int page,
-//    @RequestParam(name = "size", defaultValue = "10") int size) {
-//
-//        Page<BookDTO> favoriteBooks = bookService.getFavoriteBooks(customUserDetails.getUsername(), page, size);
-//        return ResponseEntity.ok(GenericResponse.of(favoriteBooks, "찜한 도서 목록입니다."));
-//    }
 }
