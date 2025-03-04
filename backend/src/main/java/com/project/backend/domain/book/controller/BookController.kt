@@ -110,4 +110,26 @@ class BookController(private val bookService: BookService) {
         else
             ResponseEntity.ok(GenericResponse.of("찜한 도서가 취소되었습니다."))
     }
+
+    /**
+     * -- 찜 도서 목록 확인 메소드 --
+     * 로그인한 사용자의 정보를 통해 favoriteRepository에서 찜한 도서 목록 조회
+     *
+     * @param customUserDetails 로그인한 사용자 정보
+     * @param page 페이지 번호
+     * @param size 페이지 크기
+     * @return GenericResponse<Page<BookDTO>>
+     * @author 김남우
+     * @since 3월 4일
+     */
+    @GetMapping("/favorite")
+    @Operation(summary = "도서 찜 목록")
+    fun getFavoriteBooks(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @RequestParam(name = "page", defaultValue = "1") page: Int,
+        @RequestParam(name = "size", defaultValue = "10") size: Int
+    ): ResponseEntity<GenericResponse<Page<BookDTO>>> {
+        val favoriteBooks = bookService.getFavoriteBooks(customUserDetails.username, page, size)
+        return ResponseEntity.ok(GenericResponse.of(favoriteBooks, "찜한 도서 목록입니다."))
+    }
 }
