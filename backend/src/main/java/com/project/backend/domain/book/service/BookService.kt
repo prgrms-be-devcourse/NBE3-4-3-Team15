@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -377,5 +378,29 @@ class BookService(
 
             true
         }
+    }
+
+    /**
+     * -- 찜 도서 목록 메소드 --
+     * 로그인한 유저의 찜 도서 목록 반환
+     *
+     * @param -- username --
+     * @return -- List<BookDTO> --
+     * @author -- 김남우 --
+     * @since -- 3월 4일 --
+     */
+    fun getFavoriteBooks(username: String, page: Int, size: Int): Page<BookDTO> {
+        val member = memberRepository.findByUsername(username)
+            .orElseThrow { MemberException(MemberErrorCode.NON_EXISTING_USERNAME) }
+
+        val pageable = PageRequest.of(page - 1, size)
+
+        val favoriteBooks: Page<BookDTO> = favoriteRepository.findFavoriteBooksByMemberId(member.id, pageable)
+
+        if (favoriteBooks.isEmpty) {
+            throw BookException(BookErrorCode.NO_FAVORITE_BOOKS)
+        }
+
+        return favoriteBooks
     }
 }
