@@ -83,7 +83,7 @@ interface BookRepository : JpaRepository<Book, Long> {
     @Modifying
     @Transactional
     @Query("UPDATE Book b SET b.favoriteCount = b.favoriteCount + :amount WHERE b.id = :#{#book.id}")
-    fun updateFavoriteCount(@Param("book") book: Book?, @Param("amount") amount: Int)
+    fun updateFavoriteCount(@Param("book") book: Book, @Param("amount") amount: Int)
 
     /**
      * -- 도서 찜 개수 감소 --
@@ -97,7 +97,7 @@ interface BookRepository : JpaRepository<Book, Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Book b SET b.favoriteCount = b.favoriteCount - 1 WHERE b.id = :bookId AND b.favoriteCount > 0")
-    fun decreaseFavoriteCount(@Param("bookId") bookId: Long?)
+    fun decreaseFavoriteCount(@Param("bookId") bookId: Long)
 
     /**
      * -- 찜 개수가 0인 도서 삭제 --
