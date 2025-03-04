@@ -5,12 +5,18 @@ import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.dto.KakaoDTO
 import com.project.backend.domain.book.dto.NaverDTO
 import com.project.backend.domain.book.entity.Book
+import com.project.backend.domain.book.entity.Favorite
 import com.project.backend.domain.book.entity.Keyword
 import com.project.backend.domain.book.exception.BookErrorCode
 import com.project.backend.domain.book.exception.BookException
+import com.project.backend.domain.book.key.FavoriteId
 import com.project.backend.domain.book.repository.BookRepository
+import com.project.backend.domain.book.repository.FavoriteRepository
 import com.project.backend.domain.book.repository.KeywordRepository
 import com.project.backend.domain.book.util.BookUtil
+import com.project.backend.domain.member.exception.MemberErrorCode
+import com.project.backend.domain.member.exception.MemberException
+import com.project.backend.domain.member.repository.MemberRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
@@ -25,6 +31,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
+
 /**
  * -- 도서 서비스 클래스 --
  *
@@ -36,6 +43,8 @@ class BookService(
     private val bookRepository: BookRepository,
     private val objectMapper: ObjectMapper,
     private val keywordRepository: KeywordRepository,
+    private val memberRepository: MemberRepository,
+    private val favoriteRepository: FavoriteRepository,
     @Value("\${naver.client-id}") val clientId: String,
     @Value("\${naver.client-secret}") val clientSecret: String,
     @Value("\${naver.book-search-url}") val naverUrl: String,
@@ -312,82 +321,61 @@ class BookService(
         )
     }
 
-//
-//    /**
-//     * -- 도서 찜, 찜취소 메소드 --
-//     *
-//     * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
-//     * 책이 받은 찜한 수를 Book DB에 최신화
-//     * 유저 정보와 책 id을 favorite DB에 생성 혹은 삭제
-//     * 책의 찜 수가 0이 될 시에 Book DB에서 책 데이터 삭제
-//     * 책의 정보가 책 DB에 이미 존재 할 시 같은 책을 추가하지 않고 favoritecount만 수정하여 중복 책 등록 방지
-//     *
-//     * @param -- bookDto -- 프론트에서 BODY로 받은 DTO
-//     * @param -- username --
-//     * @return -- boolean --
-//     * @author -- 정재익, 김남우 --
-//     * @since -- 2월 9일 --
-//     */
-//    @Transactional
-//    public boolean favoriteBook(BookDTO bookDto, String username) {
-//
-//        Member member = memberRepository.findByUsername(username)
-//            .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
-//
-//        Book book = bookRepository.findByIsbn(bookDto.getIsbn());
-//        FavoriteId favoriteId = new FavoriteId(member.getId(), book.getId());
-//
-//        if (favoriteRepository.existsById(favoriteId)) {
-//            favoriteRepository.deleteById(favoriteId); // 먼저 favorite 테이블에서 삭제
-//
-//            int favoriteCount = book.getFavoriteCount();
-//            if (favoriteCount == 1) {
-//                bookRepository.delete(book); // favoriteCount가 1이면 Book 테이블에서 도서 삭제
-//            }
-//            else {
-//                bookRepository.updateFavoriteCount(book, -1); // 아니면 favoriteCount 감소
-//            }
-//
-//            return false;
-//        }
-//
-//        else {
-//            bookRepository.updateFavoriteCount(book, +1); // favoriteCount 1 증가
-//
-//            Favorite favorite = Favorite.builder()
-//                .id(favoriteId)
-//                .book(book)
-//                .member(member)
-//                .build();
-//
-//            favoriteRepository.save(favorite); // favorite 테이블에 저장
-//
-//            return true;
-//        }
-//    }
-//
-//    /**
-//     * -- 찜 도서 목록 메소드 --
-//     * 로그인한 유저의 찜 도서 목록 반환
-//     *
-//     * @param -- username --
-//     * @return -- List<BookDTO> --
-//     * @author -- 김남우 --
-//     * @since -- 2월 10일 --
-//     */
-//    public Page<BookDTO> getFavoriteBooks(String username, int page, int size) {
-//
-//        Member member = memberRepository.findByUsername(username)
-//            .orElseThrow(() -> new MemberException(MemberErrorCode.NON_EXISTING_USERNAME));
-//
-//        Pageable pageable = PageRequest.of(page - 1, size);
-//
-//        Page<BookDTO> favoriteBooks = favoriteRepository.findFavoriteBooksByMemberId(member.getId(), pageable); // 멤버 ID에 해당하는 찜 도서 목록 조회
-//
-//        if (favoriteBooks.isEmpty()) {
-//            throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS);
-//        }
-//
-//        return favoriteBooks;
-//    }
+    /**
+     * -- 도서 찜, 찜취소 메소드 --
+     *
+     * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
+     * 책이 받은 찜한 수를 Book DB에 최신화
+     * 유저 정보와 책 id을 favorite DB에 생성 혹은 삭제
+     * 책의 찜 수가 0이 될 시에 Book DB에서 책 데이터 삭제
+     * 책의 정보가 책 DB에 이미 존재 할 시 같은 책을 추가하지 않고 favoritecount만 수정하여 중복 책 등록 방지
+     *
+     * @param -- bookDto -- 프론트에서 BODY로 받은 DTO
+     * @param -- username --
+     * @return -- boolean --
+     * @author -- 김남우 --
+     * @since -- 3월 4일 --
+     */
+    @Transactional
+    fun favoriteBook(bookDto: BookDTO, username: String): Boolean {
+
+        val member = memberRepository.findByUsername(username)
+            .orElseThrow { MemberException(MemberErrorCode.NON_EXISTING_USERNAME) }
+
+        val isbn = bookDto.isbn
+            ?: throw BookException(BookErrorCode.ISBN_NOT_NULL)
+
+        val book = bookRepository.findByIsbn(isbn)
+            ?: throw BookException(BookErrorCode.BOOK_NOT_FOUND)
+
+        val bookId = book.id
+            ?: throw BookException(BookErrorCode.ID_NOT_NULL)
+
+        val favoriteId = FavoriteId(member.id, bookId)
+
+        return if (favoriteRepository.existsById(favoriteId)) {
+            favoriteRepository.deleteById(favoriteId)
+
+            if (book.favoriteCount == 1) {
+                bookRepository.delete(book)
+            }
+            else {
+                bookRepository.updateFavoriteCount(book, -1)
+            }
+
+            false
+        }
+        else {
+            bookRepository.updateFavoriteCount(book, 1)
+
+            val favorite = Favorite(
+                id = favoriteId,
+                book = book,
+                member = member
+            )
+            favoriteRepository.save(favorite)
+
+            true
+        }
+    }
 }
