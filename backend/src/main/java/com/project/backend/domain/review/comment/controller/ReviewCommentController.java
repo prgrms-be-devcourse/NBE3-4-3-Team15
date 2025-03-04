@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -104,8 +105,13 @@ public class ReviewCommentController {
     @Operation(summary = "리뷰 댓글 생성")
 
     public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
+<<<<<<< HEAD
                                             @Valid @RequestBody ReviewCommentDto reviewCommentDto,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails){
+=======
+                                                                         @Valid @RequestBody ReviewCommentDto reviewCommentDto,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
+>>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 
 
        ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,userDetails);

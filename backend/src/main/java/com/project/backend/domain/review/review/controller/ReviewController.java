@@ -103,11 +103,18 @@ public class ReviewController {
     @PostMapping
     @Operation(summary = "리뷰 추가")
     @Transactional
+<<<<<<< HEAD
 
     public ResponseEntity<GenericResponse<String>>postReview( @RequestBody ReviewsDTO reviewsDTO,
                                                @AuthenticationPrincipal CustomUserDetails userDetails){
         reviewService.write(userDetails,reviewsDTO);
 
+=======
+    public ResponseEntity<GenericResponse<String>> postReview(@RequestBody ReviewsDTO reviewsDTO,
+                                                              @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        reviewService.write(reviewsDTO,userDetails.getUsername());
+>>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
 
 
         return ResponseEntity.ok(GenericResponse.of(
