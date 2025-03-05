@@ -39,6 +39,8 @@ public class Attendance extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CheckType checkType;
 
+    private long writeId;
+
     public enum CheckType {
         REVIEW,
         COMMENT

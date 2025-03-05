@@ -3,7 +3,6 @@ package com.project.backend.domain.member.service;
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.challenge.attendance.service.AttendanceService;
-import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.challenge.entry.service.EntryService;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
@@ -19,10 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.project.backend.domain.member.exception.MemberErrorCode.*;
 
@@ -96,8 +92,6 @@ public class MemberService {
         String token = jwtUtil.generateToken(member.getUsername());
         // JWT를 Set-Cookie로 저장 (HttpOnly, Secure 옵션을 설정하여 보안 강화)
         response.addHeader("Set-Cookie", "accessToken=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict");
-
-        challengeCookie(response, member);
 
         return token;// JWT 토큰 발급
     }
@@ -222,18 +216,5 @@ public class MemberService {
     public Member getMemberByUsername(String username) {
         return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
-    }
-
-    private void challengeCookie(HttpServletResponse response, Member member) {
-        List<Entry> myChallenge = entryService.getMyChallenge(member);
-
-        Map<Long, Boolean> map = new HashMap<>();
-
-        for (Entry entry : myChallenge) {
-            boolean flag = attendanceService.getCheck(entry.getChallenge().getId(), entry.getMember().getId(), LocalDate.now());
-            map.put(entry.getChallenge().getId(), flag);
-        }
-
-        response.addHeader("Set-Cookie", "challenge=" + map + "; HttpOnly; Path=/; Secure; Max-Age=3600; SameSite=Strict");
     }
 }

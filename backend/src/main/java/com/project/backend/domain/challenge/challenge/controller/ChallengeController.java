@@ -56,4 +56,13 @@ public class ChallengeController {
         return ResponseEntity.ok(GenericResponse.of("챌린지 참가 완료"));
     }
 
+    @PostMapping("{id}/validation")
+    public ResponseEntity<GenericResponse<Void>> validation(
+            @PathVariable long id,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Challenge challenge = challengeService.validation(id, user);
+
+        return ResponseEntity.ok(GenericResponse.of("%s 챌린지 인증 성공".formatted(challenge.getName())));
+    }
 }

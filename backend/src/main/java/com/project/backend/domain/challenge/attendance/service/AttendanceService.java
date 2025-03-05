@@ -22,12 +22,16 @@ public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
 
-    public boolean getCheck(long challengeId, long memberId, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay().minusNanos(1);
+    public boolean getCheck(long challengeId, long memberId) {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().plusDays(1).atStartOfDay().minusNanos(1);
 
         Optional<Attendance> op = attendanceRepository.findByChallengeIdAndMemberIdAndCreatedAtBetween(challengeId, memberId, startOfDay, endOfDay);
 
         return op.isPresent();
+    }
+
+    public void save(Attendance attendance) {
+        attendanceRepository.save(attendance);
     }
 }
