@@ -14,6 +14,13 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * RabbitMQService
+ * RabbitMQ 서비스 단
+ *
+ * @author 이광석
+ * @since 25.03.04
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -25,7 +32,7 @@ public class RabbitMQService {
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
 
-    @Value("${rabbitmq.queue.name")
+    @Value("${rabbitmq.queue.name}")
     private String queueName;
 
     private final RabbitTemplate rabbitTemplate;
@@ -35,47 +42,71 @@ public class RabbitMQService {
     private final SseService sseService;
 
 
+    /**
+     * 메시지를 exchange에 전달
+     * @param memberId
+     * @param messageDto (Long id,String content)
+     *
+     * @author 이광석
+     * @since 25.02.28
+     */
     public void sendMessage(Long memberId,MessageDto messageDto){
         String routingKey = this.routingKey+memberId;
 
 
         log.info(("message sent: {}"),messageDto.toString());
+
+
         rabbitTemplate.convertAndSend(exchangeName,routingKey,messageDto);
     }
 
 
-
+    /**
+     * rabbitmq listener
+     *  설정한(setQueueNames) 큐에 메시지가 추가되는것을 감지
+     *  큐에 메시지가 추가되면 onMessage 를 실행하고 message를 전달
+     *  onmessage는 messgae를 json(converter.fromMessage)으로 변경
+     *   sse(sendNotification)를 통해 클라이언트로 전달
+     *
+     * @param memberId
+     * @return container
+     *
+     * @author 이광석
+     * @since 25.02.28
+     */
     public SimpleMessageListenerContainer dynamicRabbitListener(Long memberId){
-        System.out.println("rabbitmq 큐에서 거냄");
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(this.routingKey+memberId);
+        container.setQueueNames(this.queueName+memberId);
 
-        System.out.println("Connection Factory: " + connectionFactory);
 
         container.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
-                System.out.println("onMessage");
-                MessageConverter converter = rabbitTemplate.getMessageConverter();
+                MessageConverter converter = rabbitTemplate.getMessageConverter(); //
                 Object obj = converter.fromMessage(message);
                 if(obj instanceof MessageDto){
                     MessageDto messageDto = (MessageDto) obj;
-                    System.out.println("sse 전달전");
                     sseService.sendNotification(memberId, messageDto.getContent());
+                }else{
+                    System.out.println("not messageDto");
                 }
             }
         });
         container.start();
-        if (container.isRunning()) {
-            System.out.println("✅ Listener is running!");
-        } else {
-            System.out.println("❌ Listener is NOT running!");
-        }
+
         return container;
     }
 
 
+    /**
+     * rabbitmq에서 사용할 queue 생성
+     * @param memberId
+     * @return queueName
+     *
+     * @author 이광석
+     * @since 25.02.28
+     */
     public String createMemberQueue(Long memberId){
         String queueName =this.queueName +memberId;
 

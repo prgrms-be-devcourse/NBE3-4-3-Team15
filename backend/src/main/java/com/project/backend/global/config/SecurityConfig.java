@@ -68,7 +68,8 @@ public class SecurityConfig {
                                 "members/{id}/followers",
                                 "members/{id}/followings",
                                 "redis/**",
-                                "rabbit/**").permitAll()
+                                "rabbit/**",
+                                "notification/sse").permitAll()
 
                         // h2-console, swagger 접근 허용
                         .requestMatchers(PathRequest.toH2Console()).permitAll()

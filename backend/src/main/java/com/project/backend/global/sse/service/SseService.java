@@ -8,6 +8,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 
+
+/**
+ * sse 관련 service
+ */
 @Service
 @RequiredArgsConstructor
 public class SseService {

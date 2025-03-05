@@ -131,7 +131,6 @@ public class NotificationService {
 
 
     /**
-<<<<<<< HEAD
      * 로그인 된 사용자와 알림 member가 같은지 확인
      * @param userDetails
      * @param notification
