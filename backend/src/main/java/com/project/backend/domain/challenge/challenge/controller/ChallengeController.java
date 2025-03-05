@@ -38,7 +38,7 @@ public class ChallengeController {
         return ResponseEntity.ok(
                 GenericResponse.of(
                         new ChallengeDto(challenge),
-                        "성공"
+                        "챌린지 생성 성공"
                 )
         );
     }
@@ -53,6 +53,7 @@ public class ChallengeController {
 
         challengeService.join(id, user, deposit);
 
-        return ResponseEntity.ok(GenericResponse.of("성공"));
+        return ResponseEntity.ok(GenericResponse.of("챌린지 참가 완료"));
     }
+
 }
