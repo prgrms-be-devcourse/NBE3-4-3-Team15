@@ -1,4 +1,4 @@
-package com.project.backend.domain.book.config
+package com.project.backend.global.redis
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
