@@ -1,15 +1,14 @@
 package com.project.backend.domain.book.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.entity.Book
 import com.project.backend.domain.book.entity.Favorite
-import com.project.backend.domain.book.entity.Keyword
 import com.project.backend.domain.book.exception.BookErrorCode
 import com.project.backend.domain.book.exception.BookException
 import com.project.backend.domain.book.key.FavoriteId
 import com.project.backend.domain.book.repository.BookRepository
 import com.project.backend.domain.book.repository.FavoriteRepository
-import com.project.backend.domain.book.repository.KeywordRepository
 import com.project.backend.domain.book.repository.RedisRepository
 import com.project.backend.domain.book.util.BookUtil
 import com.project.backend.domain.member.exception.MemberErrorCode
@@ -21,12 +20,6 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.PageRequest
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
-import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Service
 
 /**
@@ -40,15 +33,8 @@ class BookService(
     private val bookRepository: BookRepository,
     private val redisRepository: RedisRepository,
     private val apiClientService: ApiClientService,
-    private val objectMapper: ObjectMapper,
-    private val keywordRepository: KeywordRepository,
     private val memberRepository: MemberRepository,
     private val favoriteRepository: FavoriteRepository,
-    @Value("\${naver.client-id}") val clientId: String,
-    @Value("\${naver.client-secret}") val clientSecret: String,
-    @Value("\${naver.book-search-url}") val naverUrl: String,
-    @Value("\${kakao.key}") val kakaoKey: String,
-    @Value("\${kakao.url}") val kakaoUrl: String
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
@@ -219,33 +205,6 @@ class BookService(
             }
         entityManager.flush()
         entityManager.clear()
-    }
-
-    /**
-     * -- BookDTO 변환 메소드 --
-     * api 응답 데이터를 BookDTO로 변환한다
-     *
-     * @param -- item api 응답 데이터 --
-     * @param -- String apiType 네이버와 카카오 구분 --
-     * @return BookDTO
-     * @author 정재익
-     * @since 2월 18일
-     */
-    private fun convertToBook(item: Any, apiType: String): BookDTO {
-        val bookDto = when (apiType.lowercase()) {
-            "kakao" -> objectMapper.convertValue(item, KakaoDTO::class.java)
-            else -> objectMapper.convertValue(item, NaverDTO::class.java)
-        }
-        return BookDTO(
-            id = 0L,
-            title = bookDto.title,
-            author = bookDto.author,
-            description = bookDto.description,
-            image = bookDto.image,
-            isbn = bookDto.isbn,
-            ranking = null,
-            favoriteCount = 0
-        )
     }
 
     /**
