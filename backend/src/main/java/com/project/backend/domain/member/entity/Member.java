@@ -64,4 +64,8 @@ public class Member extends BaseEntity {
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
+
+    public Long getId() {
+        return id;
+    }
 }

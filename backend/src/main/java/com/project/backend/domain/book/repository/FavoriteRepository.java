@@ -36,27 +36,3 @@ public interface FavoriteRepository extends JpaRepository<Favorite, FavoriteId> 
             "JOIN f.book b " +
             "WHERE f.member.id = :memberId")
     Page<BookDTO> findFavoriteBooksByMemberId(@Param("memberId") Long memberId, Pageable pageable);
-
-    /**
-     * -- 특정 회원의 찜 목록 삭제 --
-     *
-     * @param memberId 회원 ID
-     * @author -- 정재익 --
-     * @since -- 2월 10일 --
-     */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Favorite f WHERE f.member.id = :memberId")
-    void deleteByMemberId(@Param("memberId") Long memberId);
-
-    /**
-     * -- 특정 회원이 찜한 도서 ID 목록 조회 --
-     *
-     * @param memberId 회원 ID
-     * @return 회원이 찜한 도서 ID 목록
-     * @author -- 김남우 --
-     * @since -- 2월 10일 --
-     */
-    @Query("SELECT f.book.id FROM Favorite f WHERE f.member.id = :memberId")
-    List<Long> findBookIdsByMemberId(@Param("memberId") Long memberId);
-}

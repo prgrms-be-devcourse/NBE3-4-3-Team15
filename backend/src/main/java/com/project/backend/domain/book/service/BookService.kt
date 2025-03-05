@@ -2,17 +2,31 @@ package com.project.backend.domain.book.service
 
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.entity.Book
+import com.project.backend.domain.book.entity.Favorite
+import com.project.backend.domain.book.entity.Keyword
 import com.project.backend.domain.book.exception.BookErrorCode
 import com.project.backend.domain.book.exception.BookException
+import com.project.backend.domain.book.key.FavoriteId
 import com.project.backend.domain.book.repository.BookRepository
+import com.project.backend.domain.book.repository.FavoriteRepository
+import com.project.backend.domain.book.repository.KeywordRepository
 import com.project.backend.domain.book.repository.RedisRepository
 import com.project.backend.domain.book.util.BookUtil
+import com.project.backend.domain.member.exception.MemberErrorCode
+import com.project.backend.domain.member.exception.MemberException
+import com.project.backend.domain.member.repository.MemberRepository
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Service
 
 /**
@@ -26,6 +40,15 @@ class BookService(
     private val bookRepository: BookRepository,
     private val redisRepository: RedisRepository,
     private val apiClientService: ApiClientService,
+    private val objectMapper: ObjectMapper,
+    private val keywordRepository: KeywordRepository,
+    private val memberRepository: MemberRepository,
+    private val favoriteRepository: FavoriteRepository,
+    @Value("\${naver.client-id}") val clientId: String,
+    @Value("\${naver.client-secret}") val clientSecret: String,
+    @Value("\${naver.book-search-url}") val naverUrl: String,
+    @Value("\${kakao.key}") val kakaoKey: String,
+    @Value("\${kakao.url}") val kakaoUrl: String
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
@@ -196,5 +219,114 @@ class BookService(
             }
         entityManager.flush()
         entityManager.clear()
+    }
+
+    /**
+     * -- BookDTO 변환 메소드 --
+     * api 응답 데이터를 BookDTO로 변환한다
+     *
+     * @param -- item api 응답 데이터 --
+     * @param -- String apiType 네이버와 카카오 구분 --
+     * @return BookDTO
+     * @author 정재익
+     * @since 2월 18일
+     */
+    private fun convertToBook(item: Any, apiType: String): BookDTO {
+        val bookDto = when (apiType.lowercase()) {
+            "kakao" -> objectMapper.convertValue(item, KakaoDTO::class.java)
+            else -> objectMapper.convertValue(item, NaverDTO::class.java)
+        }
+        return BookDTO(
+            id = 0L,
+            title = bookDto.title,
+            author = bookDto.author,
+            description = bookDto.description,
+            image = bookDto.image,
+            isbn = bookDto.isbn,
+            ranking = null,
+            favoriteCount = 0
+        )
+    }
+
+    /**
+     * -- 도서 찜, 찜취소 메소드 --
+     *
+     * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
+     * 책이 받은 찜한 수를 Book DB에 최신화
+     * 유저 정보와 책 id을 favorite DB에 생성 혹은 삭제
+     * 책의 찜 수가 0이 될 시에 Book DB에서 책 데이터 삭제
+     * 책의 정보가 책 DB에 이미 존재 할 시 같은 책을 추가하지 않고 favoritecount만 수정하여 중복 책 등록 방지
+     *
+     * @param -- bookDto -- 프론트에서 BODY로 받은 DTO
+     * @param -- username --
+     * @return -- boolean --
+     * @author -- 김남우 --
+     * @since -- 3월 4일 --
+     */
+    @Transactional
+    fun favoriteBook(bookDto: BookDTO, username: String): Boolean {
+
+        val member = memberRepository.findByUsername(username)
+            .orElseThrow { MemberException(MemberErrorCode.NON_EXISTING_USERNAME) }
+
+        val isbn = bookDto.isbn
+            ?: throw BookException(BookErrorCode.ISBN_NOT_NULL)
+
+        val book = bookRepository.findByIsbn(isbn)
+            ?: throw BookException(BookErrorCode.BOOK_NOT_FOUND)
+
+        val bookId = book.id
+            ?: throw BookException(BookErrorCode.ID_NOT_NULL)
+
+        val favoriteId = FavoriteId(member.id, bookId)
+
+        return if (favoriteRepository.existsById(favoriteId)) {
+            favoriteRepository.deleteById(favoriteId)
+
+            if (book.favoriteCount == 1) {
+                bookRepository.delete(book)
+            }
+            else {
+                bookRepository.updateFavoriteCount(book, -1)
+            }
+
+            false
+        }
+        else {
+            bookRepository.updateFavoriteCount(book, 1)
+
+            val favorite = Favorite(
+                id = favoriteId,
+                book = book,
+                member = member
+            )
+            favoriteRepository.save(favorite)
+
+            true
+        }
+    }
+
+    /**
+     * -- 찜 도서 목록 메소드 --
+     * 로그인한 유저의 찜 도서 목록 반환
+     *
+     * @param -- username --
+     * @return -- List<BookDTO> --
+     * @author -- 김남우 --
+     * @since -- 3월 4일 --
+     */
+    fun getFavoriteBooks(username: String, page: Int, size: Int): Page<BookDTO> {
+        val member = memberRepository.findByUsername(username)
+            .orElseThrow { MemberException(MemberErrorCode.NON_EXISTING_USERNAME) }
+
+        val pageable = PageRequest.of(page - 1, size)
+
+        val favoriteBooks: Page<BookDTO> = favoriteRepository.findFavoriteBooksByMemberId(member.id, pageable)
+
+        if (favoriteBooks.isEmpty) {
+            throw BookException(BookErrorCode.NO_FAVORITE_BOOKS)
+        }
+
+        return favoriteBooks
     }
 }
