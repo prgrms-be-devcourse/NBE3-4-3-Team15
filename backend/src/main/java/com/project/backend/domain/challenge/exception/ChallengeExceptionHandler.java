@@ -1,4 +1,4 @@
-package com.project.backend.domain.challenge.challenge.exception;
+package com.project.backend.domain.challenge.exception;
 
 
 import com.project.backend.global.response.GenericResponse;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackages = "com.project.backend.domain.review")
+@RestControllerAdvice(basePackages = "com.project.backend.domain.challenge")
 public class ChallengeExceptionHandler {
 
     @ExceptionHandler(ChallengeException.class)
