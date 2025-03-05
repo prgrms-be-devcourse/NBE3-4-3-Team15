@@ -33,7 +33,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final FavoriteRepository favoriteRepository;
-    private final BookRepository2 bookRepository;
+    private final BookRepository bookRepository;
 
     /**
      * 회원가입 처리
