@@ -4,8 +4,10 @@ import com.project.backend.domain.challenge.attendance.entity.Attendance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 /**
- *
  * 챌린지 레포지토리
  *
  * @author 손진영
@@ -13,4 +15,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
+    Optional<Attendance> findByChallengeIdAndMemberIdAndCreatedAtBetween(long challengeId, long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay);
 }

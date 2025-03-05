@@ -62,10 +62,7 @@ public class MemberController {
     @Operation(summary = "로그인")
     public ResponseEntity<GenericResponse<String>> login(
             @RequestBody @Valid LoginDto loginDto, HttpServletResponse response) {
-        String token = memberService.login(loginDto); // JWT 토큰 발급
-
-        // JWT를 Set-Cookie로 저장 (HttpOnly, Secure 옵션을 설정하여 보안 강화)
-        response.addHeader("Set-Cookie", "accessToken=" + token + "; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict");
+        String token = memberService.login(loginDto, response); // JWT 토큰 발급
 
         return ResponseEntity.ok(GenericResponse.of("로그인 성공"));
     }

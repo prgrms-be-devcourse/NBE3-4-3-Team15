@@ -9,6 +9,8 @@ import com.project.backend.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  *
  * 챌린지 참가 서비스
@@ -39,5 +41,9 @@ public class EntryService {
                     ChallengeErrorCode.DUPLICATE_ENTRY.getMessage()
             );
         }
+    }
+
+    public List<Entry> getMyChallenge(Member member) {
+        return entryRepository.findByMemberId(member.getId());
     }
 }
