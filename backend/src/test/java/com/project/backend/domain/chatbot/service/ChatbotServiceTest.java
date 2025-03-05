@@ -1,5 +1,6 @@
 package com.project.backend.domain.chatbot.service;
 
+import com.project.backend.domain.chatbot.dto.AnswerDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,9 +27,9 @@ class ChatbotServiceTest {
      */
     @Test
     public void test1(){
-        String s = chatbotService.generate("동화책 하나 추천해줘", 1L);
+        AnswerDTO s = chatbotService.generate("동화책 하나 추천해줘", 1);
 
-        System.out.println(s);
+        System.out.println(s.getMessage());
     }
 
 }
