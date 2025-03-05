@@ -46,7 +46,11 @@ public class Challenge extends BaseEntity {
 
     public enum ChallengeStatus {
         WAITING,
-        STARTED,
-        ENDED
+        START,
+        END
+    }
+
+    public void addDeposit(long deposit) {
+        totalDeposit += deposit;
     }
 }
