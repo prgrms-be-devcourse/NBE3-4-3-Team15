@@ -24,31 +24,37 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	//✅ Spring Boot Core
+	implementation 'org.springframework.boot:spring-boot-starter-web' // 웹 애플리케이션 (Spring MVC)
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA (데이터베이스 ORM)
+	implementation 'org.springframework.boot:spring-boot-starter-security' // Spring Security (인증, 인가)
+	implementation 'org.springframework.boot:spring-boot-starter-validation' // 유효성 검사 (Validation)
 
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'org.modelmapper:modelmapper:3.1.1'
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	//✅ OAuth2 & JWT (보안 및 인증)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2 클라이언트
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5' // JWT API
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5' // JWT 구현체
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JWT JSON 변환 (Jackson 지원)
 
-	//redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	//✅ Database 관련 (H2 & MySQL)
+	runtimeOnly 'com.h2database:h2' // H2 인메모리 DB (테스트용)
+	runtimeOnly 'com.mysql:mysql-connector-j' // MySQL 드라이버
 
-	//rebbitMQ 의존성
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	//✅ Swagger (API 문서화)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1' // Springdoc OpenAPI UI (Swagger)
+
+	//✅ Redis (캐싱 및 메시지 큐)
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Spring Data Redis
+
+	//✅ RabbitMQ (비동기 메시징)
+	implementation 'org.springframework.boot:spring-boot-starter-amqp' // RabbitMQ 지원 (AMQP 프로토콜)
+
+	//✅ 유틸리티 (Lombok, ModelMapper 등)
+	implementation 'org.modelmapper:modelmapper:3.1.1' // ModelMapper (객체 변환)
+
+	compileOnly 'org.projectlombok:lombok' // Lombok (컴파일 시 코드 자동 생성)
+	annotationProcessor 'org.projectlombok:lombok' // Lombok annotation 처리기
+
 
 }
 
