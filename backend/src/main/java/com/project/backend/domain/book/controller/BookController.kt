@@ -99,7 +99,7 @@ class BookController(private val bookService: BookService) {
     @PostMapping("/{isbn}/favorite")
     @Operation(summary = "도서 찜하기 / 찜취소하기")
     fun favoriteBook(
-        @PathVariable(name = "isbn") isbn: String?,
+        @PathVariable(name = "isbn") isbn: String,
         @RequestBody bookDto: BookDTO,
         @AuthenticationPrincipal customUserDetails: CustomUserDetails
     ): ResponseEntity<GenericResponse<String>> {
