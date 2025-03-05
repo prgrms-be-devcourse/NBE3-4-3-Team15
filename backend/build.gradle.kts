@@ -57,7 +57,6 @@ dependencies {
 
     // ✅ [Redis 관련 (Spring Data Redis)]
     implementation("org.springframework.boot:spring-boot-starter-data-redis") // Spring Data Redis
-    implementation("redis.clients:jedis:4.3.1") // jedis (Redis 클라이언트)
     implementation("org.redisson:redisson-spring-boot-starter:3.18.0") // Redisson (Redis 클라이언트)
 
     // ✅ [Kotlin 관련]
