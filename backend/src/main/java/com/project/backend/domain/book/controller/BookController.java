@@ -52,6 +52,15 @@ public class BookController {
         return ResponseEntity.ok(GenericResponse.of(books));
     }
 
+    /**
+     * -- 도서 상세 검색 --
+     * book id로 DB의 정보를 가져옴
+     *
+     * @param -- id 책 아이디 --
+     * @return -- ResponseEntity<GenericResponse<Page<BookDTO>>> --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
     @GetMapping("/{id}")
     @Operation(summary = "도서 상세 검색")
     public ResponseEntity<GenericResponse<BookDTO>> searchDetailBooks(

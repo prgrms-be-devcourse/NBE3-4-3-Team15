@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
@@ -80,49 +79,51 @@ public class BookService {
             throw new BookException(BookErrorCode.QUERY_EMPTY);
         }
 
-        List<Book> allBooks = new ArrayList<>();
+        List<Book> books = new ArrayList<>();
 
-        allBooks.addAll(requestApi(query, "naver", 1));
-        allBooks.addAll(requestApi(query, "naver", 100));
-        allBooks.addAll(requestApi(query, "kakao", 0));
+        books.addAll(requestApi(query, "naver", 1));
+        books.addAll(requestApi(query, "naver", 100));
+        books.addAll(requestApi(query, "kakao", 0));
 
-        saveBooks(allBooks);
-
-        List<BookDTO> uniqueBooks = searchBookDB(query);
-
-        Pageable pageable = PageRequest.of(page, size);
-        int start = page * size;
-
-        if (start >= uniqueBooks.size()) {
-            return new PageImpl<>(Collections.emptyList(), pageable, uniqueBooks.size());
-        }
-
-        int end = Math.min(start + size, uniqueBooks.size());
-        List<BookDTO> pagedBooks = uniqueBooks.subList(start, end);
-
-        return new PageImpl<>(pagedBooks, pageable, uniqueBooks.size());
+        saveBooks(books);
+        List<BookDTO> bookList = searchBooksDB(query);
+        return BookUtil.pagingBooks(page, size, bookList);
     }
+
+    /**
+     * -- 도서 상세 검색 메소드 --
+     *
+     * @param -- id 책 아이디--
+     * @return -- BookDTO --
+     * @author -- 정재익 --
+     * @since -- 2월 11일 --
+     */
+    public BookDTO searchDetailBooks(Long id) {
+        return bookRepository.findById(id)
+                .map(BookUtil::EntityToDTO)
+                .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
+    }
+
 
     /**
      * -- db 저장 메소드 --
      * isbn을 통해 중복검사
      *
-     * @param -- List<Book> 책 목록 --
+     * @param -- List<Book> 중복이 제거되지 않은 책 목록 --
      * @author -- 정재익 --
      * @since -- 2월 11일 --
      */
-    public void saveBooks(List<Book> allBooks) {
+    public void saveBooks(List<Book> books) {
+        List<Book> uniqueBooks = BookUtil.removeDuplicateBooks(books);
 
-        List<Book> uniqueBooks = BookUtil.removeDuplicateBooks(allBooks);
-
-        Set<String> existingIsbns = new HashSet<>(
+        Set<String> existingIsbn = new HashSet<>(
                 bookRepository.findByIsbnIn(
                         uniqueBooks.stream().map(Book::getIsbn).toList()
                 ).stream().map(Book::getIsbn).toList()
         );
 
         List<Book> booksToSave = uniqueBooks.stream()
-                .filter(book -> !existingIsbns.contains(book.getIsbn()))
+                .filter(book -> !existingIsbn.contains(book.getIsbn()))
                 .toList();
 
         if (booksToSave.isEmpty()) {
@@ -141,41 +142,11 @@ public class BookService {
      * @author -- 정재익 --
      * @since -- 2월 11일 --
      */
-    public List<BookDTO> searchBookDB(String query) {
-        List<Book> books = bookRepository.findByTitleOrAuthor(query);
-        return books.stream()
+    public List<BookDTO> searchBooksDB(String query) {
+        return bookRepository.findByTitleOrAuthor(query).stream()
                 .limit(400)
-                .map(book -> new BookDTO(
-                        book.getId(),
-                        book.getTitle(),
-                        book.getAuthor(),
-                        book.getDescription(),
-                        book.getImage(),
-                        book.getIsbn(),
-                        book.getFavoriteCount()
-                ))
+                .map(BookUtil::EntityToDTO)
                 .collect(Collectors.toList());
-    }
-    /**
-     * -- 도서 상세 검색 메소드 --
-     *
-     * @param -- id 책 아이디--
-     * @return -- BookDTO --
-     * @author -- 정재익 --
-     * @since -- 2월 11일 --
-     */
-    public BookDTO searchDetailBooks(Long id) {
-        Optional<Book> bookOptional = bookRepository.findById(id);
-
-        return bookOptional.map(book -> new BookDTO(
-                book.getId(),
-                book.getTitle(),
-                book.getAuthor(),
-                book.getDescription(),
-                book.getImage(),
-                book.getIsbn(),
-                book.getFavoriteCount()
-        )).orElseThrow(() -> new RuntimeException("책을 찾을 수 없습니다. ID: " + id));
     }
 
     /**
@@ -225,7 +196,6 @@ public class BookService {
                 .map(item -> BookUtil.convertToBook(item, apiType, objectMapper))
                 .collect(Collectors.toList());
     }
-
 
     /**
      * -- 도서 찜, 찜취소 메소드 --

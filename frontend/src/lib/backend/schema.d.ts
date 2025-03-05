@@ -417,7 +417,6 @@ export interface components {
             success?: boolean;
         };
         MineDto: {
-            password?: string;
             email: string;
             nickname: string;
             /** Format: int32 */

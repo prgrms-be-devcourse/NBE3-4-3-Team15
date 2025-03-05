@@ -1,12 +1,16 @@
 "use client";
 
-import { Margarine } from "next/font/google";
-import Image from "next/image";
 import client from "@/lib/client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+/**
+ * 회원가입 페이지
+ *
+ * @author 손진영
+ * @since 2025.02.11
+ */
+export default function join() {
   const router = useRouter();
   const [id, setId] = useState("");
   const [password1, setPassword1] = useState("");
@@ -16,6 +20,7 @@ export default function Login() {
   const [gender, setGender] = useState(0);
   const [birth, setBirth] = useState("");
 
+  // 회원가입 요청
   const join = async () => {
     try {
       const response = await client.POST("/members", {
@@ -48,6 +53,7 @@ export default function Login() {
         router.replace("/");
       }
     } catch (error) {
+      console.error("회워가입에 실패하였습니다.");
       alert("회원가입에 실패하였습니다.");
     }
   };
@@ -119,31 +125,26 @@ export default function Login() {
             </tr>
             <tr>
               <td>성별</td>
-              <td
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 90px)",
-                }}
-              >
-                <label style={{ margin: "auto" }}>
+              <td>
+                <label>
                   <input
                     type="radio"
-                    className="border rounded"
-                    value={0}
-                    checked={gender == 0}
-                    onChange={() => setGender(0)}
+                    value="0"
+                    checked={gender === "0"}
+                    onChange={(e) => setGender(e.target.value)} // 남자 선택 시 상태 업데이트
+                    required
                   />
-                  <span style={{ marginLeft: "10px" }}>남자</span>
+                  남자
                 </label>
-                <label style={{ margin: "auto" }}>
+                <label>
                   <input
                     type="radio"
-                    className="border rounded"
-                    value={1}
-                    checked={gender == 1}
-                    onChange={() => setGender(1)}
+                    value="1"
+                    checked={gender === "1"}
+                    onChange={(e) => setGender(e.target.value)} // 여자 선택 시 상태 업데이트
+                    required
                   />
-                  <span style={{ marginLeft: "10px" }}>여자</span>
+                  여자
                 </label>
               </td>
             </tr>

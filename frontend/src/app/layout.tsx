@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import ClientLayout from "./ClientLayout";
-import client from "@/lib/client";
 import { cookies } from "next/headers";
 
 const geistSans = Geist({
@@ -25,12 +25,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = cookies();
+  const accessToken = (await cookieStore).get("accessToken")?.value || null;
+  console.log("accessToken = " + accessToken);
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientLayout>{children}</ClientLayout>
+        <ClientLayout accessToken={accessToken}>{children}</ClientLayout>
       </body>
     </html>
   );
