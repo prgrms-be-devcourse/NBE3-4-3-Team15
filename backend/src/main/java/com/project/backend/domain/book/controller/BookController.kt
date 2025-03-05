@@ -40,7 +40,7 @@ class BookController(private val bookService: BookService) {
     @GetMapping
     @Operation(summary = "베스트셀러")
     fun mainPage(@RequestParam(name = "page") page: Int = 0,
-                 @RequestParam(name = "size") size: Int = 10
+                 @RequestParam(name = "size") size: Int = 49
     ): ResponseEntity<GenericResponse<Page<BookDTO>>> {
         val bestSellers = bookService.searchBestSellersDB(page, size)
         return ResponseEntity.ok(GenericResponse.of(bestSellers))
