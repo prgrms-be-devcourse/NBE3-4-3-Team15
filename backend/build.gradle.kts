@@ -21,57 +21,54 @@ repositories {
 }
 
 dependencies {
-    // ✅ Spring Boot 기본 스타터
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("org.projectlombok:lombok")
+    // ✅ [Spring Boot Core]
+    implementation("org.springframework.boot:spring-boot-starter-web") // 웹 애플리케이션
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa") // JPA (데이터베이스 ORM)
+    implementation("org.springframework.boot:spring-boot-starter-security") // Spring Security (인증, 인가)
+    implementation("org.springframework.boot:spring-boot-starter-validation") // 유효성 검사 (Validation)
 
-    // ✅ Kotlin 관련 라이브러리
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    // ✅ [OAuth2 / JWT (보안 및 인증)]
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client") // OAuth2 클라이언트
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5") // JWT API
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5") // JWT 구현체
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5") // JWT JSON 변환
 
-    // ✅ DB 관련 라이브러리
-    runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("com.h2database:h2")
-    implementation("redis.clients:jedis:4.3.1")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    // ✅ [Database (H2 & MySQL)]
+    runtimeOnly("com.h2database:h2") // H2 인메모리 DB
+    runtimeOnly("com.mysql:mysql-connector-j") // MySQL 드라이버
 
+    // ✅ [Swagger (API 문서화)]
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1") // Springdoc OpenAPI UI
 
-    // ✅ API 문서화 (Swagger)
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1")
+    // ✅ [Lombok (코드 간결화)]
+    compileOnly("org.projectlombok:lombok") // Lombok (컴파일 시 코드 자동 생성)
+    annotationProcessor("org.projectlombok:lombok") // Lombok annotation 처리기
 
-    // ✅ ModelMapper (객체 변환)
-    implementation("org.modelmapper:modelmapper:3.1.1")
+    // ✅ [Spring Boot DevTools]
+    developmentOnly("org.springframework.boot:spring-boot-devtools") // DevTools (자동 재시작)
 
-    // ✅ JWT 인증 관련
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    // ✅ [Test 관련]
+    testAnnotationProcessor ("org.projectlombok:lombok:1.18.30") // Lombok 어노테이션 처리기 (테스트 코드에서 Lombok 사용 시)
+    testImplementation("org.springframework.boot:spring-boot-starter-test") // 테스트 관련 (Junit 포함)
+    testImplementation("org.springframework.security:spring-security-test") // Spring Security 테스트
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0") // JUnit 최신 버전
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0") // JUnit 엔진 (런타임)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0") // JUnit 플랫폼 런처
 
-    // ✅ 비동기 및 크롤링 관련
+    // ✅ [Redis 관련 (Spring Data Redis)]
+    implementation("org.springframework.boot:spring-boot-starter-data-redis") // Spring Data Redis
+    implementation("redis.clients:jedis:4.3.1") // jedis (Redis 클라이언트)
+    implementation("org.redisson:redisson-spring-boot-starter:3.18.0") // Redisson (Redis 클라이언트)
+
+    // ✅ [Kotlin 관련]
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // Jackson Kotlin 모듈
+    implementation("org.jetbrains.kotlin:kotlin-reflect") // Kotlin 리플렉션 라이브러리
+
+    // ✅ [비동기 및 크롤링 관련]
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") // 코루틴
     implementation("org.jsoup:jsoup:1.18.3") // HTML 파싱
     implementation("com.microsoft.playwright:playwright:1.42.0") // Playwright (브라우저 자동화)
-
-    // ✅ 개발 편의 기능
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    implementation ("org.projectlombok:lombok:1.18.30")
-    annotationProcessor ("org.projectlombok:lombok:1.18.30")
-
-    testImplementation ("org.junit.jupiter:junit-jupiter:5.9.2")
-    testAnnotationProcessor ("org.projectlombok:lombok:1.18.30")
-
-    // ✅ 테스트 관련 라이브러리
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0") // JUnit 최신 버전
-    testImplementation("org.springframework.security:spring-security-test")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0") // JUnit 플랫폼 런처 추가
 }
-
 
 kotlin {
     compilerOptions {
