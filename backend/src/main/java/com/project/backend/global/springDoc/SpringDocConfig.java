@@ -38,4 +38,11 @@ public class SpringDocConfig {
                 .pathsToMatch("/review/**")
                 .build();
     }
+    @Bean
+    public GroupedOpenApi groupChallenge() {
+        return GroupedOpenApi.builder()
+                .group("challenge")
+                .pathsToMatch("/challenge/**")
+                .build();
+    }
 }
