@@ -9,7 +9,6 @@ import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
-import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -96,8 +95,10 @@ public class ReviewService {
      * @return  List<ReviewsDTO>
      */
     public List<ReviewsDTO> getUserReviews(CustomUserDetails userDetails) {
-        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(myId(userDetails));
-        return reviewsDTOS;
+        Member member = memberService.getMemberByUsername(userDetails.getUsername());
+        return member.getReviews().stream()
+                .map(ReviewsDTO::new)
+                .toList();
     }
 
 
@@ -110,10 +111,10 @@ public class ReviewService {
      */
 
     public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
-
+        Member member = memberService.getMemberByUsername(userDetails.getUsername());
 
         Review review =reviewRepository.save(Review.builder()
-                        .userId(myId(userDetails))
+                        .member(member)
                         .bookId(reviewsDTO.getBookId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
@@ -285,7 +286,7 @@ public class ReviewService {
      * @since 25.02.10
      */
     private void authorityCheck(CustomUserDetails userDetails, Review review){
-        Member member = memberRepository.findById(review.getUserId()).get(); // memberService로 변경 예정
+        Member member = memberRepository.findById(review.getMember().getId()).get(); // memberService로 변경 예정
 
 
         if(!member.getUsername().equals(userDetails.getUsername()))

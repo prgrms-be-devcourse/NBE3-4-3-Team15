@@ -19,7 +19,6 @@ import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -132,7 +131,7 @@ public class ReviewCommentService {
      */
     public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(review.getUserId())
+                .memberId(review.getMember().getId())
                 .reviewComment(reviewComment.getId())
                 .isCheck(false)
                 .build();
