@@ -21,7 +21,7 @@ const BookDetailPage = () => {
     const [book, setBook] = useState<BookDTO | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [liked, setLiked] = useState(false);
+    const [liked, setLiked] = useState(false); // 찜 상태 저장
 
     useEffect(() => {
         if (!isbn) return;
@@ -37,6 +37,7 @@ const BookDetailPage = () => {
             }
             const data = await response.json();
             setBook(data.data);
+            setLiked(data.data.isFavorited); // 서버에서 찜 여부 받아오기
         } catch (error) {
             console.error("도서 정보 조회 실패:", error);
             setError("도서 정보를 불러올 수 없습니다.");
@@ -45,8 +46,43 @@ const BookDetailPage = () => {
         }
     };
 
-    const toggleLike = () => {
-        setLiked(!liked);
+    const toggleLike = async () => {
+        if (!book) return;
+
+        try {
+            const response = await fetch(`http://localhost:8080/book/${isbn}/favorite`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(book), // bookDTO 전송
+                credentials: "include", // 로그인 정보 포함 (쿠키 기반 인증 사용 시)
+            });
+
+            if (!response.ok) {
+                throw new Error("찜하기 요청 실패");
+            }
+
+            const data = await response.json();
+            alert(data.message); // "찜한 도서가 추가되었습니다." 또는 "찜한 도서가 취소되었습니다."
+
+            // 찜 상태 반전 후, 새로운 favoriteCount 값으로 업데이트
+            setLiked((prev) => !prev);
+
+            // book이 null이 아님을 보장하고, favoriteCount만 업데이트
+            setBook((prevBook) => {
+                if (prevBook) {
+                    return {
+                        ...prevBook,
+                        favoriteCount: data.favoriteCount, // 서버에서 받은 최신 favoriteCount로 업데이트
+                    };
+                }
+                return prevBook; // prevBook이 null일 경우 그대로 반환
+            });
+        } catch (error) {
+            console.error("찜하기 요청 실패:", error);
+            alert("찜하기 요청에 실패했습니다.");
+        }
     };
 
     const shareBook = () => {
@@ -80,10 +116,10 @@ const BookDetailPage = () => {
                             <div className="mt-3 text-center">
                                 <button
                                     className={`flex items-center gap-1 text-lg ${liked ? "text-red-500" : "text-gray-500"}`}
-                                    onClick={toggleLike}
+                                    onClick={toggleLike} // ✅ 좋아요 클릭 시 API 요청
                                 >
                                     {liked ? <AiFillHeart /> : <AiOutlineHeart />}
-                                    <span>{liked ? "좋아요 취소" : "좋아요"} ({book.favoriteCount ?? 0})</span>
+                                    <span>{liked ? "찜 취소" : "찜하기"} ({book.favoriteCount ?? 0})</span>
                                 </button>
                                 <p className="text-sm text-gray-400 mt-1">📌 ISBN: {book.isbn}</p>
                             </div>
@@ -119,7 +155,4 @@ const BookDetailPage = () => {
     );
 };
 
-export default BookDetailPage;
-
-
-
+export default BookDetailPage
