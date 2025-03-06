@@ -65,7 +65,7 @@ const Page = () => {
             <section className="px-6 py-4 flex gap-4">
                 <div className="absolute left-[1%] w-[75vw] bg-white p-4 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-3">
-                        실시간 베스트셀러 TOP 100 <span className="text-sm text-gray-500">(3월 5일 12:00 기준)</span>
+                        실시간 베스트셀러 TOP 100 <span className="text-sm text-gray-500"></span>
                     </h2>
 
                     <div className="flex justify-between mb-2">

@@ -1,124 +1,193 @@
 "use client";
 
+import client from "@/lib/client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 /**
- * 로그인 페이지
+ * 회원가입 페이지
  *
  * @author 손진영
  * @since 2025.02.11
  */
-const Login: React.FC = () => {
+export default function Join() {
+  const router = useRouter();
   const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
+  const [password1, setPassword1] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [gender, setGender] = useState(0); // 0: 남자, 1: 여자
+  const [birth, setBirth] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // 로그인 요청
-  const login = async () => {
+  // 회원가입 요청
+  const join = async () => {
+    if (password1 !== password2) {
+      setErrorMessage("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
     try {
-      const response = await fetch("http://localhost:8080/members/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: id, password: password }),
-        credentials: "include", // 쿠키를 포함하도록 설정
+      const response = await client.POST("/members", {
+        body: {
+          username: id,
+          password1: password1,
+          password2: password2,
+          email: email,
+          nickname: nickname,
+          gender: gender.toString(), // gender를 숫자가 아닌 문자열로 전달
+          birth: birth,
+        },
       });
 
-      if (response.ok) {
-        window.location.href = "/";
+      if (response.response.ok) {
+        // 회원가입 성공 후 자동 로그인 처리
+        const loginResponse = await client.POST("/members/login", {
+          body: {
+            username: id,
+            password: password1,
+          },
+        });
+
+        if (loginResponse.response.ok) {
+          // 로그인 성공 후 홈으로 이동
+          router.replace("/");
+        } else {
+          setErrorMessage("자동 로그인에 실패하였습니다.");
+        }
       } else {
-        const errorData = await response.json();
-        alert(
-          `로그인에 실패하였습니다: ${errorData.message || "알 수 없는 오류"}`
-        );
+        const errorDetails = response.error.errorDetails;
+        let errorMessage = "";
+        for (let i = 0; i < errorDetails.length; i++) {
+          errorMessage +=
+              errorDetails[i].field === "password1"
+                  ? "Password"
+                  : errorDetails[i].field === "password2"
+                      ? "Password 확인"
+                      : errorDetails[i].field;
+          errorMessage += "는 " + errorDetails[i].reason + "\n";
+        }
+        setErrorMessage(errorMessage);
       }
     } catch (error) {
-      console.error("로그인에 실패하였습니다:", error);
-      alert("로그인에 실패하였습니다.");
+      console.error("회원가입에 실패하였습니다.");
+      setErrorMessage("회원가입에 실패하였습니다.");
     }
   };
 
-  // 소셜 로그인
-  const handleSocialLogin = (provider) => {
-    // Spring Boot OAuth2 로그인 엔드포인트로 리다이렉션
-    const oauthUrl = `http://localhost:8080/oauth2/authorization/${provider}`;
-    window.location.href = oauthUrl;
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          로그인
-        </h1>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-semibold text-center mb-6">회원가입</h2>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ID
-            </label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              required
-            />
-          </div>
+          {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-        </div>
+          <form className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">ID</label>
+              <input
+                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
+                  required
+              />
+            </div>
 
-        <div className="mt-6 flex justify-between">
-          <button
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
-            onClick={() => (window.location.href = "/member/join")}
-          >
-            회원가입
-          </button>
-          <button
-            onClick={login}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            로그인
-          </button>
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <input
+                  type="password"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={password1}
+                  onChange={(e) => setPassword1(e.target.value)}
+                  required
+              />
+            </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500 mb-3">소셜 로그인</p>
-          <div className="flex flex-col space-y-3 items-center">
-            <button
-              className="w-full bg-red-500 text-white px-6 py-2 text-center rounded-lg hover:bg-red-600 transition-all"
-              onClick={() => handleSocialLogin("google")}
-            >
-              구글 로그인
-            </button>
-            <button
-              className="w-full bg-green-500 text-white px-6 py-2 text-center rounded-lg hover:bg-green-600 transition-all"
-              onClick={() => handleSocialLogin("naver")}
-            >
-              네이버 로그인
-            </button>
-            <button
-              className="w-full bg-yellow-400 text-white px-6 py-2 text-center rounded-lg hover:bg-yellow-500 transition-all"
-              onClick={() => handleSocialLogin("kakao")}
-            >
-              카카오 로그인
-            </button>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Password 확인</label>
+              <input
+                  type="password"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                  type="email"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">별명</label>
+              <input
+                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  required
+              />
+            </div>
+
+            <div>
+              <span className="block text-sm font-medium text-gray-700">성별</span>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center">
+                  <input
+                      type="radio"
+                      value={0}
+                      checked={gender === 0}
+                      onChange={() => setGender(0)}
+                      required
+                      className="form-radio text-blue-500"
+                  />
+                  <span className="ml-2">남자</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                      type="radio"
+                      value={1}
+                      checked={gender === 1}
+                      onChange={() => setGender(1)}
+                      required
+                      className="form-radio text-pink-500"
+                  />
+                  <span className="ml-2">여자</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">생년월일</label>
+              <input
+                  type="date"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={birth}
+                  onChange={(e) => setBirth(e.target.value)}
+                  required
+              />
+            </div>
+
+            <div className="text-right">
+              <button
+                  type="button"
+                  onClick={join}
+                  className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                회원가입
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
   );
-};
-
-export default Login;
+}
