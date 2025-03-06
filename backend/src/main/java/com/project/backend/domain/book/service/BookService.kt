@@ -212,7 +212,6 @@ class BookService(
      * 책을 찜하는 기능 이미 찜을 했을 경우 찜 취소
      * 책이 받은 찜한 수를 Book DB에 최신화
      * 유저 정보와 책 id을 favorite DB에 생성 혹은 삭제
-     * 책의 찜 수가 0이 될 시에 Book DB에서 책 데이터 삭제
      * 책의 정보가 책 DB에 이미 존재 할 시 같은 책을 추가하지 않고 favoritecount만 수정하여 중복 책 등록 방지
      *
      * @param -- bookDto -- 프론트에서 BODY로 받은 DTO
@@ -228,7 +227,6 @@ class BookService(
             .orElseThrow { MemberException(MemberErrorCode.NON_EXISTING_USERNAME) }
 
         val isbn = bookDto.isbn
-            ?: throw BookException(BookErrorCode.ISBN_NOT_NULL)
 
         val book = bookRepository.findByIsbn(isbn)
             ?: throw BookException(BookErrorCode.BOOK_NOT_FOUND)
