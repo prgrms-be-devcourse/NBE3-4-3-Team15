@@ -48,4 +48,8 @@ public class MemberDto extends MineDto {
         this.nickname = member.getNickname();
         this.birth = member.getBirth();
     }
+
+    public Long getId(){
+        return id;
+    }
 }
