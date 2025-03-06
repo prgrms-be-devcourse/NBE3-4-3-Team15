@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from 'next/navigation';  // 여기 추가!
 import client from "@/lib/client";
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
@@ -25,6 +26,8 @@ export default function Mine() {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState(""); // 비밀번호 확인 필드 추가
 
+    const router = useRouter() // useRouter 훅 추가
+
     const getUserProfile = async () => {
         try {
             const response = await client.GET("/members/mine");
@@ -45,6 +48,10 @@ export default function Mine() {
     // 수정 상태 저장
     const edit = () => {
         setIsEditing(!isEditing);
+    };
+
+    const goToFavoriteBooksPage = () => {
+        router.push("/book/favorite"); // 새로운 페이지로 이동
     };
 
     // 수정 요청
@@ -166,11 +173,11 @@ export default function Mine() {
                                         })
                                     }
                                 >
-                                    <option value={1}>Male</option>
-                                    <option value={2}>Female</option>
+                                    <option value={0}>Male</option>
+                                    <option value={1}>Female</option>
                                 </select>
                             ) : (
-                                (userProfile.gender === 1 ? "Male" : "Female") || "Not specified"
+                                (userProfile.gender === 0 ? "Male" : "Female")
                             )}
                         </td>
                     </tr>
@@ -216,6 +223,9 @@ export default function Mine() {
             ) : (
                 <p>로딩 중...</p>
             )}
+            {/* 찜한 도서 목록 페이지로 이동하는 버튼 추가 */}
+            <button onClick={goToFavoriteBooksPage}>찜한 도서 목록 확인</button>
+
             <button onClick={() => setIsDeleteModalOpen(true)} className="delete-button">
                 회원 탈퇴
             </button>
