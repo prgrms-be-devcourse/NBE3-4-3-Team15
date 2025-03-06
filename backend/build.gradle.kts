@@ -1,10 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
+    java
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("io.freefair.lombok") version "8.6"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
+    id("io.freefair.lombok") version "8.6"
 }
 
 group = "jpabook"
@@ -18,6 +19,8 @@ java {
 
 repositories {
     mavenCentral()
+    maven("https://repo.spring.io/milestone")
+    maven("https://repo.spring.io/snapshot")
 }
 
 dependencies {
@@ -62,6 +65,10 @@ dependencies {
     // ✅ [Kotlin 관련]
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // Jackson Kotlin 모듈
     implementation("org.jetbrains.kotlin:kotlin-reflect") // Kotlin 리플렉션 라이브러리
+    implementation(platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")) // Spring AI BOM
+    implementation("org.springframework.ai:spring-ai-openai") // OpenAI API 연동
+    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter") // OpenAI Spring Boot 스타터
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8") // Kotlin 표준 라이브러리 (JDK 8 지원)
 
     // ✅ [비동기 및 크롤링 관련]
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") // 코루틴
