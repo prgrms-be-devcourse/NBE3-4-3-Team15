@@ -9,7 +9,6 @@ import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
-import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.review.entity.Review;
@@ -298,6 +297,20 @@ public class ReviewService {
         }
     }
 
+    /**
+     *
+     * 유저의 최신 리뷰 3개의 책 id 조회
+     *
+     * @param userId
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 5.
+     */
+    public List<Long> getBookIds(Long userId) {
+        List<Long> bookIds = reviewRepository.findAllByUserIdOrderByBookIdDesc(userId).stream().map(Review::getBookId).limit(3).toList();
 
+        return bookIds;
+    }
 
 }

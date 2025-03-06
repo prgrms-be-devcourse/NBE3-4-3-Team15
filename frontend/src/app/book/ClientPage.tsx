@@ -27,7 +27,6 @@ export default function ClientPage() {
   };
 
   const movePage = (pageNum) => {
-    console.log(pageNum);
     router.push(`/book?query=${query}&page=${pageNum}`);
   };
 
@@ -141,12 +140,12 @@ export default function ClientPage() {
         {books.map((book) => (
           <Link
             href={{
-              pathname: "/book/" + book.isbn,
+              pathname: "/book/" + book.id,
               query: {
                 book: JSON.stringify(book),
               },
             }}
-            as={"/book/" + book.isbn}
+            as={"/book/" + book.id}
             key={book.isbn}
           >
             <div>

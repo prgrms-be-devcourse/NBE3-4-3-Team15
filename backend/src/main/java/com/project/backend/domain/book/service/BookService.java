@@ -274,4 +274,22 @@ public class BookService {
 
         return favoriteBooks;
     }
+
+    /**
+     *
+     * 책 ID 리스트를 통해서 책 정보 중 제목을 조회하는 함수
+     *
+     * @param ids
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 5.
+     */
+    public List<String> searchBookTitlesByIds(List<Long> ids) {
+        List<Book> books = bookRepository.findAllById(ids);
+
+        List<String> list = books.stream().map(Book::getTitle).toList();
+
+        return list;
+    }
 }

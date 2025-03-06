@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.jetbrains.kotlin.jvm'
 }
 
 group = 'com.project'
@@ -21,6 +22,8 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
@@ -61,6 +64,13 @@ dependencies {
 	// ✅ [Redis 관련 의존성 추가 (Spring Data Redis)]
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Spring Data Redis
 	implementation 'org.redisson:redisson-spring-boot-starter:3.18.0' // Redisson (Redis 클라이언트)
+
+    implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
+    implementation 'org.springframework.ai:spring-ai-openai'
+
+    // perplexity 사용하기 위함
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 tasks.named('test') {
