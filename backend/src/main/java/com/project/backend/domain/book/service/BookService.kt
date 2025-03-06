@@ -239,12 +239,7 @@ class BookService(
         return if (favoriteRepository.existsById(favoriteId)) {
             favoriteRepository.deleteById(favoriteId)
 
-            if (book.favoriteCount == 1) {
-                bookRepository.delete(book)
-            }
-            else {
-                bookRepository.updateFavoriteCount(book, -1)
-            }
+            bookRepository.updateFavoriteCount(book, -1)
 
             false
         }
