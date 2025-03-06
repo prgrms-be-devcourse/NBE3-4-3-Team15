@@ -1,12 +1,14 @@
 package com.project.backend.domain.challenge.challenge.controller;
 
 import com.project.backend.domain.challenge.challenge.dto.ChallengeDto;
+import com.project.backend.domain.challenge.challenge.dto.DepositDto;
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
 import com.project.backend.domain.challenge.challenge.service.ChallengeService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +33,7 @@ public class ChallengeController {
 
     @PostMapping("/create")
     public ResponseEntity<GenericResponse<ChallengeDto>> create(
-            @RequestBody ChallengeDto challengeDto
+            @RequestBody @Valid ChallengeDto challengeDto
             ) {
         Challenge challenge = challengeService.create(challengeDto);
 
@@ -45,24 +47,31 @@ public class ChallengeController {
 
     @PostMapping("{id}/join")
     @Transactional
-    public ResponseEntity<GenericResponse<Void>> join(
+    public ResponseEntity<GenericResponse<ChallengeDto>> join(
             @PathVariable long id,
             @AuthenticationPrincipal CustomUserDetails user,
-            @RequestBody long deposit
+            @RequestBody DepositDto depositDto
             ) {
 
-        challengeService.join(id, user, deposit);
+        Challenge challenge = challengeService.join(id, user, depositDto.getDeposit());
 
-        return ResponseEntity.ok(GenericResponse.of("챌린지 참가 완료"));
+        return ResponseEntity.ok(GenericResponse.of(
+                new ChallengeDto(challenge),
+                "%s 챌린지 참가 완료".formatted(challenge.getName())
+        ));
     }
 
     @PostMapping("{id}/validation")
-    public ResponseEntity<GenericResponse<Void>> validation(
+    @Transactional
+    public ResponseEntity<GenericResponse<ChallengeDto>> validation(
             @PathVariable long id,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         Challenge challenge = challengeService.validation(id, user);
 
-        return ResponseEntity.ok(GenericResponse.of("%s 챌린지 인증 성공".formatted(challenge.getName())));
+        return ResponseEntity.ok(GenericResponse.of(
+                new ChallengeDto(challenge),
+                "%s 챌린지 인증 성공".formatted(challenge.getName())
+        ));
     }
 }

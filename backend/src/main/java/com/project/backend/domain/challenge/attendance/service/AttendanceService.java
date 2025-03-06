@@ -2,6 +2,10 @@ package com.project.backend.domain.challenge.attendance.service;
 
 import com.project.backend.domain.challenge.attendance.entity.Attendance;
 import com.project.backend.domain.challenge.attendance.repository.AttendanceRepository;
+import com.project.backend.domain.challenge.challenge.entity.Challenge;
+import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
+import com.project.backend.domain.challenge.exception.ChallengeException;
+import com.project.backend.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +26,7 @@ public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
 
-    public boolean getCheck(long challengeId, long memberId) {
+    public boolean checkTodayAttendance(long challengeId, long memberId) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().plusDays(1).atStartOfDay().minusNanos(1);
 
@@ -31,7 +35,24 @@ public class AttendanceService {
         return op.isPresent();
     }
 
-    public void save(Attendance attendance) {
-        attendanceRepository.save(attendance);
+    public Attendance save(Attendance attendance) {
+        return attendanceRepository.save(attendance);
+    }
+
+    public void validateAttendance(Challenge challenge, Member member) {
+        if (!checkTodayAttendance(challenge.getId(), member.getId())) {
+            Optional<Attendance> opAttendance = Attendance.createAttendance(challenge, member);
+
+            if (opAttendance.isEmpty()) {
+                throw new ChallengeException(
+                        ChallengeErrorCode.DAILY_VERIFICATION.getStatus(),
+                        ChallengeErrorCode.DAILY_VERIFICATION.getErrorCode(),
+                        ChallengeErrorCode.DAILY_VERIFICATION.getMessage()
+                );
+            }
+            else {
+                save(opAttendance.get());
+            }
+        }
     }
 }

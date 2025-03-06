@@ -30,12 +30,15 @@ public class ChallengeDto {
 
     private Challenge.ChallengeStatus status;
 
+    private long totalDeposit;
+
     public ChallengeDto(Challenge challenge) {
         this.name = challenge.getName();
         this.content = challenge.getContent();
         this.startDate = challenge.getStartDate();
         this.endDate = challenge.getEndDate();
         this.status = challenge.getStatus();
+        this.totalDeposit = challenge.getTotalDeposit();
     }
 
 }

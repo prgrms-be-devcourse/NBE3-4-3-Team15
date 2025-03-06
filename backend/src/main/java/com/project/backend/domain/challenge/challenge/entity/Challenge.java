@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- *
  * 챌린지 Entity
  *
  * @author 손진영
@@ -52,5 +51,17 @@ public class Challenge extends BaseEntity {
 
     public void addDeposit(long deposit) {
         totalDeposit += deposit;
+    }
+
+    public void updateStatus() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.isBefore(this.startDate)) {
+            this.status = ChallengeStatus.WAITING;
+        } else if (now.isAfter(this.endDate)) {
+            this.status = ChallengeStatus.END;
+        } else {
+            this.status = ChallengeStatus.START;
+        }
     }
 }

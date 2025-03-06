@@ -33,7 +33,7 @@ public class MemberDto extends MineDto {
 
     @JsonProperty
     @NotBlank
-    @Length(min = 8)
+    @Length(min = 2)
     private String password1;
 
     @JsonProperty

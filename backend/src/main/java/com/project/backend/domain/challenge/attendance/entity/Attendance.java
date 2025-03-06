@@ -6,6 +6,8 @@ import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Optional;
+
 
 /**
  *
@@ -44,5 +46,28 @@ public class Attendance extends BaseEntity {
     public enum CheckType {
         REVIEW,
         COMMENT
+    }
+
+    public static Optional<Attendance> createAttendance(Challenge challenge, Member member) {
+
+        return member.findTodayReview()
+                .map(review ->
+                        Attendance.builder()
+                                .challenge(challenge)
+                                .member(member)
+                                .checkType(Attendance.CheckType.REVIEW)
+                                .writeId(review.getId())
+                                .build()
+                )
+                .or(() -> member.findTodayComment()
+                        .map(comment ->
+                                Attendance.builder()
+                                        .challenge(challenge)
+                                        .member(member)
+                                        .checkType(Attendance.CheckType.REVIEW)
+                                        .writeId(comment.getId())
+                                        .build()
+                        )
+                );
     }
 }

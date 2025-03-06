@@ -10,6 +10,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -45,6 +46,12 @@ public class Member extends BaseEntity {
 
     private long deposit;
 
+    @OneToMany(mappedBy = "member")
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "member")
+    private List<ReviewComment> reviewComments;
+
     @ManyToMany(mappedBy = "recommendMember")
     private List<Review> recommendReviews;
 
@@ -69,5 +76,19 @@ public class Member extends BaseEntity {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public Optional<Review> findTodayReview() {
+        return Optional.ofNullable(this.reviews)
+                .flatMap(reviews -> reviews.stream()
+                        .filter(review -> review.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                        .findFirst());
+    }
+
+    public Optional<ReviewComment> findTodayComment() {
+        return Optional.ofNullable(this.reviewComments)
+                .flatMap(comments -> comments.stream()
+                        .filter(comment -> comment.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                        .findFirst());
     }
 }
