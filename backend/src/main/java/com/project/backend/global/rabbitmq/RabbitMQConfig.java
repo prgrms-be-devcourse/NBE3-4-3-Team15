@@ -57,6 +57,10 @@ public class RabbitMQConfig {
         return new Queue(queueName);
     }
 
+
+
+    
+
     /**
      * exchange 생성 매서드
      * direct 타입 exchange

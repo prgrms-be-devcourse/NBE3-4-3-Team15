@@ -50,7 +50,7 @@ public class RabbitMQService {
      * @author 이광석
      * @since 25.02.28
      */
-    public void sendMessage(Long memberId,MessageDto messageDto){
+    public void sendMessage(Long memberId,MessageDto messageDto){ //Producer
         String routingKey = this.routingKey+memberId;
 
 
@@ -82,7 +82,7 @@ public class RabbitMQService {
 
         container.setMessageListener(new MessageListener() {
             @Override
-            public void onMessage(Message message) {
+            public void onMessage(Message message) {   //Consumer
                 MessageConverter converter = rabbitTemplate.getMessageConverter(); //
                 Object obj = converter.fromMessage(message);
                 if(obj instanceof MessageDto){
