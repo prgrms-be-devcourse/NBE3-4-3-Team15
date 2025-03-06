@@ -6,22 +6,33 @@ import { CiSearch } from "react-icons/ci";
 import "@/lib/searchBook.css";
 import client from "@/lib/client";
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 
 export default function ClientPage() {
   const router = useRouter();
   const [book, setBook] = useState({});
-  const param = useSearchParams();
+  const pathname = usePathname();
 
-  console.log(param.get("book"));
+  const search = async () => {
+    const response = await client.GET(pathname);
+
+    const data = response.data.data;
+
+    setBook(data);
+  };
+
+  useEffect(() => {
+    search();
+  }, []);
 
   return (
     <div>
-      <div>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <span>{book.title}</span>
-        <span>{book.image}</span>
+        <img src={book.image} alt="" />
         <span>{book.author}</span>
+        <span>{book.description}</span>
         <span>{book.isbn}</span>
       </div>
       <div></div>
