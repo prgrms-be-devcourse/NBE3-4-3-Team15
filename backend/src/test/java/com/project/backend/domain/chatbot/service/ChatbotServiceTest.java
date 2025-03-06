@@ -33,7 +33,7 @@ class ChatbotServiceTest {
      */
     @Test
     public void test1(){
-        AnswerDTO s = chatbotService.generate("책 하나 추천해줘", 25);
+        AnswerDTO s = chatbotService.recommendBook("책 하나 추천해줘", 25);
 
         System.out.println(s.getMessage());
     }
