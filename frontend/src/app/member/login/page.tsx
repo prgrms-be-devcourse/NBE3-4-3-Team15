@@ -89,7 +89,7 @@ const Login: React.FC = () => {
           <div className="mt-6 flex justify-between">
             <button
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
-                onClick={() => (window.location.href = "/member/join")}
+                onClick={() => (window.location.href = "/member")}
             >
               회원가입
             </button>

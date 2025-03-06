@@ -35,7 +35,7 @@ export default function Join() {
           password2: password2,
           email: email,
           nickname: nickname,
-          gender: gender.toString(), // gender를 숫자가 아닌 문자열로 전달
+          gender: gender, // gender를 숫자가 아닌 문자열로 전달
           birth: birth,
         },
       });

@@ -13,7 +13,7 @@ spring:
           order_inserts: true
           order_updates: true
           generate_statistics: true
-        show_sql: true
+        show_sql: false
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
         hbm2ddl:

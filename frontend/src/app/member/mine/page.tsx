@@ -63,7 +63,7 @@ export default function Mine() {
 
     // 비밀번호 변경 모달 상태 변경
     const passwordEdit = () => {
-        setIsPasswordModalOpen(!isPasswordModalOpen);
+        window.location.href = "/member/mine/password";
     };
 
     // 비밀번호 변경 요청
