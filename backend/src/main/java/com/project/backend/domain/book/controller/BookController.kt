@@ -71,18 +71,18 @@ class BookController(private val bookService: BookService) {
 
     /**
      * -- 도서 상세 검색 --
-     * book id로 DB의 정보를 가져옴
+     * book isbn으로 DB의 정보를 가져옴
      *
-     * @param -- id 책 아이디 --
+     * @param -- isbn 책 isbn --
      * @return -- ResponseEntity<GenericResponse<Page<BookDTO>>> --
      * @author -- 정재익 --
-     * @since -- 2월 11일 --
+     * @since -- 3월 06일 --
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{isbn}")
     @Operation(summary = "도서 상세 검색")
-    fun searchDetailBooks(@PathVariable(name = "id") id: Long
+    fun searchDetailBooks(@PathVariable(name = "isbn") isbn: String
     ): ResponseEntity<GenericResponse<BookDTO>> {
-        val detailBook = bookService.searchDetailBooks(id)
+        val detailBook = bookService.searchDetailBooks(isbn)
         return ResponseEntity.ok(GenericResponse.of(detailBook))
     }
 

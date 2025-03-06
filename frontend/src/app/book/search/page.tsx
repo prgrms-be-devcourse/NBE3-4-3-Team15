@@ -81,12 +81,17 @@ const SearchPage = () => {
                     <>
                         <div className="grid grid-cols-7 gap-3">
                             {books.map((book) => (
-                                <div key={book.isbn} className="bg-white p-3 rounded-lg shadow-md">
+                                <div
+                                    key={book.isbn}
+                                    className="bg-white p-3 rounded-lg shadow-md cursor-pointer"
+                                    onClick={() => router.push(`/book/${book.isbn}`)}
+                                >
                                     <img src={book.image} alt={book.title} className="w-full h-60 object-cover" />
                                     <h3 className="text-base font-semibold mt-2 line-clamp-2">{book.title}</h3>
                                     <p className="text-sm text-gray-600 line-clamp-1">{book.author}</p>
                                     <p className="text-xs text-gray-500">❤️ {book.favoriteCount ?? 0}</p>
                                 </div>
+
                             ))}
                         </div>
 

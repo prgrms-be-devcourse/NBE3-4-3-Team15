@@ -78,7 +78,11 @@ const Page = () => {
                     ) : (
                         <div className="grid grid-cols-5 gap-5">
                             {bestSellers.map((book) => (
-                                <div key={book.isbn} className="bg-gray-300 rounded-md overflow-hidden relative">
+                                <div
+                                    key={book.isbn}
+                                    className="bg-gray-300 rounded-md overflow-hidden relative cursor-pointer"
+                                    onClick={() => router.push(`/book/${book.isbn}`)} // ✅ 클릭 시 상세 페이지 이동
+                                >
                                     <div className="w-full h-[80%]">
                                         <img src={book.image} alt={book.title} className="w-full h-full object-cover" />
                                     </div>
