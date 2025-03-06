@@ -1,10 +1,7 @@
 package com.project.backend.global.rabbitmq;
 
 import com.project.backend.global.rabbitmq.dto.MessageDto;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -12,6 +9,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,21 +43,7 @@ public class RabbitMQConfig {
     private String routingKey;
 
 
-    /**
-     * 큐 생성 매서드
-     * @return Queue
-     *
-     * @author 이광석
-     * @since 25.02.28
-     */
-    @Bean
-    public Queue queue() {
-        return new Queue(queueName);
-    }
 
-
-
-    
 
     /**
      * exchange 생성 매서드
@@ -75,6 +59,12 @@ public class RabbitMQConfig {
         return new DirectExchange(exchangeName);
     }
 
+    /**
+     * dlxExchange 생성
+     *
+     */
+
+
 
     /**
      * 바인딩 메서드
@@ -88,9 +78,11 @@ public class RabbitMQConfig {
      * @since 25.02.28
      */
     @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
+    public Binding binding(Queue queue,@Qualifier("exchange") DirectExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(routingKey);
     }
+
+
 
     /**
      * RabbitMQ서버와의 연결을 관리하는 ConnectionFactory 객체 생성
@@ -154,5 +146,42 @@ public class RabbitMQConfig {
     @Bean
     public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
         return new RabbitAdmin(connectionFactory);
+    }
+
+
+    @Value("${rabbitmq.dlqQueue.name}")
+    private String dlqQueueName;
+
+    @Value("${rabbitmq.dlqExchange.name}")
+    private String dlqExchangeName;
+
+    @Value("${rabbitmq.dlqRoutingKey.key}")
+    private String dlqRoutingKey;
+
+
+    /**
+     * dlq를 위한 큐 생성
+     * @return  Queue
+     *
+     * @author 이광석
+     * @since 25.03.06
+     */
+    @Bean
+    public Queue dlqQueue() {
+
+        return QueueBuilder.durable(dlqQueueName).build();
+    }
+
+    /**
+     * dlxExchange 생성
+     *
+     */
+    @Bean
+    public DirectExchange dlqExchange(){return new DirectExchange(dlqExchangeName);}
+
+
+    @Bean
+    public Binding dlqBinding(Queue dlqQueue,@Qualifier("dlqExchange") DirectExchange dlqExchange){
+        return BindingBuilder.bind(dlqQueue).to(dlqExchange).with(dlqRoutingKey);
     }
 }

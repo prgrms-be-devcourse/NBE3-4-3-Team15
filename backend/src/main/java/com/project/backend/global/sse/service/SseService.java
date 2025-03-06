@@ -29,6 +29,7 @@ public class SseService {
      */
     public SseEmitter subscribeSse(Long memberId){
 
+        //
         SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
 
         emitterRepository.save(memberId,emitter);

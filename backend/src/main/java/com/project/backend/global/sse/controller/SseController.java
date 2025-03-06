@@ -36,6 +36,7 @@ public class SseController {
     @GetMapping(value="/sse" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> SseConnect(@AuthenticationPrincipal CustomUserDetails userDetails){
         Long memberId = memberService.getMyProfile(userDetails.getUsername()).getId();
+
         SseEmitter emitter = sseService.subscribeSse(memberId);
 
         return ResponseEntity.ok(emitter);

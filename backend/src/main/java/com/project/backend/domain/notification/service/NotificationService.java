@@ -15,6 +15,7 @@ import com.project.backend.global.authority.CustomUserDetails;
 
 import com.project.backend.global.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,12 +30,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
 
-    private final SseService sseservice;
     private final RabbitMQService rabbitMQService;
-
-    private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
-
-
 
     /**
      * 알람 생성
