@@ -97,6 +97,7 @@ public class MemberService {
 //        sseService.subscribeSse(member.getId());//Sse 구독
         rabbitMQService.createMemberQueue(member.getId()); //rabbitmq를 위한 큐 생성
         rabbitMQService.dynamicRabbitListener(member.getId());
+        rabbitMQService.dlqListener();
 
         return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
     }

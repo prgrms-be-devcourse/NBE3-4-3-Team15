@@ -175,11 +175,24 @@ public class RabbitMQConfig {
     /**
      * dlxExchange 생성
      *
+     * @return DirectExchange
+     *
+     * @author 이광석
+     * @since 25.03.06
      */
     @Bean
     public DirectExchange dlqExchange(){return new DirectExchange(dlqExchangeName);}
 
 
+    /**
+     * dlq와 dlx를 바인딩
+     * @param dlqQueue
+     * @param dlqExchange
+     * @return Binding
+     *
+     * @author 이광석
+     * @since 25.03.06
+     */
     @Bean
     public Binding dlqBinding(Queue dlqQueue,@Qualifier("dlqExchange") DirectExchange dlqExchange){
         return BindingBuilder.bind(dlqQueue).to(dlqExchange).with(dlqRoutingKey);

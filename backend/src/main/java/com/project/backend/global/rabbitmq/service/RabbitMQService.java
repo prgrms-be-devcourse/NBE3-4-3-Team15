@@ -49,7 +49,6 @@ public class RabbitMQService {
 
     private final RabbitTemplate rabbitTemplate;
     private final RabbitAdmin rabbitAdmin;
-
     private final DirectExchange exchange;
     private final ConnectionFactory connectionFactory;
     private final SseService sseService;
@@ -158,31 +157,22 @@ public class RabbitMQService {
             }
         });
 
-
-
-
-//        container.setMessageListener(new MessageListener() {
-//            @Override
-//            public void onMessage(Message message) {   //Consumer
-//                MessageConverter converter = rabbitTemplate.getMessageConverter(); //
-//                Object obj = converter.fromMessage(message);
-//                if(obj instanceof MessageDto){
-//                    MessageDto messageDto = (MessageDto) obj;
-//                    sseService.sendNotification(memberId, messageDto.getContent());
-//                }else{
-//                    System.out.println("not messageDto");
-//                }
-//            }
-//        });
         container.start();
 
         return container;
     }
 
 
-
-
+    /**
+     * dlq 리스너
+     * dlq에 데이터가 들어오면 로그생성
+     *
+     * @author 이광석
+     * @since 25.03.06
+     *
+     */
     public SimpleMessageListenerContainer dlqListener(){
+
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(dlqQueueName);
