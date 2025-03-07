@@ -24,5 +24,12 @@ class Favorite(
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("memberId")
     @JoinColumn(name = "member_id", referencedColumnName = "id")
-    val member: Member
+    val member: Member,
+
+    /**
+     * 찜하기 기능에서 BaseEntity의 modifiedAt은 필요하지 않으므로,
+     * 생성 시간을 직접 설정하여 관리
+     */
+    @Column(name = "favorited_at")
+    val favoritedAt: LocalDateTime = LocalDateTime.now()
 )
