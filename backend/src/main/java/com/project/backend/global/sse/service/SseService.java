@@ -1,6 +1,7 @@
 package com.project.backend.global.sse.service;
 
 
+import com.project.backend.global.redis.RedisService;
 import com.project.backend.global.sse.rapository.EmitterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SseService {
     private final EmitterRepository emitterRepository;
+    private final RedisService redisService;
 
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
 
     /**
      * SSE 연결 메소드
+     * SSEEmiter 생성 및 SSE 연결을 관리
      * @param memberId
      * @return emitter
      *
@@ -28,27 +31,43 @@ public class SseService {
      * @since 25.02.23
      */
     public SseEmitter subscribeSse(Long memberId){
+            String key = "SSE_CONNECT:"+memberId;
+            String value = "server-1";
 
-        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+            if(redisService.getData(key)!=null){
+                redisService.deleteData(key);
 
-        emitterRepository.save(memberId,emitter);
+            }
 
-        emitter.onCompletion(()->emitterRepository.deleteBy(memberId));
-
-        emitter.onTimeout(()->emitterRepository.deleteBy(memberId));
-
-        try{
-            emitter.send(SseEmitter.event()
-                    .name("connect")
-                    .data("SSE 연결 성공"));
-            System.out.println("sse 연결 성공");
-        }catch (IOException e){
-            emitterRepository.deleteBy(memberId);
-            emitter.completeWithError(e);
-        }
+            redisService.saveData(key,value,DEFAULT_TIMEOUT);
 
 
-        return emitter;
+
+
+
+
+//        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+//
+//        emitterRepository.save(memberId,emitter);
+//
+//        emitter.onCompletion(()->emitterRepository.deleteBy(memberId)); // emitter
+//
+//        emitter.onTimeout(()->emitterRepository.deleteBy(memberId));
+//
+//
+//
+//        try{
+//            emitter.send(SseEmitter.event()
+//                    .name("connect")
+//                    .data("SSE 연결 성공"));
+//            System.out.println("sse 연결 성공");
+//        }catch (IOException e){
+//            emitterRepository.deleteBy(memberId);
+//            emitter.completeWithError(e);
+//        }
+//
+//
+//        return emitter;
     }
 
 
@@ -79,6 +98,7 @@ public class SseService {
             }
         }
     }
+
 
 
 }
