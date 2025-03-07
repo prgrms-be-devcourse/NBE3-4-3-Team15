@@ -1,5 +1,6 @@
 package com.project.backend.domain.book.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.entity.Book
 import com.project.backend.domain.book.entity.Favorite
@@ -229,7 +230,6 @@ class BookService(
             .orElseThrow { MemberException(MemberErrorCode.NON_EXISTING_USERNAME) }
 
         val isbn = bookDto.isbn
-            ?: throw BookException(BookErrorCode.ISBN_NOT_NULL)
 
         val book = bookRepository.findByIsbn(isbn)
             ?: throw BookException(BookErrorCode.BOOK_NOT_FOUND)
@@ -242,12 +242,7 @@ class BookService(
         return if (favoriteRepository.existsById(favoriteId)) {
             favoriteRepository.deleteById(favoriteId)
 
-            if (book.favoriteCount == 1) {
-                bookRepository.delete(book)
-            }
-            else {
-                bookRepository.updateFavoriteCount(book, -1)
-            }
+            bookRepository.updateFavoriteCount(book, -1)
 
             false
         }
@@ -288,8 +283,8 @@ class BookService(
 
         return favoriteBooks
     }
+
     /**
-     *
      * 책 ID 리스트를 통해서 책 정보 중 제목을 조회하는 함수
      *
      * @param ids
@@ -300,6 +295,7 @@ class BookService(
      */
     fun searchBookTitlesByIds(ids: List<Long>): List<String> {
         val books = bookRepository.findAllById(ids)
+
         return books.map { it.title }
     }
 }

@@ -18,8 +18,8 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://repo.spring.io/snapshot") } // SNAPSHOT 저장소 추가
-
+    maven("https://repo.spring.io/milestone")
+    maven("https://repo.spring.io/snapshot")
 }
 
 dependencies {
@@ -38,10 +38,11 @@ dependencies {
     // ✅ DB 관련 라이브러리
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
-    implementation("redis.clients:jedis:4.3.1")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.redisson:redisson-spring-boot-starter:3.18.0") // Redisson (Redis 클라이언트)
+    implementation("redis.clients:jedis:4.3.1")mer
 
+    // ✅ [Redis 관련 (Spring Data Redis)]
+    implementation("org.springframework.boot:spring-boot-starter-data-redis") // Spring Data Redis
+    implementation("org.redisson:redisson-spring-boot-starter:3.18.0") // Redisson (Redis 클라이언트)
 
 
     // ✅ API 문서화 (Swagger)
@@ -75,14 +76,12 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0") // JUnit 플랫폼 런처 추가
 
-    implementation(platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT"))
-    implementation("org.springframework.ai:spring-ai-openai")
-
-    // perplexity 사용하기 위함
-    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    // ✅ perplexity 사용하기 위함
+    implementation(platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")) // Spring AI BOM
+    implementation("org.springframework.ai:spring-ai-openai") // OpenAI API 연동
+    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter") // OpenAI Spring Boot 스타터
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8") // Kotlin 표준 라이브러리 (JDK 8 지원)
 }
-
 
 kotlin {
     compilerOptions {
