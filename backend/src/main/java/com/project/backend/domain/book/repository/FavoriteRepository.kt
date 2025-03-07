@@ -60,4 +60,10 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
      */
     @Query("SELECT f.book.id FROM Favorite f WHERE f.member.id = :memberId")
     fun findBookIdsByMemberId(@Param("memberId") memberId: Long): List<Long>
+
+    @Query("SELECT f.book.id, COUNT(f) FROM Favorite f WHERE f.favoritedAt BETWEEN :start AND :end GROUP BY f.book.id")
+    fun countFavoritesByBookIdAndDateTime(
+        @Param("start") start: LocalDateTime,
+        @Param("end") end: LocalDateTime
+    ): kotlin.collections.List<Array<Any>>
 }
