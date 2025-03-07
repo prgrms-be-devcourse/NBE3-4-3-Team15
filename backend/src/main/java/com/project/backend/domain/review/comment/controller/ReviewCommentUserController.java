@@ -32,15 +32,9 @@ public class ReviewCommentUserController {
      */
     @GetMapping("/review/comments")
     public  ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@AuthenticationPrincipal CustomUserDetails userDetails){
-
-        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userDetails);
+        long memberId = reviewCommentService.myId(userDetails);
+        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(memberId);
         return ResponseEntity.ok(GenericResponse.of(
-//=======
-//    @GetMapping("/review/comments/{userId}")
-//    public ResponseEntity<GenericResponse<List<ReviewCommentDto>>> getUserComment(@PathVariable("userId")Long userId){
-//        List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(userId);
-//        return ResponseEntity.ok(GenericResponse.of(
-//>>>>>>> main
                 commentDtos,
                 "User 댓글 조회 성공"
         ));
