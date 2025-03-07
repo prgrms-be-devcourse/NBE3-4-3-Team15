@@ -121,16 +121,17 @@ class BookService(
     /**
      * -- 도서 상세 검색 메소드 --
      *
-     * @param -- id 책 아이디--
+     * @param -- isbn 책 isbn--
      * @return -- BookDTO --
      *
      * @author -- 정재익 --
-     * @since -- 2월 11일 --
+     * @since -- 3월 06일 --
      */
-    fun searchDetailBooks(id: Long): BookDTO {
-        return bookRepository.findById(id)
-            .map { BookUtil.entityToDTO(it) }
-            .orElseThrow { BookException(BookErrorCode.BOOK_NOT_FOUND) }
+    fun searchDetailBooks(isbn: String): BookDTO {
+        val book = bookRepository.findByIsbn(isbn)
+            ?: throw BookException(BookErrorCode.BOOK_NOT_FOUND)
+
+        return BookUtil.entityToDTO(book)
     }
 
     /**
@@ -280,8 +281,8 @@ class BookService(
 
         return favoriteBooks
     }
-
     /**
+     *
      * 책 ID 리스트를 통해서 책 정보 중 제목을 조회하는 함수
      *
      * @param ids
@@ -292,7 +293,6 @@ class BookService(
      */
     fun searchBookTitlesByIds(ids: List<Long>): List<String> {
         val books = bookRepository.findAllById(ids)
-
         return books.map { it.title }
     }
 }
