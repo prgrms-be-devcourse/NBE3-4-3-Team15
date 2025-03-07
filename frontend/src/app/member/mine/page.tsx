@@ -9,7 +9,7 @@ import type { components } from "@/lib/backend/schema";
 type MineDto = components["schemas"]["MineDto"];
 
 export default function Mine() {
-    const [userProfile, setUserProfile] = useState<{ email: string; nickname: string; gender?: number; birth?: string; } | null>(null);
+    const [userProfile, setUserProfile] = useState<{ id:number | undefined, username : string, email: string; nickname: string; gender?: number; birth?: string; } | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [, setIsPasswordModalOpen] = useState(false);
@@ -29,14 +29,15 @@ export default function Mine() {
         try {
             const response = await client.GET("/members/mine");
             if (response.data?.data) {
-                const { email, nickname, gender, birth } = response.data.data;
-                setUserProfile({ email, nickname, gender, birth });
+                const { id, username, email, nickname, gender, birth } = response.data.data;
+                setUserProfile({ id, username,  email, nickname, gender, birth });
             }
         } catch (error) {
             console.error("회원 정보 조회 실패:", error);
             alert("회원 정보 조회에 실패하였습니다.");
         }
     };
+
 
     const edit = () => setIsEditing(!isEditing);
     const goToFavoriteBooksPage = () => router.push("/book/favorite");
@@ -47,6 +48,7 @@ export default function Mine() {
                 await client.PUT("/members/mine", { body: userProfile });
                 alert("프로필이 업데이트되었습니다.");
                 setIsEditing(false);
+                getUserProfile()
             } catch (error) {
                 console.error("프로필 업데이트 실패:", error);
                 alert("프로필 업데이트에 실패했습니다.");
