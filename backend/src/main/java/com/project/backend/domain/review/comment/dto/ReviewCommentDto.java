@@ -1,10 +1,8 @@
 package com.project.backend.domain.review.comment.dto;
 
 import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -57,7 +55,7 @@ public class ReviewCommentDto {
     public ReviewCommentDto(ReviewComment reviewComment) {
         this.id = reviewComment.getId();
         this.reviewId = reviewComment.getReview().getId();
-        this.userId = reviewComment.getUserId();
+        this.userId = reviewComment.getMember().getId();
         this.comment = reviewComment.getComment();
         this.parentId = (reviewComment.getParent() == null)?null: reviewComment.getParent().getId();
         this.depth = reviewComment.getDepth();

@@ -69,9 +69,10 @@ public class ReviewCommentService {
      * @since 25.02.06
      */
     public List<ReviewCommentDto> findUserComment(CustomUserDetails userDetails) {
-        Member member = memberRepository.findByUsername(userDetails.getUsername()).get(); //memberservice로 변경
-        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(member.getId());
-        return reviewCommentDtos;
+        Member member = memberService.getMemberByUsername(userDetails.getUsername());
+        return member.getReviewComments().stream()
+                .map(ReviewCommentDto::new)
+                .toList();
     }
 
     /**
@@ -84,6 +85,9 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,CustomUserDetails userDetails) {  // 메소드가 너무 긴듯 분할 필요
+
+        Member member = memberService.getMemberByUsername(userDetails.getUsername());
+
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -92,7 +96,7 @@ public class ReviewCommentService {
                 ));
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
-                .userId(myId(userDetails))
+                .member(member)
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
@@ -297,7 +301,7 @@ public class ReviewCommentService {
      * @since 25.02.10
      */
     private void authorityCheck(CustomUserDetails userDetails, ReviewComment comment){
-        Member member = memberRepository.findById(comment.getUserId()).get(); // memberService로 변경 예정
+        Member member = memberRepository.findById(comment.getMember().getId()).get(); // memberService로 변경 예정
 
 
         if(!member.getUsername().equals(userDetails.getUsername()))

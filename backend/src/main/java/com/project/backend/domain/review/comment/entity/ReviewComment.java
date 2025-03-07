@@ -34,8 +34,6 @@ public class ReviewComment extends BaseEntity {
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
-    private Long userId;
-
     private String comment;
 
     @ManyToOne
