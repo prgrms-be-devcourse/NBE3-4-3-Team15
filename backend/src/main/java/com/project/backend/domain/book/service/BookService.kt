@@ -1,5 +1,6 @@
 package com.project.backend.domain.book.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.entity.Book
 import com.project.backend.domain.book.entity.Favorite
@@ -281,8 +282,8 @@ class BookService(
 
         return favoriteBooks
     }
+
     /**
-     *
      * 책 ID 리스트를 통해서 책 정보 중 제목을 조회하는 함수
      *
      * @param ids
@@ -293,6 +294,7 @@ class BookService(
      */
     fun searchBookTitlesByIds(ids: List<Long>): List<String> {
         val books = bookRepository.findAllById(ids)
+
         return books.map { it.title }
     }
 }
