@@ -98,11 +98,11 @@ public class ChallengeControllerTest {
 
     @Test
     @DisplayName("챌린지 참가")
-    @WithUserDetails("123")
+    @WithUserDetails("user1")
     void t3() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/challenge/2/join")
+                        post("/challenge/4/join")
                                 .content("""
                                         {
                                             "deposit": 1000000
@@ -112,7 +112,7 @@ public class ChallengeControllerTest {
                 )
                 .andDo(print());
 
-        Challenge challenge = challengeService.getChallenge(2);
+        Challenge challenge = challengeService.getChallenge(4);
 
         resultActions
                 .andExpect(handler().handlerType(ChallengeController.class))
@@ -128,7 +128,7 @@ public class ChallengeControllerTest {
 
     @Test
     @DisplayName("챌린지 참가, 중복참가")
-    @WithUserDetails("123")
+    @WithUserDetails("user1")
     void t4() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
@@ -150,7 +150,7 @@ public class ChallengeControllerTest {
 
     @Test
     @DisplayName("챌린지 참가, valid")
-    @WithUserDetails("123")
+    @WithUserDetails("user1")
     void t5() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
@@ -172,7 +172,7 @@ public class ChallengeControllerTest {
 
     @Test
     @DisplayName("챌린지 인증")
-    @WithUserDetails("123")
+    @WithUserDetails("user1")
     void t6() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
@@ -192,5 +192,23 @@ public class ChallengeControllerTest {
                 .andExpect(jsonPath("$.data.endDate").value(challenge.getEndDate().toString()))
                 .andExpect(jsonPath("$.data.status").value(challenge.getStatus().toString()))
                 .andExpect(jsonPath("$.data.totalDeposit").value(challenge.getTotalDeposit()));
+    }
+
+    @Test
+    @DisplayName("챌린지 인증 X")
+    @WithUserDetails("user2")
+    void t7() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/challenge/3/validation")
+                )
+                .andDo(print());
+
+        Challenge challenge = challengeService.getChallenge(3);
+
+        resultActions
+                .andExpect(handler().handlerType(ChallengeController.class))
+                .andExpect(handler().methodName("validation"))
+                .andExpect(status().isBadRequest());
     }
 }
