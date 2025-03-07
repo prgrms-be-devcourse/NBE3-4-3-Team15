@@ -2,8 +2,6 @@ package com.project.backend.domain.member.service;
 
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
-import com.project.backend.domain.challenge.attendance.service.AttendanceService;
-import com.project.backend.domain.challenge.entry.service.EntryService;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.dto.MineDto;
@@ -36,8 +34,6 @@ public class MemberService {
     private final JwtUtil jwtUtil;
     private final FavoriteRepository favoriteRepository;
     private final BookRepository bookRepository;
-    private final EntryService entryService;
-    private final AttendanceService attendanceService;
 
     /**
      * 회원가입 처리

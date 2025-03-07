@@ -1,6 +1,7 @@
 package com.project.backend.domain.review.review.controller;
 
 
+import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
 import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.authority.CustomUserDetails;
@@ -39,7 +40,7 @@ public class ReviewController {
     @GetMapping
     @Operation(summary = "리뷰 목록")
     public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getReviews(@RequestParam(value="page",defaultValue = "1")int page,
-                                                                       @RequestParam(value="size",defaultValue="10")int size){
+                                                                        @RequestParam(value="size",defaultValue="10")int size){
         Page<ReviewsDTO> pages = reviewService.findAll(page,size);
         return ResponseEntity.ok(GenericResponse.of(
                 pages,
@@ -60,9 +61,10 @@ public class ReviewController {
 
     public ResponseEntity<GenericResponse<List<ReviewsDTO>>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails){
 
-        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(userDetails);
+        Long memberId = reviewService.myId(userDetails);
+        List<ReviewsDTO> reviewsDTOS = reviewService.getUserReviews(memberId);
         return ResponseEntity.ok(GenericResponse.of(
-            reviewsDTOS,
+                reviewsDTOS,
                 "리뷰 목록 반환 성공"
         ));
     }
@@ -79,8 +81,8 @@ public class ReviewController {
      */
     @GetMapping("/books/{bookId}")
     public ResponseEntity<GenericResponse<Page<ReviewsDTO>>> getBookIdReviews(@PathVariable("bookId") Long bookId,
-                                                              @RequestParam(value = "page",defaultValue = "0") Integer page,
-                                                              @RequestParam(value = "size",defaultValue = "10") Integer size){
+                                                                              @RequestParam(value = "page",defaultValue = "0") Integer page,
+                                                                              @RequestParam(value = "size",defaultValue = "10") Integer size){
         Page<ReviewsDTO> pages= reviewService.getBookIdReviews(bookId,page,size);
 
         return ResponseEntity.ok(GenericResponse.of(
@@ -105,8 +107,9 @@ public class ReviewController {
     @Transactional
 
     public ResponseEntity<GenericResponse<String>>postReview( @RequestBody ReviewsDTO reviewsDTO,
-                                               @AuthenticationPrincipal CustomUserDetails userDetails){
-        reviewService.write(userDetails,reviewsDTO);
+                                                              @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long memberId = reviewService.myId(userDetails);
+        reviewService.write(memberId,reviewsDTO);
 
 
 
@@ -129,9 +132,12 @@ public class ReviewController {
     @Operation(summary = "리뷰 수정")
     @Transactional
     public ResponseEntity<GenericResponse<ReviewsDTO>> putReviews( @RequestBody ReviewsDTO reviewsDTO,
-                                             @PathVariable("reviewId") Long reviewId,
-                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
-        reviewService.modify(reviewsDTO,reviewId,userDetails);
+                                                                   @PathVariable("reviewId") Long reviewId,
+                                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
+        reviewService.authorityCheck(userDetails,reviewId);
+        Long memberId = reviewService.myId(userDetails);
+
+        reviewService.modify(reviewsDTO,reviewId,memberId);
         return ResponseEntity.ok(GenericResponse.of(
                 reviewsDTO,
                 "리뷰 수정 성공"
@@ -152,8 +158,11 @@ public class ReviewController {
     @Transactional
 
     public ResponseEntity<GenericResponse<ReviewsDTO>> deleteReviews(@PathVariable("reviewId") Long id,
-                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
-        ReviewsDTO review=  reviewService.delete(id,userDetails);
+                                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
+        reviewService.authorityCheck(userDetails,id);
+        Long memberId = reviewService.myId(userDetails);
+
+        ReviewsDTO review=  reviewService.delete(id,memberId);
         return ResponseEntity.ok(GenericResponse.of(
                 review,
                 "리뷰 삭제 성공"
@@ -175,9 +184,9 @@ public class ReviewController {
     @Transactional
 
     public ResponseEntity<GenericResponse<ReviewsDTO>> recommendReview(@PathVariable("reviewId") Long reviewId,
-                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
-
-        boolean result = reviewService.recommend(reviewId,userDetails);
+                                                                       @AuthenticationPrincipal CustomUserDetails userDetails){
+        Long memberId = reviewService.myId(userDetails);
+        boolean result = reviewService.recommend(reviewId,memberId);
 
         ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
 

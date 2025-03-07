@@ -9,7 +9,6 @@ import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
 import com.project.backend.domain.challenge.exception.ChallengeException;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
-import com.project.backend.domain.review.review.service.ReviewService;
 import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ public class ChallengeService {
     private final MemberService memberService;
     private final EntryService entryService;
     private final AttendanceService attendanceService;
-    private final ReviewService reviewService;
 
     public Challenge getChallenge(long id) {
         return challengeRepository.findById(id)

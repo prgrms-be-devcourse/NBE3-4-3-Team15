@@ -6,6 +6,10 @@ import com.project.backend.domain.challenge.challenge.entity.Challenge;
 import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
 import com.project.backend.domain.challenge.exception.ChallengeException;
 import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
+import com.project.backend.domain.review.comment.service.ReviewCommentService;
+import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
+import com.project.backend.domain.review.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +29,8 @@ import java.util.Optional;
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
+    private final ReviewService reviewService;
+    private final ReviewCommentService reviewCommentService;
 
     public boolean checkTodayAttendance(long challengeId, long memberId) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
@@ -40,8 +46,9 @@ public class AttendanceService {
     }
 
     public void validateAttendance(Challenge challenge, Member member) {
+
         if (!checkTodayAttendance(challenge.getId(), member.getId())) {
-            Optional<Attendance> opAttendance = Attendance.createAttendance(challenge, member);
+            Optional<Attendance> opAttendance = createAttendance(challenge, member);
 
             if (opAttendance.isEmpty()) {
                 throw new ChallengeException(
@@ -54,5 +61,49 @@ public class AttendanceService {
                 save(opAttendance.get());
             }
         }
+        else {
+            throw new ChallengeException(
+                    ChallengeErrorCode.ALREADY_VALID.getStatus(),
+                    ChallengeErrorCode.ALREADY_VALID.getErrorCode(),
+                    ChallengeErrorCode.ALREADY_VALID.getMessage()
+            );
+        }
+    }
+
+    public Optional<Attendance> createAttendance(Challenge challenge, Member member) {
+
+        return findTodayReview(member.getId())
+                .map(review ->
+                        Attendance.builder()
+                                .challenge(challenge)
+                                .member(member)
+                                .checkType(Attendance.CheckType.REVIEW)
+                                .writeId(review.getId())
+                                .build()
+                )
+                .or(() -> findTodayComment(member.getId())
+                        .map(comment ->
+                                Attendance.builder()
+                                        .challenge(challenge)
+                                        .member(member)
+                                        .checkType(Attendance.CheckType.COMMENT)
+                                        .writeId(comment.getId())
+                                        .build()
+                        )
+                );
+    }
+
+    private Optional<ReviewsDTO> findTodayReview(long memberId) {
+        return Optional.ofNullable(reviewService.getUserReviews(memberId))
+                .flatMap(reviews -> reviews.stream()
+                        .filter(review -> review.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                        .findFirst());
+    }
+
+    private Optional<ReviewCommentDto> findTodayComment(long memberId) {
+        return Optional.ofNullable(reviewCommentService.findUserComment(memberId))
+                .flatMap(comments -> comments.stream()
+                        .filter(comment -> comment.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                        .findFirst());
     }
 }

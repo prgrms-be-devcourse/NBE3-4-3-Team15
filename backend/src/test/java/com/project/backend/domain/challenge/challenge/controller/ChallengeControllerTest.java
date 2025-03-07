@@ -102,7 +102,7 @@ public class ChallengeControllerTest {
     void t3() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/challenge/4/join")
+                        post("/challenge/2/join")
                                 .content("""
                                         {
                                             "deposit": 1000000
@@ -112,7 +112,7 @@ public class ChallengeControllerTest {
                 )
                 .andDo(print());
 
-        Challenge challenge = challengeService.getChallenge(4);
+        Challenge challenge = challengeService.getChallenge(2);
 
         resultActions
                 .andExpect(handler().handlerType(ChallengeController.class))
@@ -196,15 +196,13 @@ public class ChallengeControllerTest {
 
     @Test
     @DisplayName("챌린지 인증 X")
-    @WithUserDetails("user2")
+    @WithUserDetails("user3")
     void t7() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/challenge/3/validation")
+                        post("/challenge/2/validation")
                 )
                 .andDo(print());
-
-        Challenge challenge = challengeService.getChallenge(3);
 
         resultActions
                 .andExpect(handler().handlerType(ChallengeController.class))
