@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/book","/book/{id}","/book/favorite").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review/{reviewId}/comments").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ranking/weekly/book").permitAll()
 
                         // 로그인 및 회원가입은 인증 없이 허용
                         .requestMatchers("/members/login", "/members","members/{id}/followers", "members/{id}/followings").permitAll()
