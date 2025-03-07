@@ -94,7 +94,6 @@ public class MemberService {
             throw new MemberException(INCORRECT_PASSWORD);
         }
 
-//        sseService.subscribeSse(member.getId());//Sse 구독
         rabbitMQService.createMemberQueue(member.getId()); //rabbitmq를 위한 큐 생성
         rabbitMQService.dynamicRabbitListener(member.getId());
         rabbitMQService.dlqListener();

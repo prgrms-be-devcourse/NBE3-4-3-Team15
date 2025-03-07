@@ -17,6 +17,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * RabbitMQService
  * RabbitMQ 서비스 단
@@ -60,7 +64,7 @@ public class RabbitMQService {
             RabbitAdmin rabbitAdmin,
             ConnectionFactory connectionFactory,
             SseService sseService,
-            @Qualifier("exchange") DirectExchange exchange,  // ✅ 생성자에서 @Qualifier 사용
+            @Qualifier("exchange") DirectExchange exchange,  // 생성자에서 @Qualifier 사용
             @Qualifier("dlqExchange") DirectExchange directExchange
 
     ) {
@@ -82,21 +86,27 @@ public class RabbitMQService {
     public String createMemberQueue(Long memberId){
         String queueName =this.queueName +memberId;
 
-        Queue userQueue = QueueBuilder.durable(queueName)
-//                .autoDelete()
-                .deadLetterExchange(dlqExchangeName)
-                .deadLetterRoutingKey(dlqRoutingKey)
-                .exclusive()
-                .build();
+//        Queue userQueue = QueueBuilder.durable(queueName)
+//                .deadLetterExchange(dlqExchangeName)
+//                .deadLetterRoutingKey(dlqRoutingKey)
+//                .exclusive()
+//                .build();
+
+        Map<String,Object> args = new HashMap<>();
+        args.put("x-queue-type","quorum");
+
+        Queue userQueue = new Queue(queueName,true,false,false,args);
 
         rabbitAdmin.declareQueue(userQueue);
-        String routingKey = "notification.routing.user." + memberId;
 
+        String routingKey = "notification.routing.user." + memberId;
         Binding binding = BindingBuilder.bind(userQueue).to(exchange).with(routingKey);
         rabbitAdmin.declareBinding(binding);
+
         System.out.println("큐 생성 성공");
         return queueName;
     }
+
 
 
 
@@ -162,6 +172,17 @@ public class RabbitMQService {
         return container;
     }
 
+
+    public void deleteMemberQueue(Long memberId){
+        String queueName  = this.queueName+ memberId;
+
+        try{
+            boolean deleted = rabbitAdmin.deleteQueue(queueName);
+
+        }catch (Exception e){
+            System.err.println("qu 삭제 중 오류 발생: " + e.getMessage());
+        }
+    }
 
     /**
      * dlq 리스너
