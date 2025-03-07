@@ -95,10 +95,8 @@ public class ReviewService {
      * @return  List<ReviewsDTO>
      */
     public List<ReviewsDTO> getUserReviews(CustomUserDetails userDetails) {
-        Member member = memberService.getMemberByUsername(userDetails.getUsername());
-        return member.getReviews().stream()
-                .map(ReviewsDTO::new)
-                .toList();
+        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(myId(userDetails));
+        return reviewsDTOS;
     }
 
 
@@ -111,16 +109,16 @@ public class ReviewService {
      */
 
     public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
-        Member member = memberService.getMemberByUsername(userDetails.getUsername());
+
 
         Review review =reviewRepository.save(Review.builder()
-                        .member(member)
-                        .bookId(reviewsDTO.getBookId())
-                        .content(reviewsDTO.getContent())
-                        .rating(reviewsDTO.getRating())
-                        .recommendMember(new HashSet<>())
-                        .isDelete(false)
-                    .build());
+                .userId(myId(userDetails))
+                .bookId(reviewsDTO.getBookId())
+                .content(reviewsDTO.getContent())
+                .rating(reviewsDTO.getRating())
+                .recommendMember(new HashSet<>())
+                .isDelete(false)
+                .build());
 
         MemberDto memberDto = memberService.getMemberById(myId(userDetails));   //리뷰 작성자
         List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
@@ -177,7 +175,7 @@ public class ReviewService {
             reviewRepository.save(review);
         }
 
-         return new ReviewsDTO(review);
+        return new ReviewsDTO(review);
 
     }
 
@@ -207,11 +205,11 @@ public class ReviewService {
         Review review = findById(reviewId);
 
         Member member = memberRepository.findById(myId(userDetails))
-                        .orElseThrow(()->new ReviewException(
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
-                        ));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
+                ));
 
         Set<Member> list = review.getRecommendMember();
 
@@ -286,7 +284,7 @@ public class ReviewService {
      * @since 25.02.10
      */
     private void authorityCheck(CustomUserDetails userDetails, Review review){
-        Member member = memberRepository.findById(review.getMember().getId()).get(); // memberService로 변경 예정
+        Member member = memberRepository.findById(review.getUserId()).get(); // memberService로 변경 예정
 
 
         if(!member.getUsername().equals(userDetails.getUsername()))

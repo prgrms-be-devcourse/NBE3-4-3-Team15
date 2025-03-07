@@ -34,6 +34,8 @@ public class ReviewComment extends BaseEntity {
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
+    private Long userId;
+
     private String comment;
 
     @ManyToOne
@@ -47,9 +49,6 @@ public class ReviewComment extends BaseEntity {
     private Set<Member> recommend;
 
     private boolean isDelete;
-
-    @ManyToOne
-    private Member member;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewComment> replies = new ArrayList<>();  // 자식 댓글 (대댓글)

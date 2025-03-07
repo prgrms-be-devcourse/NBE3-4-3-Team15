@@ -4,7 +4,10 @@ import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.review.entity.Review;
 import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +22,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
 public class ReviewsDTO {
     Long id;
 
@@ -49,7 +51,7 @@ public class ReviewsDTO {
     public ReviewsDTO(Review review){
         this.id=review.getId();
         this.bookId = review.getBookId();
-        this.userId= review.getMember().getId();
+        this.userId= review.getUserId();
         this.content = review.getContent();
         this.rating = review.getRating();
         this.reviewCommentDtos = review.getComments().stream()

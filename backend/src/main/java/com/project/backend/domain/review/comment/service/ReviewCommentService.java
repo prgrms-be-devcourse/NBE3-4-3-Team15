@@ -19,6 +19,7 @@ import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,10 +70,9 @@ public class ReviewCommentService {
      * @since 25.02.06
      */
     public List<ReviewCommentDto> findUserComment(CustomUserDetails userDetails) {
-        Member member = memberService.getMemberByUsername(userDetails.getUsername());
-        return member.getReviewComments().stream()
-                .map(ReviewCommentDto::new)
-                .toList();
+        Member member = memberRepository.findByUsername(userDetails.getUsername()).get(); //memberservice로 변경
+        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(member.getId());
+        return reviewCommentDtos;
     }
 
     /**
@@ -85,9 +85,6 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,CustomUserDetails userDetails) {  // 메소드가 너무 긴듯 분할 필요
-
-        Member member = memberService.getMemberByUsername(userDetails.getUsername());
-
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -96,7 +93,7 @@ public class ReviewCommentService {
                 ));
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
-                .member(member)
+                .userId(myId(userDetails))
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
@@ -107,11 +104,11 @@ public class ReviewCommentService {
             ReviewComment parentComment = findCommentById(reviewCommentDto.getParentId());
 
             if(parentComment.getDepth()+1>=2){
-               throw new ReviewException(
-                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getStatus(),
-                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getErrorCode(),
-                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getMessage()
-               );
+                throw new ReviewException(
+                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getStatus(),
+                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getErrorCode(),
+                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getMessage()
+                );
             }
             reviewComment.setParent(parentComment);
             reviewComment.setDepth(parentComment.getDepth()+1);
@@ -135,7 +132,7 @@ public class ReviewCommentService {
      */
     public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(review.getMember().getId())
+                .memberId(review.getUserId())
                 .reviewComment(reviewComment.getId())
                 .isCheck(false)
                 .build();
@@ -209,11 +206,11 @@ public class ReviewCommentService {
         ReviewComment reviewComment = findCommentById(commentId);
         Member member = memberRepository.findByUsername(userDetails.getUsername())
 
-                        .orElseThrow(()->new ReviewException(
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
-                        ));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
+                ));
 
         Set<Member> members  = reviewComment.getRecommend();
         if(members.contains(member)){
@@ -301,7 +298,7 @@ public class ReviewCommentService {
      * @since 25.02.10
      */
     private void authorityCheck(CustomUserDetails userDetails, ReviewComment comment){
-        Member member = memberRepository.findById(comment.getMember().getId()).get(); // memberService로 변경 예정
+        Member member = memberRepository.findById(comment.getUserId()).get(); // memberService로 변경 예정
 
 
         if(!member.getUsername().equals(userDetails.getUsername()))

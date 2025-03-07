@@ -27,7 +27,7 @@ public class ReviewCommentDto {
     private Long id;
 
 
-    
+
     private Long reviewId;
 
 
@@ -55,7 +55,7 @@ public class ReviewCommentDto {
     public ReviewCommentDto(ReviewComment reviewComment) {
         this.id = reviewComment.getId();
         this.reviewId = reviewComment.getReview().getId();
-        this.userId = reviewComment.getMember().getId();
+        this.userId = reviewComment.getUserId();
         this.comment = reviewComment.getComment();
         this.parentId = (reviewComment.getParent() == null)?null: reviewComment.getParent().getId();
         this.depth = reviewComment.getDepth();

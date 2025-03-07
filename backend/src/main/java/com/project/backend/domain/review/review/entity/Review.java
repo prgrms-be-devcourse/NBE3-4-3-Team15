@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -35,8 +36,8 @@ public class Review extends BaseEntity {
     @NotNull
     private Long bookId;
 
-    @ManyToOne
-    private Member member;
+    @NotNull
+    private Long userId;
 
     @NotBlank
     private String content;
