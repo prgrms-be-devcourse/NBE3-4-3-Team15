@@ -91,28 +91,28 @@ public class ReviewService {
 
     /**
      * userid 기반 리뷰 찾기
-     * @param userDetails
+     * @param memberId
      * @return  List<ReviewsDTO>
      */
-    public List<ReviewsDTO> getUserReviews(CustomUserDetails userDetails) {
-        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(myId(userDetails));
+    public List<ReviewsDTO> getUserReviews(Long memberId) {
+
+        List<ReviewsDTO> reviewsDTOS = reviewRepository.findAllByUserId(memberId);
         return reviewsDTOS;
     }
 
 
     /**
      * 리뷰 생성
-     * @param -- ReviewsDTO(rating,content,bookId,memberId)
+     * @param memberId
+     * @param reviewsDTO
      *
      * @author 이광석
      * @since 25.01.27
      */
-
-    public void write(CustomUserDetails userDetails,ReviewsDTO reviewsDTO) {
-
+    public void write(Long memberId,ReviewsDTO reviewsDTO){
 
         Review review =reviewRepository.save(Review.builder()
-                .userId(myId(userDetails))
+                .userId(memberId)
                 .bookId(reviewsDTO.getBookId())
                 .content(reviewsDTO.getContent())
                 .rating(reviewsDTO.getRating())
@@ -120,7 +120,7 @@ public class ReviewService {
                 .isDelete(false)
                 .build());
 
-        MemberDto memberDto = memberService.getMemberById(myId(userDetails));   //리뷰 작성자
+        MemberDto memberDto = memberService.getMemberById(memberId);   //리뷰 작성자
         List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
 
 
@@ -140,14 +140,14 @@ public class ReviewService {
     /**
      * 리뷰 수정
      * @param -- reviewsDTO(content,rating)
-     * @param userDetails
+     * @param memberId
      *
      * @author 이광석
      * @since 25.01.27
      */
-    public void modify(ReviewsDTO reviewsDTO,Long reviewId,CustomUserDetails userDetails) {
+    public void modify(ReviewsDTO reviewsDTO,Long reviewId,Long memberId) {
         Review review = findById(reviewId);
-        authorityCheck(userDetails,review);
+
 
         review.setContent(reviewsDTO.getContent());
         review.setRating(reviewsDTO.getRating());
@@ -162,9 +162,8 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public ReviewsDTO delete(Long reviewId,CustomUserDetails userDetails) {
+    public ReviewsDTO delete(Long reviewId,Long memberId) {
         Review review = findById(reviewId);
-        authorityCheck(userDetails,review);
 
         if(review.getComments().isEmpty()){
             reviewRepository.delete(review);
@@ -201,10 +200,10 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
-    public boolean recommend(Long reviewId, CustomUserDetails userDetails) {
+    public boolean recommend(Long reviewId, Long memberId){
         Review review = findById(reviewId);
 
-        Member member = memberRepository.findById(myId(userDetails))
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new ReviewException(
                         ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
                         ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
@@ -270,7 +269,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.02.10
      */
-    private Long myId(CustomUserDetails userDetails){
+    public  Long myId(CustomUserDetails userDetails){
         return memberService.getMyProfile(userDetails.getUsername()).getId();
     }
 
@@ -278,12 +277,13 @@ public class ReviewService {
     /**
      * 리뷰작성자와 현재 사용자가 같은지 확인
      * @param userDetails
-     * @param review
+     * @param reviewId
      *
      * @author 이광석
      * @since 25.02.10
      */
-    private void authorityCheck(CustomUserDetails userDetails, Review review){
+    public  void authorityCheck(CustomUserDetails userDetails,Long reviewId){
+        Review review = findById(reviewId);
         Member member = memberRepository.findById(review.getUserId()).get(); // memberService로 변경 예정
 
 
@@ -297,6 +297,20 @@ public class ReviewService {
         }
     }
 
+    /**
+     *
+     * 유저의 최신 리뷰 3개의 책 id 조회
+     *
+     * @param userId
+     * @return
+     *
+     * @author shjung
+     * @since 25. 3. 5.
+     */
+    public List<Long> getBookIds(Long userId) {
+        List<Long> bookIds = reviewRepository.findAllByUserIdOrderByBookIdDesc(userId).stream().map(Review::getBookId).limit(3).toList();
 
+        return bookIds;
+    }
 
 }
