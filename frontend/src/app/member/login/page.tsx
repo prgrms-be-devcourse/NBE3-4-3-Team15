@@ -28,6 +28,7 @@ const Login: React.FC = () => {
       });
 
       if (response.ok) {
+        localStorage.setItem("username", id); // 저장
         window.location.href = "/";
       } else {
         const errorData = await response.json();
