@@ -20,4 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
     Page<Review> findAllByBookId(Long bookId, Pageable pageable);
 
     List<Review> findAllByUserIdOrderByBookIdDesc(Long userId);
+
+    @Query("SELECT r.bookId, COUNT(r) FROM Review r WHERE r.createdAt BETWEEN :start AND :end GROUP BY r.bookId")
+    List<Object[]> countReviewsByBookIdAndDateTime(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }
