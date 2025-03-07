@@ -24,18 +24,35 @@ public class FollowController {
     private final FollowService followService;
 
     /**
-     * @param username 팔로우/언팔로우를 하고자 하는 회원 username
+     * @param username 팔로우를 하고자 하는 회원 username
      * @param userDetails 로그인한 회원의 정보
-     * 팔로우 또는 언팔로우
-     * @return 팔로우/언팔로우 성공 여부
+     * 팔로우
+     * @return 팔로우 성공 여부
      */
     @PostMapping("/{id}/follow")
-    public ResponseEntity<GenericResponse<String>> followOrUnfollow(
+    public ResponseEntity<GenericResponse<String>> follow(
             @PathVariable("id") String username,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         System.out.println(username);
-        String message = followService.followOrUnfollow(userDetails.getUsername(), username);
+        String message = followService.follow(userDetails.getUsername(), username);
+
+        return ResponseEntity.ok(GenericResponse.of(message));
+    }
+
+    /**
+     * @param username 언팔로우를 하고자 하는 회원 username
+     * @param userDetails 로그인한 회원의 정보
+     * 언팔로우
+     * @return 언팔로우 성공 여부
+     */
+    @PostMapping("/{id}/unfollow")
+    public ResponseEntity<GenericResponse<String>> unFollow(
+            @PathVariable("id") String username,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        System.out.println(username);
+        String message = followService.unFollow(userDetails.getUsername(), username);
 
         return ResponseEntity.ok(GenericResponse.of(message));
     }
