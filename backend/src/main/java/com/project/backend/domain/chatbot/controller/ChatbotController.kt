@@ -32,7 +32,7 @@ class ChatbotController {
 
         return ResponseEntity.ok(
             GenericResponse.of(
-                chatbotService!!.generate(message.question, member.id)
+                chatbotService!!.recommendBook(message.question, member.id)
             )
         )
     }

@@ -1,8 +1,7 @@
-package com.project.backend.domain.book.entity;
+package com.project.backend.domain.book.entity
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.persistence.*
 
 /**
  * -- 책 엔티티 --
@@ -11,35 +10,32 @@ import lombok.*;
  * @since -- 1월 27일 --
  */
 @Entity
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Book {
-
+class Book(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    val id: Long? = null,
 
     @Column(columnDefinition = "TEXT")
     @JsonProperty("title")
-    private String title;
+    val title: String,
 
-    @Column(length = 100)
+    @Column(columnDefinition = "TEXT")
     @JsonProperty("author")
-    private String author;
+    var author: String,
 
     @Column(columnDefinition = "TEXT")
     @JsonProperty("description")
-    private String description;
+    var description: String,
 
     @Column(columnDefinition = "TEXT")
     @JsonProperty("image")
-    private String image;
+    val image: String,
 
     @Column(length = 50, unique = true, nullable = false)
     @JsonProperty("isbn")
-    private String isbn;
+    val isbn: String,
 
-    private int favoriteCount;
-}
+    var ranking: Int?,
+
+    val favoriteCount: Int? = 0
+)

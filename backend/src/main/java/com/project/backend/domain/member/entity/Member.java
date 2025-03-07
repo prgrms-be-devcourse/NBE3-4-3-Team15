@@ -64,4 +64,17 @@ public class Member extends BaseEntity {
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
+
+    /**
+     * -- Member 엔티티의 ID 접근을 위한 임시 Getter --
+     *
+     * @author -- 김남우 --
+     * @since -- 3월 4일 --
+     *
+     * Kotlin의 Book 엔티티와 Java의 Member 엔티티 간 ID 접근 문제 해결을 위해 임시로 직접 getter 추가
+     * Member도 Kotlin으로 마이그레이션되면 삭제 가능
+     */
+    public Long getId() {
+        return id;
+    }
 }

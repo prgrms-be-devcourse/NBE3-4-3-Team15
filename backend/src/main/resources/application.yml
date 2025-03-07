@@ -3,14 +3,17 @@ spring:
     include: secret
   application:
     name: backend
-
-
   jpa:
     hibernate:
       ddl-auto: create
     properties:
       hibernate:
-        show_sql: true
+        jdbc:
+          batch_size: 1000
+          order_inserts: true
+          order_updates: true
+          generate_statistics: true
+        show_sql: false
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
         hbm2ddl:

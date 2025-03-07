@@ -28,7 +28,6 @@ public class ReviewsDTO {
     @NotNull
     Long bookId;
 
-    @NotNull
     Long userId;
 
     @NotBlank
