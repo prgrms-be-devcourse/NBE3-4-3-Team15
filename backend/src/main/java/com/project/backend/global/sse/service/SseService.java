@@ -41,6 +41,15 @@ public class SseService {
 
             redisService.saveData(key,value,DEFAULT_TIMEOUT);
 
+            SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
+
+            try{
+                emitter.send(SseEmitter.event()
+                        .name("connect")
+                        .data("SSE 연결 성공"));
+            }catch (IOException e){
+                emitter.completeWithError(e);
+            }
 
 
 
@@ -66,8 +75,8 @@ public class SseService {
 //            emitter.completeWithError(e);
 //        }
 //
-//
-//        return emitter;
+
+        return emitter;
     }
 
 
@@ -80,10 +89,12 @@ public class SseService {
      * @since 25.02.23
      */
     public void sendNotification(Long memberId,String message){
-        SseEmitter emitter = emitterRepository.findById(memberId);
-        if (emitter == null) {
-            System.out.println("SSE Emitter not found for memberId: " + memberId);
-        }
+//        SseEmitter emitter = emitterRepository.findById(memberId);
+          if(redisService.getData("SSE_CONNECT:"+memberId)==null){
+              System.out.println("없음");
+              return;
+          }
+          SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
         System.out.println("sse 알람 시작");
         if(emitter !=null){
             try{
