@@ -20,7 +20,6 @@ import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,15 +64,14 @@ public class ReviewCommentService {
 
     /**
      * userId기반 코멘트 검색
-     * @param userDetails
+     * @param memberId
      * @return List<ReviewCommentDto>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    public List<ReviewCommentDto> findUserComment(CustomUserDetails userDetails) {
-        Member member = memberRepository.findByUsername(userDetails.getUsername()).get(); //memberservice로 변경
-        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(member.getId());
+    public List<ReviewCommentDto> findUserComment(Long memberId) {
+        List<ReviewCommentDto> reviewCommentDtos = reviewCommentRepository.findAllByUserId(memberId);
         return reviewCommentDtos;
     }
 
@@ -86,10 +84,14 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
+<<<<<<< HEAD
 
     public ReviewCommentDto write(Long reviewId,
                                   ReviewCommentDto reviewCommentDto,
                                   CustomUserDetails userDetails) {
+=======
+    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,long memberId) {  // 메소드가 너무 긴듯 분할 필요
+>>>>>>> main
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -98,7 +100,7 @@ public class ReviewCommentService {
                 ));
         ReviewComment reviewComment = ReviewComment.builder()
                 .review(review)
-                .userId(myId(userDetails))
+                .userId(memberId)
                 .comment(reviewCommentDto.getComment())
                 .recommend(new HashSet<>())
                 .depth(0)
@@ -184,12 +186,8 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto, CustomUserDetails userDetails) {
-
-
+    public ReviewCommentDto modify(Long reviewId, Long commentId,ReviewCommentDto reviewCommentDto) {
         ReviewComment reviewComment = findCommentById(commentId);
-
-        authorityCheck(userDetails,reviewComment);
 
         reviewComment.setComment(reviewCommentDto.getComment());
         reviewCommentRepository.save(reviewComment);
@@ -205,7 +203,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public ReviewCommentDto delete(Long reviewId,Long commentId,CustomUserDetails userDetails) {
+    public ReviewCommentDto delete(Long reviewId,Long commentId) {
         ReviewComment reviewComment = findCommentById(commentId);
 
         if(reviewComment.getParent()!=null){ //대댓글인 경우
@@ -221,15 +219,15 @@ public class ReviewCommentService {
     /**
      * 댓글 추천
      * @param commentId
-     * @param userDetails
+     * @param username
      * @return Boolean - 추천(true)/추천 취소(false)
      *
      * @author -- 이광석
      * @since -- 25.01.17
      */
-    public Boolean recommend(Long commentId,CustomUserDetails userDetails) {
+    public Boolean recommend(Long commentId,String username) {
         ReviewComment reviewComment = findCommentById(commentId);
-        Member member = memberRepository.findByUsername(userDetails.getUsername())
+        Member member = memberRepository.findByUsername(username)
 
                         .orElseThrow(()->new ReviewException(
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
@@ -309,24 +307,24 @@ public class ReviewCommentService {
      * @author 이광석
      * @since 25.02.10
      */
-    private Long myId(CustomUserDetails userDetails){
+    public Long myId(CustomUserDetails userDetails){
         return memberService.getMyProfile(userDetails.getUsername()).getId();
     }
 
 
     /**
      * 코멘트 작성자와 현재 사용자가 같은지 확인
-     * @param userDetails
-     * @param comment
+     * @param username
+     * @param commentUserId
      *
      * @author 이광석
      * @since 25.02.10
      */
-    private void authorityCheck(CustomUserDetails userDetails, ReviewComment comment){
-        Member member = memberRepository.findById(comment.getUserId()).get(); // memberService로 변경 예정
+    public void authorityCheck(String username, Long commentUserId){
+        Member member = memberRepository.findById(commentUserId).get(); // memberService로 변경 예정
 
 
-        if(!member.getUsername().equals(userDetails.getUsername()))
+        if(!member.getUsername().equals(username))
         {
             throw new ReviewException(
                     ReviewErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
