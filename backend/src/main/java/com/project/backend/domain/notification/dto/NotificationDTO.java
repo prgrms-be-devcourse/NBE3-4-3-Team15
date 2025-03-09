@@ -15,7 +15,9 @@ import lombok.*;
 public class NotificationDTO {
     Long id;
 
-    Long memberId;
+    Long producerMemberId;
+
+    Long consumerMemberId;
 
     Long reviewId;
 
@@ -27,23 +29,15 @@ public class NotificationDTO {
 
     public NotificationDTO(Notification notification) {
         this.id = notification.getId();
-        this.memberId = notification.getMemberId();
+        this.producerMemberId = notification.getProducerMemberId();
+        this.consumerMemberId = notification.getConsumerMemberId();
         this.reviewId = notification.getReviewId();
         this.reviewComment = notification.getReviewCommentId();
         this.isCheck = notification.isCheck();
         this.content = notification.getContent();
     }
 
-    public static NotificationDTO fromEntity(Notification notification) {
-        return NotificationDTO.builder()
-                .id(notification.getId())
-                .memberId(notification.getMemberId())
-                .reviewId(notification.getReviewId())
-                .reviewComment(notification.getReviewCommentId())
-                .isCheck(notification.isCheck())
-                .content(notification.getContent())
-                .build();
-    }
+
     public void setContent(String username, String type){
         String content= username + "님이 ";
         if(type.equals("COMMENT")) {

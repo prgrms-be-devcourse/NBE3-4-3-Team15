@@ -34,7 +34,8 @@ public class NotificationService {
      */
     public NotificationDTO create(NotificationDTO notificationDTO) {
         Notification notification = Notification.builder()
-                .memberId(notificationDTO.getMemberId())
+                .consumerMemberId(notificationDTO.getConsumerMemberId())
+                .producerMemberId(notificationDTO.getProducerMemberId())
                 .reviewId(notificationDTO.getReviewId())
                 .reviewCommentId(notificationDTO.getReviewComment())
                 .isCheck(notificationDTO.isCheck())
@@ -117,7 +118,7 @@ public class NotificationService {
     private void authorityCheck(CustomUserDetails userDetails, Notification notification){
         MemberDto memberDto = memberService.getMyProfile(userDetails.getUsername());
 
-        if(notification.getMemberId()!=memberDto.getId()){
+        if(notification.getConsumerMemberId()!=memberDto.getId()){
             throw new NotificationException(
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),

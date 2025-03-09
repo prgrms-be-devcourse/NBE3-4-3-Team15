@@ -23,7 +23,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    Long memberId;
+    Long producerMemberId;
+
+    Long consumerMemberId;
 
     Long reviewId;
 

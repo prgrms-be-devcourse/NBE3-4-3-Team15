@@ -130,7 +130,8 @@ public class ReviewCommentService {
      */
     public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(review.getUserId())
+                .consumerMemberId(review.getUserId())
+                .producerMemberId(reviewComment.getUserId())
                 .reviewComment(reviewComment.getId())
                 .isCheck(false)
                 .build();
