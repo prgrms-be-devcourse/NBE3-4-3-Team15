@@ -125,7 +125,7 @@ public class NotificationService {
      */
     private void authorityCheck(MemberDto memberDto, Notification notification){
 
-        if(notification.getConsumerMemberId().equals(memberDto.getId())){
+        if(!notification.getConsumerMemberId().equals(memberDto.getId())){
             throw new NotificationException(
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
