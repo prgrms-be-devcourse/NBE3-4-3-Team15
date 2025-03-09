@@ -44,7 +44,7 @@ public class RedisSubscriber implements MessageListener {
             System.out.println("sub 전체 알림" + channel + msg );
             sseService.broadcastNotification(msg); // 모든 SSE 연결에 전송
         }else{
-            Long memberId = Long.parseLong(channel.split(":")[1]);
+            Long memberId = Long.parseLong(list[1]);
             System.out.println("sub user"+channel+memberId+msg);
             sseService.sendNotificationToUser(memberId,msg);
         }

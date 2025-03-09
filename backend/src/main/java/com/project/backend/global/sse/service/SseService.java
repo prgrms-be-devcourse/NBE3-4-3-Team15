@@ -1,8 +1,7 @@
 package com.project.backend.global.sse.service;
 
 
-import com.project.backend.global.redis.RedisService;
-import com.project.backend.global.sse.rapository.EmitterRepository;
+import com.project.backend.global.sse.repository.EmitterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -34,8 +33,8 @@ public class SseService {
 
         emitterRepository.save(memberId,emitter);
 
-        emitter.onCompletion(() -> emitterRepository.deleteBy(memberId));
-        emitter.onTimeout(() -> emitterRepository.deleteBy(memberId));
+        emitter.onCompletion(() -> emitterRepository.deleteById(memberId));
+        emitter.onTimeout(() -> emitterRepository.deleteById(memberId));
 
 
         try{
@@ -43,7 +42,7 @@ public class SseService {
                     .name("connect")
                     .data("SSE 연결 성공"));
         }catch (IOException e){
-            emitterRepository.deleteBy(memberId);
+            emitterRepository.deleteById(memberId);
         }
 
         return emitter;
@@ -65,7 +64,7 @@ public class SseService {
                        .name(memberId+"")
                        .data(message));
            }catch (IOException e){
-               emitterRepository.deleteBy(memberId);
+               emitterRepository.deleteById(memberId);
            }
         });
     }
@@ -85,7 +84,7 @@ public class SseService {
                         .name("notification")
                         .data(message));
             } catch (IOException e) {
-                emitterRepository.deleteBy(memberId);
+                emitterRepository.deleteById(memberId);
             }
         }
     }

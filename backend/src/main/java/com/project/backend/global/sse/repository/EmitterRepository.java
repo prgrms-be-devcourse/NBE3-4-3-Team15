@@ -1,4 +1,4 @@
-package com.project.backend.global.sse.rapository;
+package com.project.backend.global.sse.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -43,7 +43,7 @@ public class EmitterRepository {
      * 구독 해제
      * @param memberId
      */
-    public void deleteBy(Long memberId){
+    public void deleteById(Long memberId){
         emitters.remove(memberId);
     }
 
