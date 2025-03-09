@@ -5,11 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-<<<<<<< HEAD
-import java.util.concurrent.TimeUnit;
 
-=======
->>>>>>> main
 /**
  * Redis 데이터 저장,삭제, 검색 Service
  *
@@ -29,13 +25,9 @@ public class RedisService {
      *@author 이광석
      *@since 25.02.26
      */
-<<<<<<< HEAD
-    public void saveData(String key,String value,Long time){
-        redisTemplate.opsForValue().set(key,value,time, TimeUnit.SECONDS);
-=======
     public void saveData(String key,String value){
         redisTemplate.opsForValue().set(key,value);
->>>>>>> main
+
     }
 
     /**

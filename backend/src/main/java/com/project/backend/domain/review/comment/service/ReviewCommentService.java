@@ -84,14 +84,8 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-<<<<<<< HEAD
 
-    public ReviewCommentDto write(Long reviewId,
-                                  ReviewCommentDto reviewCommentDto,
-                                  CustomUserDetails userDetails) {
-=======
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,long memberId) {  // 메소드가 너무 긴듯 분할 필요
->>>>>>> main
+    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,long memberId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -125,17 +119,14 @@ public class ReviewCommentService {
 
 
 
-        createCommentNotification(newReviewComment,review,reviewCommentDto,userDetails);
+        createCommentNotification(newReviewComment,review,reviewCommentDto,memberId);
 
         return new ReviewCommentDto(reviewComment);
     }
 
     /**
-<<<<<<< HEAD
-     * 코멘트 관련 알람 생성 메소드
-=======
+
      * 댓글 관련 알림 생성
->>>>>>> b9ef0952f968afdcfb3c6079ff30ab67c660d7e7
      * @param reviewComment
      * @param review
      * @param reviewCommentDto
@@ -147,22 +138,22 @@ public class ReviewCommentService {
     public void createCommentNotification(ReviewComment reviewComment,
                                           Review review,
                                           ReviewCommentDto reviewCommentDto,
-                                          CustomUserDetails userDetails){
+                                          Long memberId){
         Long receiverId;
         String content;
 
         //댓글일 경우
         if(reviewCommentDto.getParentId()==null) {
             receiverId = review.getUserId();
-            content = userDetails.getUsername()+"님이 댓글을 작성했습니다.";
+            content = memberId+"님이 댓글을 작성했습니다.";
         }
         // 대댓글일 경우
         else{
            receiverId=reviewComment.getParent().getUserId();
-           content = userDetails.getUsername()+"님이 대댓글을 작성했습니다.";
+           content = memberId+"님이 대댓글을 작성했습니다.";
         }
 
-        if(receiverId==memberService.getMyProfile(userDetails.getUsername()).getId()){
+        if(receiverId==memberId){
             return;
         }
 

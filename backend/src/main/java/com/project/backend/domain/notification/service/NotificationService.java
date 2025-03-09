@@ -8,11 +8,12 @@ import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
-import com.project.backend.global.rabbitmq.dto.MessageDto;
-import com.project.backend.global.rabbitmq.service.RabbitMQService;
+//import com.project.backend.global.rabbitmq.dto.MessageDto;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import com.project.backend.global.authority.CustomUserDetails;
 
+import com.project.backend.global.redis.RedisService;
+import com.project.backend.global.redis.service.RedisPublisher;
 import com.project.backend.global.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,10 @@ import java.util.stream.Collectors;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
+    private final RedisService redisService;
+    private final RedisPublisher publisher;
 
     private final SseService sseservice;
-    private final RabbitMQService rabbitMQService;
 
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
 
@@ -59,11 +61,7 @@ public class NotificationService {
                 .build();
 
 
-        MessageDto newMessage = new MessageDto(notification.getMemberId(),notification.getContent()); //producer에 전달한 message 생성
-
-
-        rabbitMQService.sendMessage(notification.getMemberId(),newMessage);//producer
-
+        publisher.publishToUser(notification.getMemberId(),notification.getContent());
         return new NotificationDTO(notificationRepository.save(notification));
     }
 

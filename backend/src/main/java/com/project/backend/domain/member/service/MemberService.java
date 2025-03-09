@@ -10,7 +10,7 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.global.jwt.JwtUtil;
-import com.project.backend.global.rabbitmq.service.RabbitMQService;
+//import com.project.backend.global.rabbitmq.service.RabbitMQService;
 import com.project.backend.global.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +37,7 @@ public class MemberService {
     private final FavoriteRepository favoriteRepository;
     private final BookRepository bookRepository;
     private final SseService sseService;
-    private final RabbitMQService rabbitMQService;
+//    private final RabbitMQService rabbitMQService;
 
     /**
      * 회원가입 처리
@@ -94,9 +94,9 @@ public class MemberService {
             throw new MemberException(INCORRECT_PASSWORD);
         }
 
-//        sseService.subscribeSse(member.getId());//Sse 구독
-        rabbitMQService.createMemberQueue(member.getId()); //rabbitmq를 위한 큐 생성
-        rabbitMQService.dynamicRabbitListener(member.getId());
+////        sseService.subscribeSse(member.getId());//Sse 구독
+//        rabbitMQService.createMemberQueue(member.getId()); //rabbitmq를 위한 큐 생성
+//        rabbitMQService.dynamicRabbitListener(member.getId());
 
         return jwtUtil.generateToken(member.getUsername()); // JWT 토큰 발급
     }

@@ -17,8 +17,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SseService {
     private final EmitterRepository emitterRepository;
-    private final RedisService redisService;
-
+//    private final RedisService redisService;
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
 
     /**
@@ -31,50 +30,21 @@ public class SseService {
      * @since 25.02.23
      */
     public SseEmitter subscribeSse(Long memberId){
-            String key = "SSE_CONNECT:"+memberId;
-            String value = "server-1";
+        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
 
-            if(redisService.getData(key)!=null){
-                redisService.deleteData(key);
+        emitterRepository.save(memberId,emitter);
 
-            }
-
-            redisService.saveData(key,value,DEFAULT_TIMEOUT);
-
-            SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-
-            try{
-                emitter.send(SseEmitter.event()
-                        .name("connect")
-                        .data("SSE 연결 성공"));
-            }catch (IOException e){
-                emitter.completeWithError(e);
-            }
+        emitter.onCompletion(() -> emitterRepository.deleteBy(memberId));
+        emitter.onTimeout(() -> emitterRepository.deleteBy(memberId));
 
 
-
-
-
-//        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-//
-//        emitterRepository.save(memberId,emitter);
-//
-//        emitter.onCompletion(()->emitterRepository.deleteBy(memberId)); // emitter
-//
-//        emitter.onTimeout(()->emitterRepository.deleteBy(memberId));
-//
-//
-//
-//        try{
-//            emitter.send(SseEmitter.event()
-//                    .name("connect")
-//                    .data("SSE 연결 성공"));
-//            System.out.println("sse 연결 성공");
-//        }catch (IOException e){
-//            emitterRepository.deleteBy(memberId);
-//            emitter.completeWithError(e);
-//        }
-//
+        try{
+            emitter.send(SseEmitter.event()
+                    .name("connect")
+                    .data("SSE 연결 성공"));
+        }catch (IOException e){
+            emitterRepository.deleteBy(memberId);
+        }
 
         return emitter;
     }
@@ -82,34 +52,42 @@ public class SseService {
 
     /**
      * 프론트로 알람 전달 메소드
-     * @param memberId
+     *
      * @param message
      *
      * @author 이광석
      * @since 25.02.23
      */
-    public void sendNotification(Long memberId,String message){
-//        SseEmitter emitter = emitterRepository.findById(memberId);
-          if(redisService.getData("SSE_CONNECT:"+memberId)==null){
-              System.out.println("없음");
-              return;
-          }
-          SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-        System.out.println("sse 알람 시작");
-        if(emitter !=null){
-            try{
-                System.out.println("알람 전달 성공");
+    public void broadcastNotification(String message) {
+        emitterRepository.getAllEmitters().forEach((memberId, emitter) -> {
+           try{
+               emitter.send(SseEmitter.event()
+                       .name(memberId+"")
+                       .data(message));
+           }catch (IOException e){
+               emitterRepository.deleteBy(memberId);
+           }
+        });
+    }
+
+    /**
+     * 메시지를 특정 사용자에게 전달하는 메서드
+     * @param memberId - 수신자 memberId
+     * @param message - 메시지 내용
+     * @author 이광석
+     * @since 25.03.09
+     */
+    public void sendNotificationToUser(Long memberId,String message) {
+        SseEmitter emitter = emitterRepository.findById(memberId);
+        if (emitter != null) {
+            try {
                 emitter.send(SseEmitter.event()
                         .name("notification")
                         .data(message));
-            }catch(IOException e){
-                System.out.println("알람 전달 실패");
+            } catch (IOException e) {
                 emitterRepository.deleteBy(memberId);
-                emitter.completeWithError(e);
             }
         }
     }
-
-
 
 }

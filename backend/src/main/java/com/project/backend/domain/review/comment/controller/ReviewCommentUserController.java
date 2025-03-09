@@ -36,10 +36,7 @@ public class ReviewCommentUserController {
         long memberId = reviewCommentService.myId(userDetails);
         List<ReviewCommentDto> commentDtos = reviewCommentService.findUserComment(memberId);
         return ResponseEntity.ok(GenericResponse.of(
-<<<<<<< HEAD
 
-=======
->>>>>>> main
                 commentDtos,
                 "User 댓글 조회 성공"
         ));
