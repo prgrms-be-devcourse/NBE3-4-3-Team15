@@ -75,8 +75,7 @@ class CrawlingService(private val bookService: BookService) {
         val tasks = (0 until threadCount).map { i ->
             Callable {
                 val filteredEntries = bestSellersMap.filterKeys { it % threadCount == i }
-                filteredEntries.map { (ranking, link) ->
-                    getBestSellerBookDTO(ranking, link)
+                filteredEntries.map { (ranking, link) -> getBestSellerBookDTO(ranking, link)
                 }
             }
         }
@@ -100,6 +99,7 @@ class CrawlingService(private val bookService: BookService) {
      * @since -- 3월 04일 --
      */
     private fun getBestSellerBookDTO(ranking: Int, link: String, maxRetries: Int = 3): BookDTO {
+
         var retries = 0
         val doc: Document = Jsoup.connect(link).get()
         extractThread("${ranking}위 크롤링")
@@ -107,17 +107,13 @@ class CrawlingService(private val bookService: BookService) {
         while (true) {
             val title = doc.selectFirst("h2.gd_name")?.text()?.takeIf { it.isNotBlank() } ?: "제목 정보 없음"
             val author = doc.selectFirst("span.gd_auth")?.text()?.takeIf { it.isNotBlank() } ?: "작가 정보 없음"
-            val description = Jsoup.clean(
-                doc.selectFirst("div#infoset_introduce div.infoWrap_txtInner")?.text()?.takeIf { it.isNotBlank() }
-                    ?: "설명 없음", Safelist.none()).trim()
+            val description = Jsoup.clean(doc.selectFirst("div#infoset_introduce div.infoWrap_txtInner")?.text()?.takeIf { it.isNotBlank() } ?: "설명 없음", Safelist.none()).trim()
             val image = doc.selectFirst("img.gImg")?.attr("src")?.takeIf { it.isNotBlank() } ?: "이미지 없음"
             val isbn = extractIsbn(doc)
 
             if (title == "제목 정보 없음" || author == "작가 정보 없음" || description == "설명 없음" || image == "이미지 없음" || isbn == "") {
                 retries++
-                if (retries >= maxRetries) {
-                    return BookDTO(null, title, author, description, image, isbn, ranking, 0)
-                }
+                if (retries >= maxRetries) { return BookDTO(null, title, author, description, image, isbn, ranking, 0) }
                 continue
             }
             return BookDTO(null, title, author, description, image, isbn, ranking, 0)
@@ -134,6 +130,7 @@ class CrawlingService(private val bookService: BookService) {
      * @since -- 3월 04일 --
      */
     private fun extractIsbn(doc: Document, default: String = "ISBN 정보 없음"): String {
+
         val tableScope = doc.selectFirst("div.infoSetCont_wrap .b_size")
         return tableScope?.selectFirst("tr:has(th:contains(ISBN13)) td")?.text() ?: default
     }
@@ -147,6 +144,7 @@ class CrawlingService(private val bookService: BookService) {
      * @since -- 3월 09일 --
      */
     fun saveBestSellers(bestSellerBookDTOs: List<BookDTO>) {
+
         extractThread("베스트셀러 저장")
         bookService.saveBestsellers(bestSellerBookDTOs)
     }
