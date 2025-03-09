@@ -4,10 +4,7 @@ package com.project.backend.domain.notification.entity;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -35,4 +32,8 @@ public class Notification {
     boolean isCheck;
 
     String content;
+
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType notificationType;
 }

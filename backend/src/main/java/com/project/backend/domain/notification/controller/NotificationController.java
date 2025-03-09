@@ -95,7 +95,7 @@ public class NotificationController {
     public ResponseEntity<GenericResponse<String>> notificationDelete(@PathVariable("notificationId") Long notificationId,
                                                                       @AuthenticationPrincipal CustomUserDetails userDetails){
         MemberDto memberDto = memberService.getMyProfile(userDetails.getUsername());
-        notificationService.notificationDelete(notificationId,memberDto);
+        notificationService.deleteNotification(notificationId,memberDto);
         return ResponseEntity.ok(GenericResponse.of(
                 "삭제 성공"
         ));

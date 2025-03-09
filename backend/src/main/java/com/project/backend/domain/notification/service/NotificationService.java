@@ -6,10 +6,12 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
+import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import com.project.backend.global.authority.CustomUserDetails;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final MemberService memberService;
+
+    public String buildContent(String username, NotificationType type){
+        return username + "님이"+type.getMessage();
+    }
 
     /**
      * 알람 생성
@@ -37,9 +42,10 @@ public class NotificationService {
                 .consumerMemberId(notificationDTO.getConsumerMemberId())
                 .producerMemberId(notificationDTO.getProducerMemberId())
                 .reviewId(notificationDTO.getReviewId())
-                .reviewCommentId(notificationDTO.getReviewComment())
+                .reviewCommentId(notificationDTO.getReviewCommentId())
                 .isCheck(notificationDTO.isCheck())
                 .content(notificationDTO.getContent())
+                .notificationType(notificationDTO.getNotificationType())
                 .build();
 
 
@@ -66,6 +72,7 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
+    @Transactional
     public void notificationCheck(Long notificationId, MemberDto memberDto) {
         Notification notification = findNotificationById(notificationId);
         authorityCheck(memberDto,notification);
@@ -81,7 +88,8 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public void notificationDelete(Long notificationId,MemberDto memberDto) {
+    @Transactional
+    public void deleteNotification(Long notificationId,MemberDto memberDto) {
         Notification notification = findNotificationById(notificationId);
         authorityCheck(memberDto,notification);
         notificationRepository.delete(notification);
@@ -117,7 +125,7 @@ public class NotificationService {
      */
     private void authorityCheck(MemberDto memberDto, Notification notification){
 
-        if(notification.getConsumerMemberId()!=memberDto.getId()){
+        if(notification.getConsumerMemberId().equals(memberDto.getId())){
             throw new NotificationException(
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
@@ -125,4 +133,5 @@ public class NotificationService {
             );
         }
     }
+
 }
