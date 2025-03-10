@@ -2,6 +2,8 @@ package com.project.backend.domain.notification.dto;
 
 
 import com.project.backend.domain.notification.entity.Notification;
+import com.project.backend.domain.notification.entity.NotificationType;
+import com.project.backend.domain.notification.service.NotificationService;
 import lombok.*;
 
 
@@ -15,44 +17,30 @@ import lombok.*;
 public class NotificationDTO {
     Long id;
 
-    Long memberId;
+    Long producerMemberId;
+
+    Long consumerMemberId;
 
     Long reviewId;
 
-    Long reviewComment;
+    Long reviewCommentId;
 
     boolean isCheck;
 
     String content;
 
+    NotificationType notificationType;
+
     public NotificationDTO(Notification notification) {
         this.id = notification.getId();
-        this.memberId = notification.getMemberId();
+        this.producerMemberId = notification.getProducerMemberId();
+        this.consumerMemberId = notification.getConsumerMemberId();
         this.reviewId = notification.getReviewId();
-        this.reviewComment = notification.getReviewCommentId();
+        this.reviewCommentId = notification.getReviewCommentId();
         this.isCheck = notification.isCheck();
         this.content = notification.getContent();
+        this.notificationType = notification.getNotificationType();
     }
 
-    public static NotificationDTO fromEntity(Notification notification) {
-        return NotificationDTO.builder()
-                .id(notification.getId())
-                .memberId(notification.getMemberId())
-                .reviewId(notification.getReviewId())
-                .reviewComment(notification.getReviewCommentId())
-                .isCheck(notification.isCheck())
-                .content(notification.getContent())
-                .build();
-    }
-    public void setContent(String username, String type){
-        String content= username + "님이 ";
-        if(type.equals("COMMENT")) {
-            content += "댓글을 작성하였습니다";
-        }else if(type.equals("REPLY")){
-            content+= "대댓글을 작성하였습니다";
-        }else if(type.equals("REVIEW")){
-            content+= "리뷰를 작성하였습니다";
-        }
-        this.content = content;
-    }
+
 }

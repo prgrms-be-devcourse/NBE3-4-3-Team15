@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+
 /**
  * Redis 데이터 저장,삭제, 검색 Service
  *
@@ -26,6 +27,7 @@ public class RedisService {
      */
     public void saveData(String key,String value){
         redisTemplate.opsForValue().set(key,value);
+
     }
 
     /**
