@@ -1,6 +1,7 @@
 package com.project.backend.domain.book.crawling
 
 import com.project.backend.domain.book.repository.RedisRepository
+import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 
 /**
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Component
  * @since -- 3월 09일 --
  */
 @Component
-class CrawlingFacade(private val crawlingService: CrawlingService, private val redisRepository: RedisRepository) {
+class CrawlingFacade(private val crawlingService2: CrawlingService2, private val redisRepository: RedisRepository) {
+
 
     /**
      * -- 크롤링 실행 및 통제 메서드 --
@@ -24,17 +26,18 @@ class CrawlingFacade(private val crawlingService: CrawlingService, private val r
      * @author -- 정재익 --
      * @since -- 3월 09일 --
      */
-    fun executeCrawling() {
-        crawlingService.getBestSellersMap()
-        val currentHash = crawlingService.getMapHash()
-        val previousHash = redisRepository.loadPreviousHash()
+    fun executeCrawling() { runBlocking {
+            crawlingService2.getBestSellersMap()
+            val currentHash = crawlingService2.getMapHash()
+            val previousHash = redisRepository.loadPreviousHash()
 
-        if (currentHash != previousHash) {
-            val bestSellerBookDTOs = crawlingService.getBestSellerBookDTOs()
-            crawlingService.saveBestSellers(bestSellerBookDTOs)
-            redisRepository.saveHash(currentHash)
-        } else {
-            crawlingService.logNoChange()
+//            if (currentHash != previousHash) {
+                val bestSellerBookDTOs = crawlingService2.getBestSellerBookDTOs()
+                crawlingService2.saveBestSellers(bestSellerBookDTOs)
+                redisRepository.saveHash(currentHash)
+//            } else {
+//                crawlingService2.logNoChange()
+//            }
         }
     }
 }
