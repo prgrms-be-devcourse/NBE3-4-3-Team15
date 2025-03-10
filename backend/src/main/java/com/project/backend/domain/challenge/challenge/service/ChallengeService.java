@@ -12,6 +12,7 @@ import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -74,5 +75,12 @@ public class ChallengeService {
 
     public Optional<Challenge> findLatest() {
         return challengeRepository.findFirstByOrderByIdDesc();
+    }
+
+    @Transactional
+    public void updateChallengeStatus() {
+        challengeRepository.updateChallengeStatuses();
+
+        entryService.updateIsActiveForEndedChallenges();
     }
 }

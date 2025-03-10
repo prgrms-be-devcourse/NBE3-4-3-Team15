@@ -46,4 +46,8 @@ public class EntryService {
     public List<Entry> getMyChallenge(Member member) {
         return entryRepository.findByMemberId(member.getId());
     }
+
+    public void updateIsActiveForEndedChallenges() {
+        entryRepository.updateIsActiveForEndedChallenges();
+    }
 }
