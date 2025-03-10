@@ -23,4 +23,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByChallengeIdAndMemberId(long challengeId, long memberId);
 
     List<Attendance> findByChallengeId(Long challengeId);
+
+    long countByChallengeIdAndMemberId(Long id, Long id1);
 }

@@ -3,6 +3,8 @@ package com.project.backend.domain.challenge.attendance.service;
 import com.project.backend.domain.challenge.attendance.entity.Attendance;
 import com.project.backend.domain.challenge.attendance.repository.AttendanceRepository;
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
+import com.project.backend.domain.challenge.entry.entity.Entry;
+import com.project.backend.domain.challenge.entry.service.EntryService;
 import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
 import com.project.backend.domain.challenge.exception.ChallengeException;
 import com.project.backend.domain.member.entity.Member;
@@ -34,6 +36,7 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final ReviewService reviewService;
     private final ReviewCommentService reviewCommentService;
+    private final EntryService entryService;
 
     public boolean checkTodayAttendance(long challengeId, long memberId) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
@@ -62,6 +65,7 @@ public class AttendanceService {
             }
             else {
                 save(opAttendance.get());
+                updateEntryRate(challenge, member);
             }
         }
         else {
@@ -102,7 +106,6 @@ public class AttendanceService {
             );
         }
 
-        // 오늘 작성된 댓글 중 유효한 데이터 선택
         Optional<ReviewCommentDto> validComment = todayComments.stream()
                 .filter(comment -> todayAttendances.stream()
                         .noneMatch(attendance ->
@@ -121,8 +124,15 @@ public class AttendanceService {
             );
         }
 
-        // 유효한 리뷰나 댓글이 없으면 빈 값 반환
         return Optional.empty();
+    }
+
+    public List<Attendance> getAttendanceChallenge(Challenge challenge, Member member) {
+        return attendanceRepository.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
+    }
+
+    public List<Attendance> findByChallengeId(Long challengeId) {
+        return attendanceRepository.findByChallengeId(challengeId);
     }
 
     private List<ReviewsDTO> findTodayReviews(long memberId) {
@@ -141,11 +151,13 @@ public class AttendanceService {
                 .collect(Collectors.toList());
     }
 
-    public List<Attendance> getAttendanceChallenge(Challenge challenge, Member member) {
-        return attendanceRepository.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
-    }
+    private void updateEntryRate(Challenge challenge, Member member) {
+        Entry entry = entryService.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
 
-    public List<Attendance> findByChallengeId(Long challengeId) {
-        return attendanceRepository.findByChallengeId(challengeId);
+        int totalDay = challenge.getTotalDays();
+
+        long attendanceCount = attendanceRepository.countByChallengeIdAndMemberId(challenge.getId(), member.getId());
+
+        entry.updateRate(attendanceCount, totalDay);
     }
 }

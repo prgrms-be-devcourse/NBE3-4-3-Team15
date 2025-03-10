@@ -32,6 +32,10 @@ public class EntryService {
                             .member(member)
                             .deposit(deposit)
                             .isActive(true)
+                            .refundAmount(0)
+                            .rewardAmount(0)
+                            .refunded(false)
+                            .rate(0)
                             .build()
             );
         } catch (Exception e) {
@@ -49,5 +53,14 @@ public class EntryService {
 
     public List<Entry> findByChallengeId(Long challengeId) {
         return entryRepository.findByChallengeId(challengeId);
+    }
+
+    public Entry findByChallengeIdAndMemberId(Long challengeId, Long memberId) {
+        return entryRepository.findByChallengeIdAndMemberId(challengeId, memberId)
+                .orElseThrow(() -> new ChallengeException(
+                        ChallengeErrorCode.ENTRY_NOT_FOUND.getStatus(),
+                        ChallengeErrorCode.ENTRY_NOT_FOUND.getErrorCode(),
+                        ChallengeErrorCode.ENTRY_NOT_FOUND.getMessage()
+                ));
     }
 }

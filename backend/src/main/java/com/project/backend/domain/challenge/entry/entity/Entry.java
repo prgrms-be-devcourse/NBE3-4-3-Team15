@@ -40,4 +40,16 @@ public class Entry extends BaseEntity {
     private long deposit;
 
     private boolean isActive;
+
+    private long refundAmount;
+
+    private long rewardAmount;
+
+    private boolean refunded;
+
+    public double rate;
+
+    public void updateRate(long attendanceCount, int totalDay) {
+        this.rate = (attendanceCount / (double) totalDay) * 100;
+    }
 }

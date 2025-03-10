@@ -46,6 +46,7 @@ public class Challenge extends BaseEntity {
     public enum ChallengeStatus {
         WAITING,
         START,
+        REFUNDING,
         END
     }
 
@@ -63,5 +64,10 @@ public class Challenge extends BaseEntity {
         } else {
             this.status = ChallengeStatus.START;
         }
+    }
+
+    public int getTotalDays() {
+        return (int) (endDate.toLocalDate().toEpochDay() -
+                startDate.toLocalDate().toEpochDay() + 1);
     }
 }

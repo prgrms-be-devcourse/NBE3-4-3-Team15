@@ -14,7 +14,8 @@ public enum ChallengeErrorCode {
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST,"VALIDATION_FAILED","입력한 데이터가 유효하지 않습니다"),
     UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN,"UNAUTHORIZED_ACCESS","권한이 없습니다"),
     DAILY_VERIFICATION(HttpStatus.BAD_REQUEST, "DAILY_VERIFICATION", "챌린지 인증 조건을 충족하지 못했습니다."),
-    ALREADY_VALID(HttpStatus.CONFLICT, "ALREADY_VALID", "이미 인증된 챌린지 입니다.");
+    ALREADY_VALID(HttpStatus.CONFLICT, "ALREADY_VALID", "이미 인증된 챌린지 입니다."),
+    ENTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "ENTRY_NOT_FOUND","참여 정보를 찾을 수 없습니다.");
 
 
     private final HttpStatus status;

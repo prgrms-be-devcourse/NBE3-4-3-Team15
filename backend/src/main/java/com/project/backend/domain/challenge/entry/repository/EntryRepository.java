@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 챌린지 참가 레포지토리
@@ -25,4 +26,6 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
     void updateIsActiveForEndedChallenges();
 
     List<Entry> findByChallengeId(Long challengeId);
+
+    Optional<Entry> findByChallengeIdAndMemberId(Long challengeId, Long memberId);
 }

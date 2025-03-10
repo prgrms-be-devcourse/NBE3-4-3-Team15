@@ -1,23 +1,15 @@
 package com.project.backend.domain.challenge.reward.service;
 
 import com.project.backend.domain.challenge.attendance.entity.Attendance;
-import com.project.backend.domain.challenge.attendance.repository.AttendanceRepository;
 import com.project.backend.domain.challenge.attendance.service.AttendanceService;
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
-import com.project.backend.domain.challenge.challenge.repository.ChallengeRepository;
 import com.project.backend.domain.challenge.challenge.service.ChallengeService;
 import com.project.backend.domain.challenge.entry.entity.Entry;
-import com.project.backend.domain.challenge.entry.repository.EntryRepository;
 import com.project.backend.domain.challenge.entry.service.EntryService;
-import com.project.backend.domain.member.entity.Member;
-import com.project.backend.domain.member.service.MemberService;
-import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,20 +18,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RewardService {
 
-    private final ChallengeRepository challengeRepository;
-    private final EntryRepository entryRepository;
-    private final AttendanceRepository attendanceRepository;
     private final ChallengeService challengeService;
     private final EntryService entryService;
     private final AttendanceService attendanceService;
-    private final MemberService memberService;
 
     @Transactional
-    public void processRewards(Long challengeId) {
+    public void processRewards() {
+        List<Challenge> challenges = challengeService.findChallengesInRefundProgress();
+
+        for (Challenge challenge : challenges)
+            refundInProgress(challenge.getId());
+    }
+
+    private void refundInProgress(Long challengeId) {
         // 1. 챌린지 정보 가져오기
         Challenge challenge = challengeService.getChallenge(challengeId);
-
-        int totalDays = calculateTotalDays(challenge);
+        int totalDays = challenge.getTotalDays();
 
         // 2. 참가자의 출석 데이터 가져오기
         List<Attendance> attendances = attendanceService.findByChallengeId(challengeId);
@@ -56,27 +50,20 @@ public class RewardService {
         List<Entry> failedEntries = groupedEntries.get("FAILED");
 
         // 6. 실패자의 차감된 금액 계산
-        BigDecimal totalPenaltyAmount = calculatePenaltyAmount(failedEntries);
+        long totalPenaltyAmount = calculatePenaltyAmount(failedEntries);
 
         // 7. 성공자의 추가 보상 분배
         distributeRewards(successfulEntries, totalPenaltyAmount, challenge.getTotalDeposit());
 
         // 8. 실패자 페널티 적용 및 환급
         applyPenaltiesAndRefunds(failedEntries);
-    }
 
-    private int calculateTotalDays(Challenge challenge) {
-        return (int) (challenge.getEndDate().toLocalDate().toEpochDay() -
-                challenge.getStartDate().toLocalDate().toEpochDay() + 1);
+        challenge.setStatus(Challenge.ChallengeStatus.REFUNDING);
     }
 
     private Map<String, List<Entry>> groupEntriesByParticipation(List<Entry> entries, List<Attendance> attendances, int totalDays) {
         return entries.stream().collect(Collectors.groupingBy(entry -> {
-            long memberAttendanceCount = attendances.stream()
-                    .filter(attendance -> attendance.getMember().getId().equals(entry.getMember().getId()))
-                    .count();
-
-            double participationRate = (memberAttendanceCount / (double) totalDays) * 100;
+            double participationRate = entry.getRate();
 
             if (participationRate == 100) return "SUCCESS";
             else if (participationRate >= 80) return "PARTIAL";
@@ -84,44 +71,40 @@ public class RewardService {
         }));
     }
 
-    private BigDecimal calculatePenaltyAmount(List<Entry> failedEntries) {
-        BigDecimal totalPenalty = BigDecimal.ZERO;
+    private long calculatePenaltyAmount(List<Entry> failedEntries) {
+        long totalPenalty = 0;
 
         for (Entry entry : failedEntries) {
-            double participationRate = entry.getParticipationRate(); // 이미 계산된 참여율 사용
-            BigDecimal penaltyRate;
+            double participationRate = entry.getRate();
+            double penaltyRate;
 
-            if (participationRate >= 70) penaltyRate = BigDecimal.valueOf(0.05);
-            else if (participationRate >= 60) penaltyRate = BigDecimal.valueOf(0.10);
-            else penaltyRate = BigDecimal.valueOf(0.15);
+            if (participationRate >= 70) penaltyRate = 0.05;
+            else if (participationRate >= 60) penaltyRate = 0.10;
+            else penaltyRate = 0.15;
 
-            BigDecimal penaltyAmount = entry.getDeposit().multiply(penaltyRate);
-            totalPenalty = totalPenalty.add(penaltyAmount);
+            long penaltyAmount = (long) (entry.getDeposit() * penaltyRate);
+            totalPenalty += penaltyAmount;
 
-            // 차감된 금액 저장
-            entry.setRefundAmount(entry.getDeposit().subtract(penaltyAmount));
-            entryRepository.save(entry);
+            entry.setRefundAmount(entry.getDeposit() - penaltyAmount);
+            entry.setRefunded(true);
         }
 
         return totalPenalty;
     }
 
-    private void distributeRewards(List<Entry> successfulEntries, BigDecimal totalPenaltyAmount, long totalDeposit) {
+    private void distributeRewards(List<Entry> successfulEntries, long totalPenaltyAmount, long totalDeposit) {
         for (Entry entry : successfulEntries) {
-            BigDecimal rewardRatio = entry.getDeposit().divide(totalDeposit, 10, BigDecimal.ROUND_DOWN);
-            BigDecimal rewardAmount = rewardRatio.multiply(totalPenaltyAmount);
+            double rewardRatio = entry.getDeposit() / (double) totalDeposit;
+            long rewardAmount = (long) (rewardRatio * totalPenaltyAmount);
 
-            // 추가 보상 저장
             entry.setRewardAmount(rewardAmount);
-            entry.setRefundAmount(entry.getDeposit().add(rewardAmount));
-            entryRepository.save(entry);
+            entry.setRefundAmount(entry.getDeposit() + rewardAmount);
         }
     }
 
     private void applyPenaltiesAndRefunds(List<Entry> failedEntries) {
         for (Entry entry : failedEntries) {
-            entry.setRefunded(true); // 환급 완료 표시
-            entryRepository.save(entry);
+            entry.setRefunded(true);
         }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,9 +26,12 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     @Query("UPDATE Challenge c " +
             "SET c.status = CASE " +
             "WHEN c.status = 'WAITING' AND c.startDate <= CURRENT_TIMESTAMP THEN 'START' " +
-            "WHEN c.status = 'START' AND c.endDate <= CURRENT_TIMESTAMP THEN 'END' " +
+            "WHEN c.status = 'START' AND c.endDate <= CURRENT_TIMESTAMP THEN 'REFUNDING' " +
             "END " +
             "WHERE (c.status = 'WAITING' AND c.startDate <= CURRENT_TIMESTAMP) " +
             "OR (c.status = 'START' AND c.endDate <= CURRENT_TIMESTAMP)")
     void updateChallengeStatuses();
+
+    @Query("SELECT c FROM Challenge c WHERE c.status = 'REFUNDING'")
+    List<Challenge> findChallengesInRefundProgress();
 }
