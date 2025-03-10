@@ -39,7 +39,7 @@ dependencies {
     // ✅ DB 관련 라이브러리
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
-    implementation("redis.clients:jedis:4.3.1")mer
+    implementation("redis.clients:jedis:4.3.1")
 
     // ✅ [Redis 관련 (Spring Data Redis)]
     implementation("org.springframework.boot:spring-boot-starter-data-redis") // Spring Data Redis
