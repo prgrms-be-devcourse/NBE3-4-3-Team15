@@ -47,7 +47,7 @@ public class Entry extends BaseEntity {
 
     private boolean refunded;   // 환급 여부
 
-    public double rate; // 참여율
+    private double rate; // 참여율
 
     public void updateRate(long attendanceCount, int totalDay) {
         this.rate = (attendanceCount / (double) totalDay) * 100;

@@ -64,6 +64,7 @@ public class SecurityConfig {
 
                         // 로그인 및 회원가입은 인증 없이 허용
                         .requestMatchers("/members/login", "/members","members/{id}/followers", "members/{id}/followings").permitAll()
+                        .requestMatchers("/challenge", "/challenge/{id}").permitAll()
 
                         // h2-console, swagger 접근 허용
                         .requestMatchers(PathRequest.toH2Console()).permitAll()

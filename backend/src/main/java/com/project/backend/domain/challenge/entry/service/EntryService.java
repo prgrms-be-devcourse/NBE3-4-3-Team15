@@ -63,4 +63,17 @@ public class EntryService {
                         ChallengeErrorCode.ENTRY_NOT_FOUND.getMessage()
                 ));
     }
+
+    public List<Entry> findByMemberId(Long id) {
+        List<Entry> entries = entryRepository.findByMemberId(id);
+
+        if (entries.isEmpty()) {
+            throw new ChallengeException(
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getStatus(),
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getErrorCode(),
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getMessage()
+            );
+        }
+        return entries;
+    }
 }
