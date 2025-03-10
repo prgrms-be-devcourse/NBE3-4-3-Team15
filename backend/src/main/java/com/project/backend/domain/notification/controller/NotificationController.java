@@ -8,6 +8,7 @@ import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -56,9 +57,12 @@ public class NotificationController {
      * @since 25.02.06
      */
     @GetMapping("/myNotification")
-    public ResponseEntity<GenericResponse<List<NotificationDTO>>> getUserIdNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<GenericResponse<Page<NotificationDTO>>> getUserIdNotification(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                                        @RequestParam(value = "page",defaultValue = "1") int page,
+                                                                                        @RequestParam(value = "size", defaultValue = "10") int size,
+                                                                                        @RequestParam(value = "onlyNotCheck", defaultValue = "false") boolean onlyNotCheck){
         MemberDto memberDto = memberService.getMyProfile(userDetails.getUsername());
-        List<NotificationDTO> notificationDTOS = notificationService.findByUser(memberDto);
+        Page<NotificationDTO> notificationDTOS = notificationService.findByUser(memberDto,page,size,onlyNotCheck);
         return ResponseEntity.ok(GenericResponse.of(
                 notificationDTOS,
                 "알림 조회 성공"

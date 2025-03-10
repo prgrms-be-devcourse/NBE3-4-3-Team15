@@ -14,6 +14,10 @@ import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.redis.service.RedisPublisher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,9 +67,17 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public List<NotificationDTO> findByUser(MemberDto memberDto) {
+    public Page<NotificationDTO> findByUser(MemberDto memberDto,int page, int size,boolean onlyNotCheck) {
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by(Sort.Direction.DESC,"createdAt"));
+        Page<Notification> notificationPage;
 
-        return notificationRepository.findAllByConsumerMemberId(memberDto.getId());
+        if(onlyNotCheck){
+            notificationPage = notificationRepository.findAllByConsumerMemberIdAndIsCheckFalse(memberDto.getId(),pageable);
+        }else{
+            notificationPage = notificationRepository.findAllByConsumerMemberId(memberDto.getId(),pageable);
+        }
+        return notificationPage.map(NotificationDTO::new);
+
     }
 
     /**

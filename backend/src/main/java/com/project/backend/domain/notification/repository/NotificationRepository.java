@@ -19,4 +19,6 @@ public interface NotificationRepository extends JpaRepository<Notification,Long>
 
     List<NotificationDTO> findAllByConsumerMemberId(Long id);
     Page<Notification> findAllByConsumerMemberId(Long id, Pageable pageable);
+
+    Page<Notification> findAllByConsumerMemberIdAndIsCheckFalse(Long id,Pageable pageable);
 }
