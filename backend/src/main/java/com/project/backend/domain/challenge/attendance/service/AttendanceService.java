@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -72,38 +75,69 @@ public class AttendanceService {
 
     public Optional<Attendance> createAttendance(Challenge challenge, Member member) {
 
-        return findTodayReview(member.getId())
-                .map(review ->
-                        Attendance.builder()
-                                .challenge(challenge)
-                                .member(member)
-                                .checkType(Attendance.CheckType.REVIEW)
-                                .writeId(review.getId())
-                                .build()
-                )
-                .or(() -> findTodayComment(member.getId())
-                        .map(comment ->
-                                Attendance.builder()
-                                        .challenge(challenge)
-                                        .member(member)
-                                        .checkType(Attendance.CheckType.COMMENT)
-                                        .writeId(comment.getId())
-                                        .build()
-                        )
-                );
+        List<ReviewsDTO> todayReviews = findTodayReviews(member.getId());
+        List<ReviewCommentDto> todayComments = findTodayComments(member.getId());
+
+        List<Attendance> todayAttendances = attendanceRepository.findByMemberIdAndCreatedAtBetween(
+                member.getId(),
+                LocalDate.now().atStartOfDay(),
+                LocalDate.now().plusDays(1).atStartOfDay().minusNanos(1)
+        );
+
+        Optional<ReviewsDTO> validReview = todayReviews.stream()
+                .filter(review -> todayAttendances.stream()
+                        .noneMatch(attendance ->
+                                attendance.getCheckType() == Attendance.CheckType.REVIEW &&
+                                        attendance.getWriteId() == review.getId()))
+                .findFirst();
+
+        if (validReview.isPresent()) {
+            return Optional.of(
+                    Attendance.builder()
+                            .challenge(challenge)
+                            .member(member)
+                            .checkType(Attendance.CheckType.REVIEW)
+                            .writeId(validReview.get().getId())
+                            .build()
+            );
+        }
+
+        // 오늘 작성된 댓글 중 유효한 데이터 선택
+        Optional<ReviewCommentDto> validComment = todayComments.stream()
+                .filter(comment -> todayAttendances.stream()
+                        .noneMatch(attendance ->
+                                attendance.getCheckType() == Attendance.CheckType.COMMENT &&
+                                        attendance.getWriteId() == comment.getId()))
+                .findFirst();
+
+        if (validComment.isPresent()) {
+            return Optional.of(
+                    Attendance.builder()
+                            .challenge(challenge)
+                            .member(member)
+                            .checkType(Attendance.CheckType.COMMENT)
+                            .writeId(validComment.get().getId())
+                            .build()
+            );
+        }
+
+        // 유효한 리뷰나 댓글이 없으면 빈 값 반환
+        return Optional.empty();
     }
 
-    private Optional<ReviewsDTO> findTodayReview(long memberId) {
+    private List<ReviewsDTO> findTodayReviews(long memberId) {
         return Optional.ofNullable(reviewService.getUserReviews(memberId))
-                .flatMap(reviews -> reviews.stream()
-                        .filter(review -> review.getCreatedAt().toLocalDate().equals(LocalDate.now()))
-                        .findFirst());
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(review -> review.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                .collect(Collectors.toList());
     }
 
-    private Optional<ReviewCommentDto> findTodayComment(long memberId) {
+    private List<ReviewCommentDto> findTodayComments(long memberId) {
         return Optional.ofNullable(reviewCommentService.findUserComment(memberId))
-                .flatMap(comments -> comments.stream()
-                        .filter(comment -> comment.getCreatedAt().toLocalDate().equals(LocalDate.now()))
-                        .findFirst());
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(comment -> comment.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                .collect(Collectors.toList());
     }
 }
