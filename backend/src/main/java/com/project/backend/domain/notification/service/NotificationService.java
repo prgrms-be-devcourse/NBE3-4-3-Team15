@@ -32,7 +32,7 @@ public class NotificationService {
     private final RedisPublisher redisPublisher;
 
     public String buildContent(String username, NotificationType type){
-        return username + "님이"+type.getMessage();
+        return username + "님이 "+type.getMessage();
     }
 
     /**
@@ -148,5 +148,7 @@ public class NotificationService {
             );
         }
     }
+
+    
 
 }
