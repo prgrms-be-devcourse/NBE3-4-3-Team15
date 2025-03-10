@@ -7,7 +7,9 @@ import com.project.backend.domain.follow.exception.FollowException;
 import com.project.backend.domain.follow.repository.FollowRepository;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,17 @@ public class FollowService {
     private static final String PENDING_UNFOLLOWS = "pendingUnfollows"; // 언팔로우 요청이 발생한 목록
 
     /**
+     * @param username 조회할 회원의 사용자명
+     * @return 락이 걸린 상태의 Member 엔티티
+     * @throws FollowException 회원을 찾을 수 없는 경우 발생
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    private Member findMemberWithLock(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new FollowException(FollowErrorCode.NOT_FOUND_MEMBER));
+    }
+
+    /**
      * 팔로우 기능
      *
      * @param followerId  팔로우를 요청하는 사용자 ID
@@ -39,9 +52,9 @@ public class FollowService {
      * @return 팔로우 성공 메시지
      */
     public String follow(String followerId, String followingId) {
-        // 팔로우를 요청한 사용자와 대상 사용자를 조회
-        Member follower = findMemberByUsername(followerId);
-        Member following = findMemberByUsername(followingId);
+        // 1. 비관적 락을 걸고 사용자 조회
+        Member follower = findMemberWithLock(followerId);
+        Member following = findMemberWithLock(followingId);
 
         // 자기 자신을 팔로우하려는 경우 예외 처리
         if (follower.equals(following)) {
@@ -91,9 +104,9 @@ public class FollowService {
      * @return 언팔로우 성공 메시지
      */
     public String unFollow(String followerId, String followingId) {
-        // 언팔로우를 요청한 사용자와 대상 사용자를 조회
-        Member follower = findMemberByUsername(followerId);
-        Member following = findMemberByUsername(followingId);
+        // 1. 비관적 락을 걸고 사용자 조회
+        Member follower = findMemberWithLock(followerId);
+        Member following = findMemberWithLock(followingId);
 
         // 자기 자신을 언팔로우하려는 경우 예외 처리
         if (follower.equals(following)) {
