@@ -28,7 +28,6 @@ public class RedisPublisher {
      * @since 25.03.09
      */
     public void publishToUser(Long memberId,String message){
-        System.out.println("publishToUser"+ memberId+ message);
         redisTemplate.convertAndSend("notification:"+memberId,message);
     }
 }

@@ -6,7 +6,7 @@ import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.service.NotificationService;
 import lombok.*;
 
-
+import java.time.LocalDateTime;
 
 
 @Setter
@@ -31,6 +31,8 @@ public class NotificationDTO {
 
     NotificationType notificationType;
 
+    LocalDateTime create_At;
+
     public NotificationDTO(Notification notification) {
         this.id = notification.getId();
         this.producerMemberId = notification.getProducerMemberId();
@@ -40,6 +42,7 @@ public class NotificationDTO {
         this.isCheck = notification.isCheck();
         this.content = notification.getContent();
         this.notificationType = notification.getNotificationType();
+        this.create_At = notification.getCreatedAt();
     }
 
 
