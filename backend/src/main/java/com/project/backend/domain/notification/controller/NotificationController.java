@@ -105,4 +105,15 @@ public class NotificationController {
                 "삭제 성공"
         ));
     }
+
+    @GetMapping("/{notificationCount}")
+    public ResponseEntity<GenericResponse<Long>> notificationTotalCount(@AuthenticationPrincipal CustomUserDetails userDetails){
+        MemberDto memberDto = memberService.getMyProfile(userDetails.getUsername());
+        Long total = notificationService.getNotificationTotalCount(memberDto);
+        return ResponseEntity.ok(GenericResponse.of(
+                total,
+                "전체 알람 전달 성공"
+
+        ));
+    }
 }

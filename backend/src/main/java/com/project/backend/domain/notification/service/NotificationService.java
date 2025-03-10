@@ -2,15 +2,12 @@ package com.project.backend.domain.notification.service;
 
 
 import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
-import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
-import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.redis.service.RedisPublisher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 알람 서비스
@@ -149,6 +144,10 @@ public class NotificationService {
         }
     }
 
-    
 
+    public Long getNotificationTotalCount(MemberDto memberDto) {
+        Long memberId = memberDto.getId();
+
+        return notificationRepository.countByConsumerMemberId(memberId);
+    }
 }
