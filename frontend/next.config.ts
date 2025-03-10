@@ -1,7 +1,16 @@
-import type { NextConfig } from "next";
+import { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const config: NextConfig = {
+    async rewrites() {
+        return [
+            {
+                source: '/members/:path*',
+                destination: 'http://localhost:8080/members/:path*', // backend server address
+            },
+        ];
+    },
 };
 
-export default nextConfig;
+export default config;
+
+

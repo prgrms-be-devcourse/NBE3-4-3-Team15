@@ -14,6 +14,7 @@ const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+
   // 로그인 요청
   const login = async () => {
     setErrorMessage(""); // 기존 에러 메시지 초기화
@@ -28,7 +29,10 @@ const Login: React.FC = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("username", id); // 저장
         window.location.href = "/";
+        localStorage.setItem("token", data.accessToken)
       } else {
         const errorData = await response.json();
         setErrorMessage(errorData.message || "알 수 없는 오류");
