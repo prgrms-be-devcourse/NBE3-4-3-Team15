@@ -19,4 +19,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     Optional<Attendance> findByChallengeIdAndMemberIdAndCreatedAtBetween(long challengeId, long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
     List<Attendance> findByMemberIdAndCreatedAtBetween(Long id, LocalDateTime localDateTime, LocalDateTime localDateTime1);
+
+    List<Attendance> findByChallengeIdAndMemberId(long challengeId, long memberId);
+
+    List<Attendance> findByChallengeId(Long challengeId);
 }

@@ -140,4 +140,12 @@ public class AttendanceService {
                 .filter(comment -> comment.getCreatedAt().toLocalDate().equals(LocalDate.now()))
                 .collect(Collectors.toList());
     }
+
+    public List<Attendance> getAttendanceChallenge(Challenge challenge, Member member) {
+        return attendanceRepository.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
+    }
+
+    public List<Attendance> findByChallengeId(Long challengeId) {
+        return attendanceRepository.findByChallengeId(challengeId);
+    }
 }

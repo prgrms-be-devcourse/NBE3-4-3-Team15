@@ -79,9 +79,9 @@ insert into review_comment(`created_at`, `modified_at`, `comment`, `depth`, `is_
     ON DUPLICATE KEY UPDATE modified_at = now();
 
 insert into challenge(`created_at`, `modified_at`, `content`, `end_date`, `name`, `start_date`, `status`, `total_deposit`)
-    VALUES (now(), now(), '한달간 출석을 잘 합니다.', '2025-03-07 02:04:17.105', '한달 챌린지1', '2025-04-07 02:04:17.105', 'START', '100000'),
-     (now(), now(), '한달간 출석을 잘 합니다.', '2025-03-07 02:04:17.105', '한달 챌린지2', '2025-04-07 02:04:17.105', 'START', '100000'),
-     (now(), now(), '한달간 출석을 잘 합니다.', '2025-03-07 02:04:17.105', '한달 챌린지3', '2025-04-07 02:04:17.105', 'START', '100000')
+    VALUES (now(), now(), '한달간 출석을 잘 합니다.', '2025-04-07 02:04:17.105', '한달 챌린지1', '2025-03-07 02:04:17.105', 'START', '100000'),
+     (now(), now(), '한달간 출석을 잘 합니다.', '2025-04-07 02:04:17.105', '한달 챌린지2', '2025-03-07 02:04:17.105', 'START', '100000'),
+     (now(), now(), '한달간 출석을 잘 합니다.', '2025-04-07 02:04:17.105', '한달 챌린지3', '2025-03-07 02:04:17.105', 'START', '100000')
      ON DUPLICATE KEY UPDATE modified_at = now();
 
 insert into entry(`created_at`, `modified_at`, `deposit`, `is_active`, `challenge_id`, `member_id`)
