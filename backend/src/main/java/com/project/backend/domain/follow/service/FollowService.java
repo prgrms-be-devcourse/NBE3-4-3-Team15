@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -138,27 +139,69 @@ public class FollowService {
 
 
     /**
-     * 사용자의 팔로워 목록 조회
+     * 사용자의 팔로잉 목록 조회
      * @param username 사용자 username
      * @return 팔로잉 정보 리스트
      */
     @Transactional(readOnly = true)
     public List<FollowResponseDto> getFollowings(String username) {
         Member member = findMemberByUsername(username);
-        return followRepository.findByFollower(member).stream()
+        SetOperations<String, String> setOps = redisTemplate.opsForSet();
+
+        String followingKey = String.format(FOLLOWING_PREFIX, username);
+        Set<String> followingIds = setOps.members(followingKey);
+
+        // 1. Redis 에 데이터가 존재하면 그대로 반환
+        if (followingIds != null && !followingIds.isEmpty()) {
+            return followingIds.stream()
+                    .map(this::findMemberByUsername) // username → Member 조회
+                    .map(following -> toFollowResponseDto(new Follow(member, following), false))
+                    .toList();
+        }
+
+        // 2. Redis 에 데이터가 없으면 DB 에서 조회 후 Redis 에 저장
+        List<Follow> followings = followRepository.findByFollower(member);
+
+        if (!followings.isEmpty()) {
+            setOps.add(followingKey, followings.stream()
+                    .map(f -> f.getFollowing().getUsername()).distinct().toArray(String[]::new)); // Redis 에 저장
+        }
+
+        return followings.stream()
                 .map(f -> toFollowResponseDto(f, false))
                 .toList();
     }
 
     /**
-     * 사용자의 팔로잉 목록 조회
+     * 사용자의 팔로워 목록 조회
      * @param username 조회할 회원 username
      * @return 팔로워 정보 리스트
      */
     @Transactional(readOnly = true)
     public List<FollowResponseDto> getFollowers(String username) {
         Member member = findMemberByUsername(username);
-        return followRepository.findByFollowing(member).stream()
+        SetOperations<String, String> setOps = redisTemplate.opsForSet();
+
+        String followersKey = String.format(FOLLOWERS_PREFIX, username);
+        Set<String> followerIds = setOps.members(followersKey);
+
+        // 1. Redis 에서 데이터가 존재하면 반환
+        if (followerIds != null && !followerIds.isEmpty()) {
+            return followerIds.stream()
+                    .map(this::findMemberByUsername) // username → Member 조회
+                    .map(follower -> toFollowResponseDto(new Follow(follower, member), true))
+                    .toList();
+        }
+
+        // 2. Redis 에 데이터가 없으면 DB 에서 조회 후 Redis 에 저장
+        List<Follow> followers = followRepository.findByFollowing(member);
+
+        if (!followers.isEmpty()) {
+            setOps.add(followersKey, followers.stream()
+                    .map(f -> f.getFollower().getUsername()).distinct().toArray(String[]::new)); // Redis 에 저장
+        }
+
+        return followers.stream()
                 .map(f -> toFollowResponseDto(f, true))
                 .toList();
     }
@@ -176,15 +219,24 @@ public class FollowService {
     /**
      * Follow 엔티티를 FollowResponseDto로 변환
      * @param follow 팔로우 엔티티
+     * @param isFollowerList 팔로워 리스트인지 여부
      * @return FollowResponseDto
      */
     private FollowResponseDto toFollowResponseDto(Follow follow, boolean isFollowerList) {
         Member target = isFollowerList ? follow.getFollower() : follow.getFollowing();
+
+        // Redis 에서 followerCount, followingCount 가져오기
+        String followersKey = String.format(FOLLOWERS_PREFIX, target.getUsername());
+        String followingKey = String.format(FOLLOWING_PREFIX, target.getUsername());
+
+        Long followerCount = redisTemplate.opsForSet().size(followersKey);  // 팔로워 수
+        Long followingCount = redisTemplate.opsForSet().size(followingKey); // 팔로잉 수
+
         return new FollowResponseDto(
                 target.getUsername(),
                 target.getNickname(),
-                followRepository.countByFollowing(target),
-                followRepository.countByFollower(target)
+                followerCount != null ? followerCount : 0,   // null 체크 후 반환
+                followingCount != null ? followingCount : 0 // null 체크 후 반환
         );
     }
 }
