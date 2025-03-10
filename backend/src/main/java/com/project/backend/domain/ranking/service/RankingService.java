@@ -47,9 +47,19 @@ public class RankingService {
         }
     }
 
-//    private double calculateRankingScore(Long favoriteCount, Long reviewCount){
-//        double score = (favoriteCount * 0.5) + (reviewCount * 0.5);
-//        return score;
-//    }
+    public List<Map<String, Object>>  getWeeklyRanking() {
+        Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
+                .reverseRangeWithScores(WEEKLY_RANKING_KEY, 0, 9);
 
+        List<Map<String, Object>> rankingList = new ArrayList<>();
+        int rank = 1;
+        for (Object bookId : rankings) {
+            Map<String, Object> ranking = new HashMap<>();
+            ranking.put("rank", rank++);
+            ranking.put("book_id", bookId);
+            rankingList.add(ranking);
+        }
+
+        return rankingList;
+    }
 }
