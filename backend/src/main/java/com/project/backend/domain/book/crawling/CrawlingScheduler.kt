@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component
 class CrawlingScheduler(private val crawlingFacade: CrawlingFacade) {
     private val logger = LoggerFactory.getLogger(CrawlingScheduler::class.java)
 
-
     /**
      * -- 크롤링 스케줄러 --
      * 매시간 10분마다 베스트셀러 크롤링
@@ -23,7 +22,7 @@ class CrawlingScheduler(private val crawlingFacade: CrawlingFacade) {
      * @author -- 정재익 --
      * @since -- 3월 01일 --
      */
-    @Scheduled(cron = "0 47 * * * *")
+    @Scheduled(cron = "0 10 * * * *")
     fun scheduledCrawling() {
         logger.info("크롤링 시작: ${java.time.LocalDateTime.now()}")
         crawlingFacade.executeCrawling()

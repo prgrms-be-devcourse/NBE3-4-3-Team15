@@ -2,15 +2,13 @@ package com.project.backend.domain.book.crawling
 
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.service.BookService
+import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 /**
  * -- 크롤링 서비스 --
@@ -20,9 +18,6 @@ import java.util.concurrent.Future
  */
 @Service
 class CrawlingService(private val bookService: BookService) {
-
-    private val threadCount = 5
-    private val executorService = Executors.newFixedThreadPool(threadCount)
     private val logger = LoggerFactory.getLogger(CrawlingService::class.java)
     private lateinit var bestSellersMap: Map<Int, String>
 
@@ -62,26 +57,20 @@ class CrawlingService(private val bookService: BookService) {
     }
 
     /**
-     * -- 상세페이지 크롤링 스레드 풀 자원 분배 메서드 --*
-     * 스레드 풀에 생성된 5개의 스레드에 자원 분배하여 상세페이지 크롤링 실행
+     * -- 상세페이지 크롤링 코루틴 설정 메서드 --*
+     * Dispatchers.IO에 5개의 스레드 제한을 지정 후 상세페이지 크롤링 실행
      * bestSellersMap에 담긴 url로 접속하여 세부페이지 크롤링 실행
-     * 모든 스레드의 작업이 끝나고 BookDTO를 합쳐 리스트로 만들어 반환
+     * 모든 작업이 끝나고 awaitAll로 BookDTO를 합쳐 리스트로 만들어 반환
      *
      * @return -- List<BookDTO> 베스트셀러 정보가 입력된 책 리스트 --
      * @author -- 정재익 --
      * @since -- 3월 09일 --
      */
-    fun getBestSellerBookDTOs(): List<BookDTO> {
-        val tasks = (0 until threadCount).map { i ->
-            Callable {
-                val filteredEntries = bestSellersMap.filterKeys { it % threadCount == i }
-                filteredEntries.map { (ranking, link) -> getBestSellerBookDTO(ranking, link)
-                }
-            }
-        }
-
-        val futures: List<Future<List<BookDTO>>> = executorService.invokeAll(tasks)
-        return futures.flatMap { it.get() }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun getBestSellerBookDTOs(): List<BookDTO> = withContext(Dispatchers.IO.limitedParallelism(5)){
+        bestSellersMap.map { (ranking, link) ->
+            async { getBestSellerBookDTO(ranking, link)}
+        }.awaitAll()
     }
 
     /**
@@ -99,7 +88,6 @@ class CrawlingService(private val bookService: BookService) {
      * @since -- 3월 04일 --
      */
     private fun getBestSellerBookDTO(ranking: Int, link: String, maxRetries: Int = 3): BookDTO {
-
         var retries = 0
         val doc: Document = Jsoup.connect(link).get()
         extractThread("${ranking}위 크롤링")
@@ -130,7 +118,6 @@ class CrawlingService(private val bookService: BookService) {
      * @since -- 3월 04일 --
      */
     private fun extractIsbn(doc: Document, default: String = "ISBN 정보 없음"): String {
-
         val tableScope = doc.selectFirst("div.infoSetCont_wrap .b_size")
         return tableScope?.selectFirst("tr:has(th:contains(ISBN13)) td")?.text() ?: default
     }
@@ -144,7 +131,6 @@ class CrawlingService(private val bookService: BookService) {
      * @since -- 3월 09일 --
      */
     fun saveBestSellers(bestSellerBookDTOs: List<BookDTO>) {
-
         extractThread("베스트셀러 저장")
         bookService.saveBestsellers(bestSellerBookDTOs)
     }
