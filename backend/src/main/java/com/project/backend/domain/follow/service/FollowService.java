@@ -148,10 +148,13 @@ public class FollowService {
         Member member = findMemberByUsername(username);
         SetOperations<String, String> setOps = redisTemplate.opsForSet();
 
+        // 팔로잉 목록에 대한 Redis 키 생성
         String followingKey = String.format(FOLLOWING_PREFIX, username);
+
+        // Redis 에서 해당 사용자의 팔로잉 목록을 조회
         Set<String> followingIds = setOps.members(followingKey);
 
-        // 1. Redis 에 데이터가 존재하면 그대로 반환
+        // 1. Redis 에 팔로잉 목록이 이미 있으면, Redis 에서 해당 데이터를 바로 반환
         if (followingIds != null && !followingIds.isEmpty()) {
             return followingIds.stream()
                     .map(this::findMemberByUsername) // username → Member 조회
@@ -159,14 +162,17 @@ public class FollowService {
                     .toList();
         }
 
-        // 2. Redis 에 데이터가 없으면 DB 에서 조회 후 Redis 에 저장
+        // 2. Redis 에 팔로잉 목록이 없으면, DB 에서 해당 데이터를 조회 후 Redis 에 저장
         List<Follow> followings = followRepository.findByFollower(member);
 
+        // DB 에서 팔로잉 목록을 조회한 후 Redis 에 저장
         if (!followings.isEmpty()) {
             setOps.add(followingKey, followings.stream()
                     .map(f -> f.getFollowing().getUsername()).distinct().toArray(String[]::new)); // Redis 에 저장
         }
 
+
+        // DB 에서 조회된 팔로잉 목록을 FollowResponseDto 로 변환하여 반환
         return followings.stream()
                 .map(f -> toFollowResponseDto(f, false))
                 .toList();
@@ -182,10 +188,13 @@ public class FollowService {
         Member member = findMemberByUsername(username);
         SetOperations<String, String> setOps = redisTemplate.opsForSet();
 
+        // 팔로워 목록에 대한 Redis 키 생성
         String followersKey = String.format(FOLLOWERS_PREFIX, username);
+
+        // Redis 에서 해당 사용자의 팔로워 목록을 조회
         Set<String> followerIds = setOps.members(followersKey);
 
-        // 1. Redis 에서 데이터가 존재하면 반환
+        // 1. Redis 에 팔로워 목록이 이미 있으면, Redis 에서 해당 데이터를 바로 반환
         if (followerIds != null && !followerIds.isEmpty()) {
             return followerIds.stream()
                     .map(this::findMemberByUsername) // username → Member 조회
@@ -193,7 +202,7 @@ public class FollowService {
                     .toList();
         }
 
-        // 2. Redis 에 데이터가 없으면 DB 에서 조회 후 Redis 에 저장
+        // 2. Redis 에 팔로워 목록이 없으면, DB 에서 해당 데이터를 조회 후 Redis 에 저장
         List<Follow> followers = followRepository.findByFollowing(member);
 
         if (!followers.isEmpty()) {
@@ -201,6 +210,7 @@ public class FollowService {
                     .map(f -> f.getFollower().getUsername()).distinct().toArray(String[]::new)); // Redis 에 저장
         }
 
+        // DB 에서 조회된 팔로워 목록을 FollowResponseDto 로 변환하여 반환
         return followers.stream()
                 .map(f -> toFollowResponseDto(f, true))
                 .toList();
