@@ -8,6 +8,7 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
@@ -130,10 +131,12 @@ public class ReviewService {
         for(FollowResponseDto followDto: followers){
             MemberDto follower = memberService.getMyProfile(followDto.username());  // 리뷰 작성자를 팔로우 하는 팔로워
             NotificationDTO notificationDTO = NotificationDTO.builder()
-                    .memberId(follower.getId())
+                    .producerMemberId(memberId)
+                    .consumerMemberId(follower.getId())
                     .reviewId(review.getId())
                     .isCheck(false)
-                    .content("리뷰가 작성되었습니다.")
+                    .content(notificationService.buildContent(memberDto.getUsername(),NotificationType.REVIEW))
+                    .notificationType(NotificationType.REVIEW)
                     .build();
             notificationService.create(notificationDTO);
         }

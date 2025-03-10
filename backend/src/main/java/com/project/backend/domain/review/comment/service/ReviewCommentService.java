@@ -6,6 +6,7 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
@@ -40,9 +41,8 @@ public class ReviewCommentService {
     private final ReviewService reviewService;
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
-    private final MemberService memberService;
     private final NotificationService notificationService;
-
+    private final MemberService memberService;
 
     /**
      * 리뷰 코멘트 목록 출력
@@ -84,8 +84,7 @@ public class ReviewCommentService {
      * @author -- 이광석
      * @since -- 25.01.17
      */
-
-    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,long memberId) {
+    public ReviewCommentDto write(Long reviewId, ReviewCommentDto reviewCommentDto,long memberId) {  // 메소드가 너무 긴듯 분할 필요
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(()-> new ReviewException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
@@ -117,52 +116,38 @@ public class ReviewCommentService {
 
         ReviewComment newReviewComment = reviewCommentRepository.save(reviewComment);
 
-
-
-        createCommentNotification(newReviewComment,review,reviewCommentDto,memberId);
+        createCommentNotification(newReviewComment,review,reviewCommentDto);
 
         return new ReviewCommentDto(reviewComment);
     }
 
     /**
-
-     * 댓글 관련 알림 생성
+     * 코멘트 관련 알람 생성 메소드
      * @param reviewComment
      * @param review
      * @param reviewCommentDto
      *
      * @author 이광석
-
-     * @since 25.02.23
+     * @since 25.02.10
      */
-    public void createCommentNotification(ReviewComment reviewComment,
-                                          Review review,
-                                          ReviewCommentDto reviewCommentDto,
-                                          Long memberId){
-        Long receiverId;
-        String content;
-
-        //댓글일 경우
-        if(reviewCommentDto.getParentId()==null) {
-            receiverId = review.getUserId();
-            content = memberId+"님이 댓글을 작성했습니다.";
-        }
-        // 대댓글일 경우
-        else{
-           receiverId=reviewComment.getParent().getUserId();
-           content = memberId+"님이 대댓글을 작성했습니다.";
-        }
-
-        if(receiverId==memberId){
-            return;
-        }
-
+    public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(receiverId)
-                .reviewComment(reviewComment.getId())
+                .consumerMemberId(review.getUserId())
+                .producerMemberId(reviewComment.getUserId())
+                .reviewCommentId(reviewComment.getId())
                 .isCheck(false)
-                .content(content)
                 .build();
+
+        MemberDto producer = memberService.getMemberById( reviewComment.getUserId());
+
+        if(reviewCommentDto.getParentId()==null) {
+            notificationDTO.setNotificationType(NotificationType.COMMENT);
+            notificationDTO.setContent(notificationService.buildContent(producer.getUsername(),notificationDTO.getNotificationType()));
+        }else{
+            notificationDTO.setNotificationType(NotificationType.REVIEW);
+            notificationDTO.setContent(notificationService.buildContent(producer.getUsername(), notificationDTO.getNotificationType()));
+        }
+
         notificationService.create(notificationDTO);
     }
 

@@ -1,25 +1,21 @@
 package com.project.backend.domain.notification.service;
 
 
-
 import com.project.backend.domain.member.dto.MemberDto;
+import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
+import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
-//import com.project.backend.global.rabbitmq.dto.MessageDto;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import com.project.backend.global.authority.CustomUserDetails;
-
-import com.project.backend.global.redis.RedisService;
-import com.project.backend.global.redis.service.RedisPublisher;
-import com.project.backend.global.sse.service.SseService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 알람 서비스
@@ -28,23 +24,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final MemberService memberService;
-    private final RedisService redisService;
-    private final RedisPublisher publisher;
 
-    private final SseService sseservice;
-
-    private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
-
-
+    public String buildContent(String username, NotificationType type){
+        return username + "님이"+type.getMessage();
+    }
 
     /**
      * 알람 생성
-     * 팔로워들에게 알림 전달(내가 리뷰 작성시)
-     * 댓글 작성시 리뷰 작성자에게
-     * 대댓글 작성시 댓글 작성자에게
-     *
-     *
      * @param notificationDTO
      * @return NotificationDTO
      *
@@ -53,29 +39,30 @@ public class NotificationService {
      */
     public NotificationDTO create(NotificationDTO notificationDTO) {
         Notification notification = Notification.builder()
-                .memberId(notificationDTO.getMemberId())
+                .consumerMemberId(notificationDTO.getConsumerMemberId())
+                .producerMemberId(notificationDTO.getProducerMemberId())
                 .reviewId(notificationDTO.getReviewId())
-                .reviewCommentId(notificationDTO.getReviewComment())
+                .reviewCommentId(notificationDTO.getReviewCommentId())
                 .isCheck(notificationDTO.isCheck())
                 .content(notificationDTO.getContent())
+                .notificationType(notificationDTO.getNotificationType())
                 .build();
 
 
-        publisher.publishToUser(notification.getMemberId(),notification.getContent());
         return new NotificationDTO(notificationRepository.save(notification));
     }
 
     /**
      * 알람 조회
-     * @param userDetails
+     * @param memberDto - 클라이언트 memberDTO
      * @return List<NotificationDTO>
      *
      * @author 이광석
      * @since 25.02.06
      */
-    public List<NotificationDTO> findByUser(CustomUserDetails userDetails) {
-        MemberDto member = memberService.getMyProfile(userDetails.getUsername());
-        return notificationRepository.findALLByMemberId(member.getId());
+    public List<NotificationDTO> findByUser(MemberDto memberDto) {
+
+        return notificationRepository.findAllByConsumerMemberId(memberDto.getId());
     }
 
     /**
@@ -85,9 +72,10 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public void notificationCheck(Long notificationId, CustomUserDetails userDetails) {
+    @Transactional
+    public void notificationCheck(Long notificationId, MemberDto memberDto) {
         Notification notification = findNotificationById(notificationId);
-        authorityCheck(userDetails,notification);
+        authorityCheck(memberDto,notification);
         notification.setCheck(true);
         notificationRepository.save(notification);
 
@@ -100,13 +88,12 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public void notificationDelete(Long notificationId,CustomUserDetails userDetails) {
+    @Transactional
+    public void deleteNotification(Long notificationId,MemberDto memberDto) {
         Notification notification = findNotificationById(notificationId);
-        authorityCheck(userDetails,notification);
+        authorityCheck(memberDto,notification);
         notificationRepository.delete(notification);
     }
-
-
 
 
     /**
@@ -130,16 +117,15 @@ public class NotificationService {
 
     /**
      * 로그인 된 사용자와 알림 member가 같은지 확인
-     * @param userDetails
+     * @param memberDto
      * @param notification
      *
      * @author 이광석
      * @since 25.02.11
      */
-    private void authorityCheck(CustomUserDetails userDetails, Notification notification){
-        MemberDto memberDto = memberService.getMyProfile(userDetails.getUsername());
+    private void authorityCheck(MemberDto memberDto, Notification notification){
 
-        if(notification.getMemberId()!=memberDto.getId()){
+        if(!notification.getConsumerMemberId().equals(memberDto.getId())){
             throw new NotificationException(
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getStatus(),
                     NotificationErrorCode.UNAUTHORIZED_ACCESS.getErrorCode(),
@@ -147,23 +133,5 @@ public class NotificationService {
             );
         }
     }
-    /**
-     * member기반 알림 리스트 출력
-     * @param username
-     * @return List<NotificationDTO>
-     *
-     * @author 이광석
-     * @since 25.02.23
-     */
-    public List<NotificationDTO> getMyNotification(String username) {
-        Long userId = memberService.getMyProfile(username).getId();
-        List<Notification> notifications = notificationRepository.findAllByMemberId(userId);
-        List<NotificationDTO> notificationDTOS = notifications.stream()
-                .map(notification -> new NotificationDTO(notification))
-                .collect(Collectors.toList());
-        return notificationDTOS;
-    }
-
-
 
 }
