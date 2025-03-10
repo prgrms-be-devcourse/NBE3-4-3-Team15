@@ -15,4 +15,6 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification,Long> {
 
     List<NotificationDTO> findALLByMemberId(Long memberId);
+
+    List<Notification> findAllByMemberId(Long memberId);
 }

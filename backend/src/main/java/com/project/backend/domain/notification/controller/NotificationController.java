@@ -5,10 +5,14 @@ import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -24,6 +28,7 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
 
+
     /**
      * 알림 생성
      * @param notificationDTO
@@ -33,7 +38,8 @@ public class NotificationController {
      * @since  25.02.06
      */
     @PostMapping
-    public ResponseEntity<GenericResponse<NotificationDTO>> createNotification(@RequestBody NotificationDTO notificationDTO){
+    public ResponseEntity<GenericResponse<NotificationDTO>> createNotification(@RequestBody NotificationDTO notificationDTO
+                                                                               ){
         NotificationDTO newNotificationDTO = notificationService.create(notificationDTO);
         return ResponseEntity.ok(GenericResponse.of(
                 newNotificationDTO,
@@ -94,4 +100,18 @@ public class NotificationController {
                 "삭제 성공"
         ));
     }
+
+    @GetMapping
+    public ResponseEntity<GenericResponse<List<NotificationDTO>>> getMyNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
+        List<NotificationDTO> notificationDTOS =notificationService.getMyNotification(userDetails.getUsername());
+        return ResponseEntity.ok(GenericResponse.of(
+                notificationDTOS,
+                "알람 목록 반환 성공"
+        ));
+    }
+
+
+
+
+
 }

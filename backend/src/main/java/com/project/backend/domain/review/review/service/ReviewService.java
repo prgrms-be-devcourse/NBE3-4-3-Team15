@@ -109,6 +109,7 @@ public class ReviewService {
      * @author 이광석
      * @since 25.01.27
      */
+
         public void write(Long memberId,ReviewsDTO reviewsDTO){
 
         Review review =reviewRepository.save(Review.builder()
@@ -120,8 +121,10 @@ public class ReviewService {
                         .isDelete(false)
                     .build());
 
+
         MemberDto memberDto = memberService.getMemberById(memberId);   //리뷰 작성자
         List<FollowResponseDto> followers  = followService.getFollowers(memberDto.getUsername()); // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
+
 
 
         for(FollowResponseDto followDto: followers){
@@ -134,7 +137,6 @@ public class ReviewService {
                     .build();
             notificationService.create(notificationDTO);
         }
-
     }
 
     /**
@@ -312,5 +314,7 @@ public class ReviewService {
 
         return bookIds;
     }
+
+    
 
 }

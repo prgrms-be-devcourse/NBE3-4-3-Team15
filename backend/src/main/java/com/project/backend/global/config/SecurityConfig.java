@@ -62,7 +62,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/review/{reviewId}/comments").permitAll()
 
                         // 로그인 및 회원가입은 인증 없이 허용
-                        .requestMatchers("/members/login", "/members","members/{id}/followers", "members/{id}/followings").permitAll()
+                        .requestMatchers("/members/login",
+                                "/members",
+                                "members/{id}/followers",
+                                "members/{id}/followings",
+                                "redis/**",
+                                "rabbit/**",
+                                "notification/sse").permitAll()
 
                         // h2-console, swagger 접근 허용
                         .requestMatchers(PathRequest.toH2Console()).permitAll()

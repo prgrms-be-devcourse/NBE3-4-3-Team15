@@ -1,19 +1,25 @@
 package com.project.backend.domain.notification.service;
 
 
+
 import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
+//import com.project.backend.global.rabbitmq.dto.MessageDto;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import com.project.backend.global.authority.CustomUserDetails;
+
+import com.project.backend.global.redis.RedisService;
+import com.project.backend.global.redis.service.RedisPublisher;
+import com.project.backend.global.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 알람 서비스
@@ -23,9 +29,22 @@ import java.util.List;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
+    private final RedisService redisService;
+    private final RedisPublisher publisher;
+
+    private final SseService sseservice;
+
+    private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
+
+
 
     /**
      * 알람 생성
+     * 팔로워들에게 알림 전달(내가 리뷰 작성시)
+     * 댓글 작성시 리뷰 작성자에게
+     * 대댓글 작성시 댓글 작성자에게
+     *
+     *
      * @param notificationDTO
      * @return NotificationDTO
      *
@@ -42,6 +61,7 @@ public class NotificationService {
                 .build();
 
 
+        publisher.publishToUser(notification.getMemberId(),notification.getContent());
         return new NotificationDTO(notificationRepository.save(notification));
     }
 
@@ -87,6 +107,8 @@ public class NotificationService {
     }
 
 
+
+
     /**
      * Notification 탐색
      * @param notificationId
@@ -125,4 +147,23 @@ public class NotificationService {
             );
         }
     }
+    /**
+     * member기반 알림 리스트 출력
+     * @param username
+     * @return List<NotificationDTO>
+     *
+     * @author 이광석
+     * @since 25.02.23
+     */
+    public List<NotificationDTO> getMyNotification(String username) {
+        Long userId = memberService.getMyProfile(username).getId();
+        List<Notification> notifications = notificationRepository.findAllByMemberId(userId);
+        List<NotificationDTO> notificationDTOS = notifications.stream()
+                .map(notification -> new NotificationDTO(notification))
+                .collect(Collectors.toList());
+        return notificationDTOS;
+    }
+
+
+
 }
