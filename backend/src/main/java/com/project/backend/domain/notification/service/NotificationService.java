@@ -11,6 +11,7 @@ import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
 import com.project.backend.global.authority.CustomUserDetails;
+import com.project.backend.global.redis.service.RedisPublisher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final RedisPublisher redisPublisher;
 
     public String buildContent(String username, NotificationType type){
         return username + "님이"+type.getMessage();
@@ -48,6 +50,7 @@ public class NotificationService {
                 .notificationType(notificationDTO.getNotificationType())
                 .build();
 
+        redisPublisher.publishToUser(notification.getConsumerMemberId(),notification.getContent());
 
         return new NotificationDTO(notificationRepository.save(notification));
     }
