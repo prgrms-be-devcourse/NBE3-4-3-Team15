@@ -2,6 +2,7 @@ package com.project.backend.domain.member.service;
 
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.follow.service.FollowService;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.dto.MineDto;
@@ -11,6 +12,7 @@ import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,14 @@ public class MemberService {
     private final JwtUtil jwtUtil;
     private final FavoriteRepository favoriteRepository;
     private final BookRepository bookRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    // FollowService 의존성 추가
+    private final FollowService followService;
+
+    // Redis 키 패턴 정의 (FollowService에서 사용하는 것과 동일하게)
+    private static final String FOLLOWING_PREFIX = "%s:following";
+    private static final String FOLLOWERS_PREFIX = "%s:followers";
 
     /**
      * 회원가입 처리
@@ -100,8 +110,23 @@ public class MemberService {
     public MemberDto getMyProfile(String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
-        
-        return new MemberDto(member);
+
+        MemberDto memberDto = new MemberDto(member);
+
+        // Redis에서 팔로잉, 팔로워 수 조회
+        String followersKey = String.format(FOLLOWERS_PREFIX, username);
+        String followingKey = String.format(FOLLOWING_PREFIX, username);
+
+        Long followerCount = redisTemplate.opsForSet().size(followersKey);  // 팔로워 수
+        Long followingCount = redisTemplate.opsForSet().size(followingKey); // 팔로잉 수
+
+        // Redis에 값이 없는 경우 null이 반환될 수 있으므로, 기본값 0으로 설정
+        memberDto.setFollowCounts(
+                followerCount != null ? followerCount : 0L,
+                followingCount != null ? followingCount : 0L
+        );
+
+        return memberDto;
     }
 
     /**
@@ -127,7 +152,22 @@ public class MemberService {
                 mineDto.getBirth()
         );
 
-        return new MemberDto(member);
+        MemberDto memberDto = new MemberDto(member);
+
+        // Redis에서 팔로잉, 팔로워 수 조회
+        String followersKey = String.format(FOLLOWERS_PREFIX, username);
+        String followingKey = String.format(FOLLOWING_PREFIX, username);
+
+        Long followerCount = redisTemplate.opsForSet().size(followersKey);  // 팔로워 수
+        Long followingCount = redisTemplate.opsForSet().size(followingKey); // 팔로잉 수
+
+        // Redis에 값이 없는 경우 null이 반환될 수 있으므로, 기본값 0으로 설정
+        memberDto.setFollowCounts(
+                followerCount != null ? followerCount : 0L,
+                followingCount != null ? followingCount : 0L
+        );
+
+        return memberDto;
     }
 
     /**
