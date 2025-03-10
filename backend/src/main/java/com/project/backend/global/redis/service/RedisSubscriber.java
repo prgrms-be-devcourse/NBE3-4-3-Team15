@@ -7,6 +7,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.connection.Message;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -34,17 +35,21 @@ public class RedisSubscriber implements MessageListener {
      */
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        String channel = new String(pattern);
+        String channel = new String(message.getChannel());
         String msg = message.toString();
 
         String[] list = channel.split(":");
 
+        System.out.println(channel);
+        System.out.println(list.length);
+        System.out.println(list[0]);
+        System.out.println(list[1]);
 
         if(list.length<2) {
             System.out.println("sub 전체 알림" + channel + msg );
             sseService.broadcastNotification(msg); // 모든 SSE 연결에 전송
         }else{
-            Long memberId = Long.parseLong(list[1]);
+            Long memberId = Long.parseLong(list[1].trim());
             System.out.println("sub user"+channel+memberId+msg);
             sseService.sendNotificationToUser(memberId,msg);
         }
