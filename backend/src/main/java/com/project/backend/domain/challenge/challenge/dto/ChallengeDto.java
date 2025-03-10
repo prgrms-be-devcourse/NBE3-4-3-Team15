@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ChallengeDto {
 
+    private long id;
+
     @NotBlank
     @Length(min = 2, max = 16)
     private String name;
@@ -33,6 +35,7 @@ public class ChallengeDto {
     private long totalDeposit;
 
     public ChallengeDto(Challenge challenge) {
+        this.id = challenge.getId();
         this.name = challenge.getName();
         this.content = challenge.getContent();
         this.startDate = challenge.getStartDate();

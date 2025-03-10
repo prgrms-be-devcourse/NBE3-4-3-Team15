@@ -34,4 +34,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     @Query("SELECT c FROM Challenge c WHERE c.status = 'REFUNDING'")
     List<Challenge> findChallengesInRefundProgress();
+
+    List<Challenge> findByStatus(Challenge.ChallengeStatus status);
 }

@@ -88,4 +88,22 @@ public class ChallengeService {
     public List<Challenge> findChallengesInRefundProgress() {
         return challengeRepository.findChallengesInRefundProgress();
     }
+
+    public List<ChallengeDto> findByStatus(Challenge.ChallengeStatus status) {
+        System.out.println("status = " + status);
+        List<Challenge> challenges = challengeRepository.findByStatus(status);
+        System.out.println(challenges);
+
+        if (challenges.isEmpty()) {
+            throw new ChallengeException(
+                    ChallengeErrorCode.CHALLENGE_NOT_FOUND.getStatus(),
+                    ChallengeErrorCode.CHALLENGE_NOT_FOUND.getErrorCode(),
+                    ChallengeErrorCode.CHALLENGE_NOT_FOUND.getMessage()
+            );
+        }
+
+        return challenges.stream()
+                .map(ChallengeDto::new)
+                .toList();
+    }
 }
