@@ -1,6 +1,5 @@
 package com.project.backend.domain.book.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.project.backend.domain.book.dto.BookDTO
 import com.project.backend.domain.book.entity.Book
 import com.project.backend.domain.book.entity.Favorite
