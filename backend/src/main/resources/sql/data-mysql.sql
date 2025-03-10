@@ -84,8 +84,8 @@ insert into challenge(`created_at`, `modified_at`, `content`, `end_date`, `name`
      (now(), now(), '한달간 출석을 잘 합니다.', '2025-04-07 02:04:17.105', '한달 챌린지3', '2025-03-07 02:04:17.105', 'START', '100000')
      ON DUPLICATE KEY UPDATE modified_at = now();
 
-insert into entry(`created_at`, `modified_at`, `deposit`, `is_active`, `challenge_id`, `member_id`)
-    VALUES (now(), now(), '100000', 'true', '1', '1'),
-     (now(), now(), '100000', 'true', '2', '2'),
-     (now(), now(), '100000', 'true', '3', '3')
+insert into entry(`created_at`, `modified_at`, `deposit`, `is_active`, `challenge_id`, `member_id`, `rate`, `refund_amount`, `refunded`, `reward_amount`)
+    VALUES (now(), now(), '100000', 'true', '1', '1', 0, 0, false, 0),
+     (now(), now(), '100000', 'true', '2', '2', 0, 0, false, 0),
+     (now(), now(), '100000', 'true', '3', '3', 0, 0, false, 0)
      ON DUPLICATE KEY UPDATE modified_at = now();

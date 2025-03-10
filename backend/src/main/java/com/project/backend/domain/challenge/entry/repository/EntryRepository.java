@@ -22,7 +22,7 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Entry e SET e.isActive = false WHERE e.challenge.id IN (SELECT c.id FROM Challenge c WHERE c.endDate <= CURRENT_DATE AND c.status = 'END')")
+    @Query("UPDATE Entry e SET e.isActive = false WHERE e.challenge.id IN (SELECT c.id FROM Challenge c WHERE c.endDate <= CURRENT_DATE AND c.status = 'END' OR c.status = 'REFUNDING')")
     void updateIsActiveForEndedChallenges();
 
     List<Entry> findByChallengeId(Long challengeId);

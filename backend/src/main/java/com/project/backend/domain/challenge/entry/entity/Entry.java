@@ -41,13 +41,13 @@ public class Entry extends BaseEntity {
 
     private boolean isActive;
 
-    private long refundAmount;
+    private long refundAmount;  // 환급 금액
 
-    private long rewardAmount;
+    private long rewardAmount;  // 추가 보상 금액
 
-    private boolean refunded;
+    private boolean refunded;   // 환급 여부
 
-    public double rate;
+    public double rate; // 참여율
 
     public void updateRate(long attendanceCount, int totalDay) {
         this.rate = (attendanceCount / (double) totalDay) * 100;

@@ -12,12 +12,12 @@ public class ChallengeScheduler {
     private final ChallengeService challengeService;
     private final RewardService rewardService;
 
-    @Scheduled(cron = "0 20 11 * * ?")
+    @Scheduled(cron = "0 22 16 * * ?")
     public void updateChallengeStatus() {
         challengeService.updateChallengeStatus();
     }
 
-    @Scheduled(cron = "0 20 11 * * ?")
+    @Scheduled(cron = "0 23 16 * * ?")
     public void updateReward() {
         rewardService.processRewards();
     }
