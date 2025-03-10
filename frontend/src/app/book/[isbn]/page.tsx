@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { AiOutlineHeart, AiFillHeart, AiOutlineShareAlt } from "react-icons/ai";
+import {AiFillHeart, AiOutlineHeart} from "react-icons/ai";
 
 interface BookDTO {
     id: number;
@@ -23,18 +23,13 @@ const BookDetailPage = () => {
     const [error, setError] = useState("");
     const [liked, setLiked] = useState(false); // 찜 상태 저장
 
-    useEffect(() => {
-        if (!isbn) return;
-        fetchBookDetail();
-    }, [isbn]);
-
+    // ✅ 책 정보 가져오기 (로그인 없이 접근 가능)
     const fetchBookDetail = async () => {
         setLoading(true);
         try {
             const response = await fetch(`http://localhost:8080/book/${isbn}`);
-            if (!response.ok) {
-                throw new Error("도서 정보를 가져올 수 없습니다.");
-            }
+            if (!response.ok) throw new Error("도서 정보를 가져올 수 없습니다.");
+
             const data = await response.json();
             setBook(data.data);
             setLiked(data.data.isFavorited); // 서버에서 찜 여부 받아오기
@@ -85,10 +80,9 @@ const BookDetailPage = () => {
         }
     };
 
-    const shareBook = () => {
-        navigator.clipboard.writeText(window.location.href);
-        alert("링크가 복사되었습니다!");
-    };
+    useEffect(() => {
+        fetchBookDetail();
+    }, [isbn]);
 
     return (
         <div className="min-h-screen bg-gray-100 p-6 flex justify-center">
@@ -98,7 +92,6 @@ const BookDetailPage = () => {
                 <p className="text-red-500">{error}</p>
             ) : book ? (
                 <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg">
-                    {/* 뒤로가기 버튼 */}
                     <button className="text-blue-500 mb-4" onClick={() => router.back()}>
                         ◀ 뒤로가기
                     </button>
@@ -111,41 +104,41 @@ const BookDetailPage = () => {
                                 alt={book.title}
                                 className="w-60 h-80 object-cover rounded-lg shadow-lg"
                             />
-
-                            {/* 좋아요 & ISBN */}
-                            <div className="mt-3 text-center">
-                                <button
-                                    className={`flex items-center gap-1 text-lg ${liked ? "text-red-500" : "text-gray-500"}`}
-                                    onClick={toggleLike} // ✅ 좋아요 클릭 시 API 요청
-                                >
-                                    {liked ? <AiFillHeart /> : <AiOutlineHeart />}
-                                    <span>{liked ? "찜 취소" : "찜하기"} ({book.favoriteCount ?? 0})</span>
-                                </button>
-                                <p className="text-sm text-gray-400 mt-1">📌 ISBN: {book.isbn}</p>
-                            </div>
+                            <p className="text-sm text-gray-400 mt-1">📌 ISBN: {book.isbn}</p>
+                        </div>
+                        {/* 좋아요 & ISBN */}
+                        <div className="mt-3 text-center">
+                            <button
+                                className={`flex items-center gap-1 text-lg ${liked ? "text-red-500" : "text-gray-500"}`}
+                                onClick={toggleLike} // ✅ 좋아요 클릭 시 API 요청
+                            >
+                                {liked ? <AiFillHeart /> : <AiOutlineHeart />}
+                                <span>{liked ? "찜 취소" : "찜하기"} ({book.favoriteCount ?? 0})</span>
+                            </button>
+                            <p className="text-sm text-gray-400 mt-1">📌 ISBN: {book.isbn}</p>
                         </div>
 
                         {/* 책 정보 */}
                         <div className="md:w-2/3 md:ml-6 mt-6 md:mt-0">
-                            {/* 📌 랭킹을 책 제목 위에 배치 */}
                             {book.ranking && (
                                 <p className="text-lg font-semibold text-red-500">🏆 {book.ranking}위</p>
                             )}
                             <h2 className="text-3xl font-bold">{book.title}</h2>
-                            <p className="text-lg text-gray-600 mt-2">저자: <span className="font-semibold">{book.author}</span></p>
+                            <p className="text-lg text-gray-600 mt-2">
+                                저자: <span className="font-semibold">{book.author}</span>
+                            </p>
                             <p className="text-sm text-gray-500 mt-2 leading-relaxed">{book.description}</p>
-
-                            {/* 공유 버튼 */}
-                            <div className="flex items-center gap-4 mt-4">
-                                <button
-                                    className="flex items-center gap-1 text-lg text-gray-500 hover:text-blue-500"
-                                    onClick={shareBook}
-                                >
-                                    <AiOutlineShareAlt />
-                                    <span>공유</span>
-                                </button>
-                            </div>
                         </div>
+                    </div>
+
+                    {/* ✅ 리뷰 목록 조회 버튼 */}
+                    <div className="mt-8">
+                        <button
+                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                            onClick={() => router.push(`/review/books/${book?.id}`)}
+                        >
+                            💬 모든 리뷰 보기
+                        </button>
                     </div>
                 </div>
             ) : (
@@ -155,4 +148,4 @@ const BookDetailPage = () => {
     );
 };
 
-export default BookDetailPage
+export default BookDetailPage;
