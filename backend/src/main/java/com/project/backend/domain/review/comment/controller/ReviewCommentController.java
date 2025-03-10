@@ -104,8 +104,9 @@ public class ReviewCommentController {
     @Operation(summary = "리뷰 댓글 생성")
 
     public ResponseEntity<GenericResponse<ReviewCommentDto>> postComment(@PathVariable("reviewId") Long reviewId,
-                                            @Valid @RequestBody ReviewCommentDto reviewCommentDto,
-                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
+
+                                                                         @Valid @RequestBody ReviewCommentDto reviewCommentDto,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails){
 
         long memberId = reviewCommentService.myId(userDetails);
        ReviewCommentDto newReviewCommentDto = reviewCommentService.write(reviewId,reviewCommentDto,memberId);

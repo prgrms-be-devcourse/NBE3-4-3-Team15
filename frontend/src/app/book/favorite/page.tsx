@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import client from "@/lib/client"; // axios나 fetch API 클라이언트
 import { components } from "@/lib/backend/schema";
 
@@ -10,10 +11,12 @@ const FavoriteBooks = () => {
     const [favoriteBooks, setFavoriteBooks] = useState<BookDTO[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const [page, setPage] = useState(1);
     const pageSize = 10;
     const [totalPages, setTotalPages] = useState(1);
+
+
+    const router = useRouter();
 
     useEffect(() => {
         fetchFavoriteBooks();
@@ -49,17 +52,17 @@ const FavoriteBooks = () => {
             ) : error ? (
                 <p className="error">{error}</p>
             ) : favoriteBooks.length > 0 ? (
-                <ul>
+                <div className="book-grid">
                     {favoriteBooks.map((book) => (
-                        <li key={book.id}>
+                        <div key={book.id} className="book-card" onClick={() => router.push(`/book/${book.isbn}`)}>
                             <img src={book.image} alt={book.title} className="book-image" />
-                            <div>
+                            <div className="book-info">
                                 <h4>{book.title}</h4>
                                 <p>{book.author}</p>
                             </div>
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             ) : (
                 <p>찜한 도서가 없습니다.</p>
             )}
@@ -73,41 +76,66 @@ const FavoriteBooks = () => {
 
             <style jsx>{`
                 .favorite-books-container {
-                    max-width: 800px;
+                    max-width: 900px;
                     margin: 0 auto;
                     padding: 20px;
-                    font-family: Arial, sans-serif;
+                    font-family: 'Arial', sans-serif;
+                    text-align: center;
                 }
 
-                .favorite-books-container ul {
-                    list-style-type: none;
-                    padding: 0;
-                }
-
-                .favorite-books-container li {
-                    display: flex;
-                    gap: 20px;
+                h3 {
+                    font-size: 26px;
+                    font-weight: bold;
+                    color: #333;
                     margin-bottom: 20px;
-                    border-bottom: 1px solid #ccc;
-                    padding-bottom: 20px;
+                }
+
+                .book-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                    gap: 20px;
+                    justify-content: center;
+                    padding: 20px;
+                }
+
+                .book-card {
+                    background: white;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    cursor: pointer;
+                    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 10px;
+                    text-align: center;
+                }
+
+                .book-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
                 }
 
                 .book-image {
-                    width: 100px;
-                    height: 150px;
+                    width: 120px;
+                    height: 180px;
                     object-fit: cover;
                     border-radius: 8px;
                 }
 
-                .favorite-books-container h3 {
-                    margin-bottom: 20px;
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #333;
+                .book-info {
+                    margin-top: 10px;
                 }
 
-                .favorite-books-container p {
+                h4 {
                     font-size: 16px;
+                    color: #444;
+                    font-weight: bold;
+                }
+
+                p {
+                    font-size: 14px;
                     color: #666;
                 }
 
@@ -124,27 +152,27 @@ const FavoriteBooks = () => {
                 .pagination {
                     display: flex;
                     justify-content: center;
-                    gap: 20px;
+                    gap: 10px;
                     margin-top: 20px;
                 }
 
                 button {
                     padding: 10px 15px;
-                    background-color: #007bff;
+                    background: linear-gradient(135deg, #007bff, #0056b3);
                     color: white;
                     border: none;
                     cursor: pointer;
                     font-size: 16px;
                     border-radius: 5px;
-                    transition: 0.3s;
+                    transition: all 0.3s ease;
                 }
 
                 button:hover {
-                    background-color: #0056b3;
+                    background: linear-gradient(135deg, #0056b3, #004494);
                 }
 
                 button:disabled {
-                    background-color: #ccc;
+                    background: #ccc;
                     cursor: not-allowed;
                 }
             `}</style>

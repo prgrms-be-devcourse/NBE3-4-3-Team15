@@ -1,10 +1,12 @@
 package com.project.backend.domain.review.comment.service;
 
 
+import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
+import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
@@ -130,17 +132,20 @@ public class ReviewCommentService {
      */
     public void createCommentNotification(ReviewComment reviewComment,Review review,ReviewCommentDto reviewCommentDto){
         NotificationDTO notificationDTO = NotificationDTO.builder()
-                .memberId(review.getUserId())
-                .reviewComment(reviewComment.getId())
+                .consumerMemberId(review.getUserId())
+                .producerMemberId(reviewComment.getUserId())
+                .reviewCommentId(reviewComment.getId())
                 .isCheck(false)
                 .build();
 
+        MemberDto producer = memberService.getMemberById( reviewComment.getUserId());
 
         if(reviewCommentDto.getParentId()==null) {
-
-            notificationDTO.setContent("nick", "COMMENT");
+            notificationDTO.setNotificationType(NotificationType.COMMENT);
+            notificationDTO.setContent(notificationService.buildContent(producer.getUsername(),notificationDTO.getNotificationType()));
         }else{
-            notificationDTO.setContent("nick", "REPLY");
+            notificationDTO.setNotificationType(NotificationType.REVIEW);
+            notificationDTO.setContent(notificationService.buildContent(producer.getUsername(), notificationDTO.getNotificationType()));
         }
 
         notificationService.create(notificationDTO);
