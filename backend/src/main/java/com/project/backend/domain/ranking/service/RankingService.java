@@ -45,12 +45,11 @@ public class RankingService {
         }
     }
 
-    public List<Map<String, Object>> getWeeklyBookRanking() {
+    public List<Map<String, Object>> getWeeklyRanking(String rankingKey) {
         Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
-                .reverseRangeWithScores(WEEKLY_RANKING_KEY, 0, 9);
+                .reverseRangeWithScores(rankingKey, 0, 9);
 
         List<Map<String, Object>> rankingList = new ArrayList<>();
-
         int rank = 1;
         int displayRank = 1;
         Double prevScore = null;
@@ -58,16 +57,14 @@ public class RankingService {
         for (ZSetOperations.TypedTuple<Object> entry : rankings) {
             Map<String, Object> ranking = new HashMap<>();
             double score = entry.getScore();
-            Object bookId = entry.getValue();
+            Object itemId = entry.getValue();
 
-            // 이전 점수와 다르면 표시 등수를 현재 등수로 업데이트
             if (prevScore != null && !prevScore.equals(score)) {
                 rank = displayRank;
             }
 
             ranking.put("rank", rank);
-            ranking.put("item_id", bookId);
-//            ranking.put("score", score);
+            ranking.put("item_id", itemId);
             rankingList.add(ranking);
 
             prevScore = score;
