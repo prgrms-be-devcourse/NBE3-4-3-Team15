@@ -30,9 +30,40 @@ public class RankingService {
     private final ReviewRecommendationRepository reviewRecommendationRepository;
     private final ReviewCommentRepository reviewCommentRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private static final String WEEKLY_BOOKS_RANKING_KEY = "weekly_books_ranking";
-    private static final String WEEKLY_REVIEWS_RANKING_KEY = "weekly_reviews_ranking";
-    private static final String DAILY_REVIEWS_RANKING_KEY = "daily_books_ranking";
+
+    public void updateRanking(RankingType rankingType, LocalDateTime start, LocalDateTime end) {
+        List<Object[]> firstCounts;
+        List<Object[]> secondCounts;
+        double weight1, weight2;
+
+        switch (rankingType) {
+            case WEEKLY_BOOKS:
+                firstCounts = favoriteRepository.findFavoriteCounts(start, end);
+                secondCounts = reviewRepository.findReviewCounts(start, end);
+                weight1 = 0.5;
+                weight2 = 0.5;
+                break;
+
+            case WEEKLY_REVIEWS:
+                firstCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
+                secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
+                weight1 = 0.7;
+                weight2 = 0.3;
+                break;
+
+            case DAILY_REVIEWS:
+                firstCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
+                secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
+                weight1 = 0.6;
+                weight2 = 0.4;
+                break;
+
+            default:
+                throw new RankingException(RankingErrorCode.UNKNOWN_RANKING_TYPE);
+        }
+
+        updateRankingInRedis(rankingType.getKey(), firstCounts, secondCounts, weight1, weight2);
+    }
 
 
 
@@ -77,38 +108,5 @@ public class RankingService {
         }
 
         return rankingList;
-    }
-
-    public void updateWeeklyBooksRanking(LocalDateTime start, LocalDateTime end) {
-        List<Object[]> favoriteCounts = favoriteRepository.findFavoriteCounts(start, end);
-        List<Object[]> reviewCounts = reviewRepository.findReviewCounts(start, end);
-
-        updateRanking(WEEKLY_BOOKS_RANKING_KEY, favoriteCounts, reviewCounts, 0.5, 0.5);
-    }
-
-    public void updateWeeklyReviewsRanking(LocalDateTime start, LocalDateTime end) {
-        List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
-        List<Object[]> CommentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
-
-        updateRanking(WEEKLY_REVIEWS_RANKING_KEY, recommendCounts, CommentCounts, 0.7, 0.3);
-    }
-
-    public void updateDailyReviewsRanking(LocalDateTime start, LocalDateTime end) {
-        List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
-        List<Object[]> commentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
-
-        updateRanking(DAILY_REVIEWS_RANKING_KEY, recommendCounts, commentCounts, 0.6, 0.4);
-    }
-
-    public List<Map<String, Object>> getWeeklyBookRanking() {
-        return getRanking(WEEKLY_BOOKS_RANKING_KEY);
-    }
-
-    public List<Map<String, Object>> getWeeklyReviewRanking() {
-        return getRanking(WEEKLY_REVIEWS_RANKING_KEY);
-    }
-
-    public List<Map<String, Object>> getDailyReviewsRanking() {
-        return getRanking(DAILY_REVIEWS_RANKING_KEY);
     }
 }
