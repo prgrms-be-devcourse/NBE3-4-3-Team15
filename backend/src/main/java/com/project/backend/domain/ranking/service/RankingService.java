@@ -1,6 +1,8 @@
 package com.project.backend.domain.ranking.service;
 
 import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
+import com.project.backend.domain.review.recommendation.repository.ReviewRecommendationRepository;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,8 +25,12 @@ public class RankingService {
 
     private final FavoriteRepository favoriteRepository;
     private final ReviewRepository reviewRepository;
+    private final ReviewRecommendationRepository reviewRecommendationRepository;
+    private final ReviewCommentRepository reviewCommentRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String WEEKLY_BOOKS_RANKING_KEY = "weekly_books_ranking";
+    private static final String WEEKLY_REVIEWS_RANKING_KEY = "weekly_reviews_ranking";
+    private static final String DAILY_REVIEWS_RANKING_KEY = "daily_books_ranking";
 
     public void updateWeeklyRanking(String rankingKey, List<Object[]> favoriteCounts, List<Object[]> reviewCounts) {
         Map<Long, Integer> favoriteMap = favoriteCounts.stream()
@@ -83,5 +89,16 @@ public class RankingService {
 
     public List<Map<String, Object>> getWeeklyBookRanking() {
         return getWeeklyRanking(WEEKLY_BOOKS_RANKING_KEY);
+    }
+
+    public void updateWeeklyReviewsRanking(LocalDateTime start, LocalDateTime end) {
+        List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end); // 리뷰 랭킹에서는 찜 데이터 필요 없음
+        List<Object[]> CommentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
+
+        updateWeeklyRanking(WEEKLY_REVIEWS_RANKING_KEY, recommendCounts, CommentCounts);
+    }
+
+    public List<Map<String, Object>> getWeeklyReviewRanking() {
+        return getWeeklyRanking(WEEKLY_REVIEWS_RANKING_KEY);
     }
 }
