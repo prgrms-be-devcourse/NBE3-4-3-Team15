@@ -1,6 +1,8 @@
 package com.project.backend.domain.challenge.challenge.repository;
 
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -36,4 +38,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     List<Challenge> findChallengesInRefundProgress();
 
     List<Challenge> findByStatus(Challenge.ChallengeStatus status);
+
+    Page<Challenge> findByStatus(Challenge.ChallengeStatus status, Pageable pageable);
 }

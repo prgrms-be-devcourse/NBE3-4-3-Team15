@@ -12,6 +12,10 @@ import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.authority.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,9 +64,18 @@ public class ChallengeService {
     public Challenge join(long challengeId, Member member, long deposit) {
         Challenge challenge = getChallenge(challengeId);
 
-        entryService.join(challenge, member, deposit);
-        challenge.plusDeposit(deposit);
-        member.plusDeposit(deposit);
+        if (challenge.getStatus().equals(Challenge.ChallengeStatus.WAITING)) {
+            entryService.join(challenge, member, deposit);
+            challenge.plusDeposit(deposit);
+            member.plusDeposit(deposit);
+        }
+        else {
+            throw new ChallengeException(
+                    ChallengeErrorCode.JOIN_IMPOSSIBLE.getStatus(),
+                    ChallengeErrorCode.JOIN_IMPOSSIBLE.getErrorCode(),
+                    ChallengeErrorCode.JOIN_IMPOSSIBLE.getMessage()
+            );
+        }
 
         return challenge;
     }
@@ -177,5 +190,20 @@ public class ChallengeService {
         return challenges.stream()
                 .map(ChallengeDto::new)
                 .toList();
+    }
+
+    public Page<ChallengeDto> findByStatus(Challenge.ChallengeStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Challenge> challenges = challengeRepository.findByStatus(status, pageable);
+
+        if (challenges.isEmpty()) {
+            throw new ChallengeException(
+                    ChallengeErrorCode.CHALLENGE_NOT_FOUND.getStatus(),
+                    ChallengeErrorCode.CHALLENGE_NOT_FOUND.getErrorCode(),
+                    ChallengeErrorCode.CHALLENGE_NOT_FOUND.getMessage()
+            );
+        }
+
+        return challenges.map(ChallengeDto::new);
     }
 }

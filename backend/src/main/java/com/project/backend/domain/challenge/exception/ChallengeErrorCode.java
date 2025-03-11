@@ -17,6 +17,7 @@ public enum ChallengeErrorCode {
     ALREADY_VALID(HttpStatus.CONFLICT, "ALREADY_VALID", "이미 인증된 챌린지 입니다."),
     ENTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "ENTRY_NOT_FOUND","참여 정보를 찾을 수 없습니다."),
     CANCEL_IMPOSSIBLE(HttpStatus.BAD_REQUEST, "CANCEL_IMPOSSIBLE", "챌린지 취소가 불가능합니다."),
+    JOIN_IMPOSSIBLE(HttpStatus.BAD_REQUEST, "JOIN_IMPOSSIBLE", "챌린지 신청 가능한 기간이 아닙니다."),
     CREATE_CHALLENGE(HttpStatus.UNAUTHORIZED, "CREATE_CHALLENGE", "관리자만 접근 가능합니다.");
 
 
