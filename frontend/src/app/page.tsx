@@ -78,7 +78,7 @@ const Page = () => {
 
   const getWeeklyReviewRanking = async () => {
     try {
-      const response = client.GET("/ranking/weekly/review");
+      const response = await client.GET("/ranking/weekly/review");
       const data = response.data?.data;
       setWeeklyReviews((weeklyReviews) => data);
     } catch (error) {}
@@ -86,7 +86,7 @@ const Page = () => {
 
   const getDailyReviewRanking = async () => {
     try {
-      const response = client.GET("/ranking/daily/review");
+      const response = await client.GET("/ranking/daily/review");
       const data = response.data?.data;
       setDailyReviews((dailyReviews) => data);
     } catch (error) {}
