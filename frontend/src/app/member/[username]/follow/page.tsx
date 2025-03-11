@@ -15,6 +15,7 @@ const FollowingsPage = () => {
     const [followers, setFollowers] = useState<FollowResponseDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const username = localStorage.getItem("username");
 
@@ -52,8 +53,23 @@ const FollowingsPage = () => {
         fetchFollowers();
     }, [username]);
 
+    // 언팔로우 처리 함수
+    const handleUnfollow = async (followingUsername: string) => {
+        try {
+            const response = await axios.post(`/members/${username}/unfollow`, null, {
+                params: { id: followingUsername }
+            });
+            setSuccessMessage("언팔로우 성공");
+            // 성공 시, 해당 팔로잉 목록에서 해당 사용자를 제거
+            setFollowings(followings.filter(following => following.username !== followingUsername));
+        } catch (err) {
+            setError("언팔로우에 실패했습니다.");
+        }
+    };
+
     if (loading) return <div style={styles.loading}>로딩 중...</div>;
     if (error) return <div style={styles.error}>{error}</div>;
+    if (successMessage) return <div style={styles.success}>{successMessage}</div>;
 
     return (
         <div style={styles.container}>
@@ -75,6 +91,12 @@ const FollowingsPage = () => {
                                             <p>팔로잉: {following.followingCount}</p>
                                         </div>
                                     </div>
+                                    <button 
+                                        style={styles.unfollowButton} 
+                                        onClick={() => handleUnfollow(following.username)}
+                                    >
+                                        언팔로우
+                                    </button>
                                 </li>
                             ))}
                         </ul>
@@ -98,6 +120,7 @@ const FollowingsPage = () => {
                                             <p>팔로잉: {follower.followingCount}</p>
                                         </div>
                                     </div>
+                                    <button style={styles.unfollowButton}>언팔로우</button>
                                 </li>
                             ))}
                         </ul>
@@ -198,14 +221,29 @@ const styles = {
         color: "#f44336",
         marginTop: "20px",
     },
+    success: {
+        textAlign: "center",
+        fontSize: "1.2rem",
+        color: "#4CAF50",
+        marginTop: "20px",
+    },
     message: {
         textAlign: "center",
         fontSize: "1.2rem",
         color: "#f44336",
         marginTop: "20px",
     },
+    unfollowButton: {
+        marginTop: "10px",
+        padding: "4px 8px",
+        fontSize: "1rem",
+        color: "#fff",
+        backgroundColor: "#ff4d4d",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        transition: "background-color 0.3s",
+    },
 };
 
 export default FollowingsPage;
-
-
