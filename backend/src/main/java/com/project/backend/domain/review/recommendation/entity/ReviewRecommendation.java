@@ -7,6 +7,12 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * 리뷰 추천 엔티티
+ *
+ * @author 김남우
+ * @since 2025.03.10
+ */
 @Entity
 @Getter
 @Setter
