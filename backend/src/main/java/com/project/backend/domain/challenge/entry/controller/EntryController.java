@@ -11,14 +11,10 @@ import com.project.backend.global.response.GenericResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 엔트리 컨트롤러
@@ -65,14 +61,13 @@ public class EntryController {
      * @return 회원의 참가 기록 목록
      */
     @GetMapping("/mine")
-    public ResponseEntity<GenericResponse<List<EntryDto>>> mine(
-            @AuthenticationPrincipal CustomUserDetails user
+    public ResponseEntity<GenericResponse<Page<EntryDto>>> mine(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Member member = memberService.getMemberByUsername(user.getUsername());
-        List<EntryDto> entryDtos = entryService.findByMemberId(member.getId())
-                .stream()
-                .map(EntryDto::new)
-                .toList();
+        Page<EntryDto> entryDtos = entryService.findByMemberId(member.getId(), page, size);
 
         return ResponseEntity.ok(GenericResponse.of(
                 entryDtos,
@@ -87,14 +82,13 @@ public class EntryController {
      * @return 회원의 환급 목록
      */
     @GetMapping("/mine/refunds")
-    public ResponseEntity<GenericResponse<List<RefundsDto>>> myRefunds(
-            @AuthenticationPrincipal CustomUserDetails user
+    public ResponseEntity<GenericResponse<Page<RefundsDto>>> myRefunds(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Member member = memberService.getMemberByUsername(user.getUsername());
-        List<RefundsDto> refundsDtos = entryService.findByMemberId(member.getId())
-                .stream()
-                .map(RefundsDto::new)
-                .toList();
+        Page<RefundsDto> refundsDtos = entryService.findRefundsByMemberId(member.getId(), page, size);
 
         return ResponseEntity.ok(GenericResponse.of(
                 refundsDtos,

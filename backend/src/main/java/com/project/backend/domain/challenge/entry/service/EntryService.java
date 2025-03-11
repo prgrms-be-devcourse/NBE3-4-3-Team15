@@ -1,12 +1,18 @@
 package com.project.backend.domain.challenge.entry.service;
 
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
+import com.project.backend.domain.challenge.entry.dto.EntryDto;
+import com.project.backend.domain.challenge.entry.dto.RefundsDto;
 import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.challenge.entry.repository.EntryRepository;
 import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
 import com.project.backend.domain.challenge.exception.ChallengeException;
 import com.project.backend.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -112,5 +118,35 @@ public class EntryService {
      */
     public void quit(Entry entry) {
         entryRepository.delete(entry);
+    }
+
+    public Page<EntryDto> findByMemberId(Long memberId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Entry> entries = entryRepository.findByMemberId(memberId, pageable);
+
+        if (entries.isEmpty()) {
+            throw new ChallengeException(
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getStatus(),
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getErrorCode(),
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getMessage()
+            );
+        }
+
+        return entries.map(EntryDto::new);
+    }
+
+    public Page<RefundsDto> findRefundsByMemberId(Long memberId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Entry> entries = entryRepository.findByMemberId(memberId, pageable);
+
+        if (entries.isEmpty()) {
+            throw new ChallengeException(
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getStatus(),
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getErrorCode(),
+                    ChallengeErrorCode.ENTRY_NOT_FOUND.getMessage()
+            );
+        }
+
+        return entries.map(RefundsDto::new);
     }
 }

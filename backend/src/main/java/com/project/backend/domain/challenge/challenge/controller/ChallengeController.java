@@ -14,12 +14,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 챌린지 컨트롤러
@@ -44,10 +43,12 @@ public class ChallengeController {
      * @return 챌린지 목록
      */
     @GetMapping
-    public ResponseEntity<GenericResponse<List<ChallengeDto>>> items(
-            @RequestParam(name = "status", defaultValue = "WAITING") Challenge.ChallengeStatus status
+    public ResponseEntity<GenericResponse<Page<ChallengeDto>>> items(
+            @RequestParam(name = "status", defaultValue = "WAITING") Challenge.ChallengeStatus status,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        List<ChallengeDto> challenges = challengeService.findByStatus(status);
+        Page<ChallengeDto> challenges = challengeService.findByStatus(status, page, size);
 
         return ResponseEntity.ok(GenericResponse.of(
                 challenges,
