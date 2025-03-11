@@ -48,16 +48,17 @@ public class RankingService {
 
         List<Map<String, Object>> rankingList = new ArrayList<>();
         int rank = 1;
-        int displayRank = 1;
         Double prevScore = null;
 
-        for (ZSetOperations.TypedTuple<Object> entry : rankings) {
+        for (int i = 0; i < rankings.size(); i++) {
+            ZSetOperations.TypedTuple<Object> entry = (ZSetOperations.TypedTuple<Object>) rankings.toArray()[i];
+
             Map<String, Object> ranking = new HashMap<>();
             double score = entry.getScore();
             Object itemId = entry.getValue();
 
             if (prevScore != null && !prevScore.equals(score)) {
-                rank = displayRank;
+                rank = i + 1;
             }
 
             ranking.put("rank", rank);
@@ -66,7 +67,6 @@ public class RankingService {
             rankingList.add(ranking);
 
             prevScore = score;
-            displayRank++;
         }
 
         return rankingList;
@@ -80,7 +80,7 @@ public class RankingService {
     }
 
     public void updateWeeklyReviewsRanking(LocalDateTime start, LocalDateTime end) {
-        List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end); // 리뷰 랭킹에서는 찜 데이터 필요 없음
+        List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
         List<Object[]> CommentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
 
         updateRanking(WEEKLY_REVIEWS_RANKING_KEY, recommendCounts, CommentCounts, 0.7, 0.3);
