@@ -2,20 +2,20 @@ package com.project.backend.domain.notification.service;
 
 
 import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
-import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.entity.Notification;
 import com.project.backend.domain.notification.entity.NotificationType;
 import com.project.backend.domain.notification.exception.NotificationErrorCode;
 import com.project.backend.domain.notification.exception.NotificationException;
 import com.project.backend.domain.notification.repository.NotificationRepository;
-import com.project.backend.global.authority.CustomUserDetails;
+import com.project.backend.global.redis.service.RedisPublisher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 알람 서비스
@@ -24,9 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final RedisPublisher redisPublisher;
 
     public String buildContent(String username, NotificationType type){
-        return username + "님이"+type.getMessage();
+        return username + "님이 "+type.getMessage();
     }
 
     /**
@@ -48,6 +49,7 @@ public class NotificationService {
                 .notificationType(notificationDTO.getNotificationType())
                 .build();
 
+        redisPublisher.publishToUser(notification.getConsumerMemberId(),notification.getContent());
 
         return new NotificationDTO(notificationRepository.save(notification));
     }
@@ -60,9 +62,17 @@ public class NotificationService {
      * @author 이광석
      * @since 25.02.06
      */
-    public List<NotificationDTO> findByUser(MemberDto memberDto) {
+    public Page<NotificationDTO> findByUser(MemberDto memberDto,int page, int size,boolean onlyNotCheck) {
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by(Sort.Direction.DESC,"createdAt"));
+        Page<Notification> notificationPage;
 
-        return notificationRepository.findAllByConsumerMemberId(memberDto.getId());
+        if(onlyNotCheck){
+            notificationPage = notificationRepository.findAllByConsumerMemberIdAndIsCheckFalse(memberDto.getId(),pageable);
+        }else{
+            notificationPage = notificationRepository.findAllByConsumerMemberId(memberDto.getId(),pageable);
+        }
+        return notificationPage.map(NotificationDTO::new);
+
     }
 
     /**
@@ -134,4 +144,10 @@ public class NotificationService {
         }
     }
 
+
+    public Long getNotificationTotalCount(MemberDto memberDto) {
+        Long memberId = memberDto.getId();
+
+        return notificationRepository.countByConsumerMemberId(memberId);
+    }
 }
