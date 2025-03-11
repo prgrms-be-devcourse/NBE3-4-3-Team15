@@ -1,7 +1,9 @@
 package com.project.backend.domain.ranking.service;
 
+import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.ranking.common.RankingType;
+import com.project.backend.domain.ranking.dto.RankingDTO;
 import com.project.backend.domain.ranking.exception.RankingErrorCode;
 import com.project.backend.domain.ranking.exception.RankingException;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
@@ -29,6 +31,7 @@ public class RankingService {
     private final ReviewRepository reviewRepository;
     private final ReviewRecommendationRepository reviewRecommendationRepository;
     private final ReviewCommentRepository reviewCommentRepository;
+    private final BookRepository bookRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -107,27 +110,29 @@ public class RankingService {
      * @author 김남우
      * @since 2025.03.09
      */
-    public List<Map<String, Object>> getRanking(RankingType rankingType) {
+    public List<RankingDTO> getRanking(RankingType rankingType) {
         int maxRank = rankingType == RankingType.DAILY_REVIEWS ? 5 : 10;
         Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
                 .reverseRangeWithScores(rankingType.getKey(), 0, maxRank - 1);
 
-        List<Map<String, Object>> rankingList = new ArrayList<>();
+        List<RankingDTO> rankingList = new ArrayList<>();
         int rank = 1;
         Double prevScore = null;
-
         int index = 0;
+
         for (ZSetOperations.TypedTuple<Object> entry : rankings) {
-            Map<String, Object> ranking = new HashMap<>();
             double score = entry.getScore();
-            Object itemId = entry.getValue();
+            Long itemId = Long.valueOf(entry.getValue().toString());
 
-            if (prevScore != null && !prevScore.equals(score)) { rank = index + 1; }
+            if (prevScore != null && !prevScore.equals(score)) {
+                rank = index + 1;
+            }
 
-            ranking.put("rank", rank);
-            ranking.put("item_id", itemId);
-            ranking.put("score", score);
-            rankingList.add(ranking);
+            // 책 제목과 리뷰 내용 가져오기
+            String title = bookRepository.findTitleById(itemId).orElse("제목 없음");
+            String content = reviewRepository.findContentById(itemId).orElse("내용 없음");
+
+            rankingList.add(new RankingDTO(rank, title, content, score));
 
             prevScore = score;
             index++;
