@@ -47,55 +47,17 @@ public class RankingService {
                 weight1 = 0.5;
                 weight2 = 0.5;
                 if (firstCounts.isEmpty()) { throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS); }
-                if (secondCounts.isEmpty()) {
-                    throw new ReviewException(
-                            ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
-                            ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
-                            ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
-                    );
-                }
+                if (secondCounts.isEmpty()) throw createReviewException(ReviewErrorCode.REVIEW_NOT_FOUND);
                 break;
 
             case WEEKLY_REVIEWS:
-                firstCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
-                secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
-                weight1 = 0.7;
-                weight2 = 0.3;
-                if (firstCounts.isEmpty()) {
-                    throw new ReviewException(
-                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getStatus(),
-                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getErrorCode(),
-                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getMessage()
-                    );
-                }
-                if (secondCounts.isEmpty()) {
-                    throw new ReviewException(
-                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getStatus(),
-                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getErrorCode(),
-                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getMessage()
-                    );
-                }
-                break;
-
             case DAILY_REVIEWS:
                 firstCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
                 secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
-                weight1 = 0.6;
-                weight2 = 0.4;
-                if (firstCounts.isEmpty()) {
-                    throw new ReviewException(
-                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getStatus(),
-                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getErrorCode(),
-                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getMessage()
-                    );
-                }
-                if (secondCounts.isEmpty()) {
-                    throw new ReviewException(
-                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getStatus(),
-                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getErrorCode(),
-                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getMessage()
-                    );
-                }
+                weight1 = (rankingType == RankingType.WEEKLY_REVIEWS) ? 0.7 : 0.6;
+                weight2 = (rankingType == RankingType.WEEKLY_REVIEWS) ? 0.3 : 0.4;
+                if (firstCounts.isEmpty()) throw createReviewException(ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND);
+                if (secondCounts.isEmpty()) throw createReviewException(ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND);
                 break;
 
             default:
@@ -103,6 +65,10 @@ public class RankingService {
         }
 
         updateRankingInRedis(rankingType.getKey(), firstCounts, secondCounts, weight1, weight2);
+    }
+
+    private ReviewException createReviewException(ReviewErrorCode errorCode) {
+        return new ReviewException(errorCode.getStatus(), errorCode.getErrorCode(), errorCode.getMessage());
     }
 
     private void updateRankingInRedis(String rankingKey, List<Object[]> counts1, List<Object[]> counts2, double weight1, double weight2) {
