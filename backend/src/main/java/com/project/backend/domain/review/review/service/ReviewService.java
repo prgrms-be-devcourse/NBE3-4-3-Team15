@@ -116,7 +116,6 @@ public class ReviewService {
                         .bookId(reviewsDTO.getBookId())
                         .content(reviewsDTO.getContent())
                         .rating(reviewsDTO.getRating())
-                        .recommendMember(new HashSet<>())
                         .isDelete(false)
                     .build());
 
