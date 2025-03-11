@@ -76,23 +76,21 @@ public class RankingService {
     }
 
     public List<Map<String, Object>> getRanking(RankingType rankingType) {
+        int maxRank = rankingType == RankingType.DAILY_REVIEWS ? 5 : 10;
         Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
-                .reverseRangeWithScores(rankingType.getKey(), 0, 9);
+                .reverseRangeWithScores(rankingType.getKey(), 0, maxRank - 1);
 
         List<Map<String, Object>> rankingList = new ArrayList<>();
         int rank = 1;
         Double prevScore = null;
 
-        for (int i = 0; i < rankings.size(); i++) {
-            ZSetOperations.TypedTuple<Object> entry = (ZSetOperations.TypedTuple<Object>) rankings.toArray()[i];
-
+        int index = 0;
+        for (ZSetOperations.TypedTuple<Object> entry : rankings) {
             Map<String, Object> ranking = new HashMap<>();
             double score = entry.getScore();
             Object itemId = entry.getValue();
 
-            if (prevScore != null && !prevScore.equals(score)) {
-                rank = i + 1;
-            }
+            if (prevScore != null && !prevScore.equals(score)) { rank = index + 1; }
 
             ranking.put("rank", rank);
             ranking.put("item_id", itemId);
@@ -100,6 +98,9 @@ public class RankingService {
             rankingList.add(ranking);
 
             prevScore = score;
+            index++;
+
+            if (rankingType == RankingType.DAILY_REVIEWS && index >= 5) break;
         }
 
         return rankingList;
