@@ -1,5 +1,6 @@
 package com.project.backend.domain.ranking.controller;
 
+import com.project.backend.domain.ranking.common.RankingType;
 import com.project.backend.domain.ranking.service.RankingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,24 +29,26 @@ public class RankingController {
 
     private final RankingService rankingService;
 
+
     @GetMapping("/weekly/book")
     @Operation(summary = "주간 인기 도서 랭킹")
     public ResponseEntity<List<Map<String, Object>>> getWeeklyBookRanking() {
-        List<Map<String, Object>> weeklyBookRanking = rankingService.getWeeklyBookRanking();
-        return ResponseEntity.ok(weeklyBookRanking);
+        return getRankingResponse(RankingType.WEEKLY_BOOKS);
     }
 
     @GetMapping("/weekly/review")
     @Operation(summary = "주간 인기 리뷰 랭킹")
     public ResponseEntity<List<Map<String, Object>>> getWeeklyReviewRanking() {
-        List<Map<String, Object>> weeklyReviewRanking = rankingService.getWeeklyReviewRanking();
-        return ResponseEntity.ok(weeklyReviewRanking);
+        return getRankingResponse(RankingType.WEEKLY_REVIEWS);
     }
 
-    @GetMapping("/daliy/review")
+    @GetMapping("/daily/review")
     @Operation(summary = "인기 급상승 리뷰 랭킹")
     public ResponseEntity<List<Map<String, Object>>> getDailyReviewsRanking() {
-        List<Map<String, Object>> daliyReviewRanking = rankingService.getDailyReviewsRanking();
-        return ResponseEntity.ok(daliyReviewRanking);
+        return getRankingResponse(RankingType.DAILY_REVIEWS);
+    }
+
+    private ResponseEntity<List<Map<String, Object>>> getRankingResponse(RankingType rankingType) {
+        return ResponseEntity.ok(rankingService.getRanking(rankingType));
     }
 }
