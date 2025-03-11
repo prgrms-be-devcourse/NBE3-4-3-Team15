@@ -185,7 +185,7 @@ const Page = () => {
                   className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
                 >
                   <p className="font-semibold text-lg text-center">
-                    {review.rank}. {rank.title}
+                    {review.rank}. {review.title}
                   </p>
                   <p className="font-semibold text-sm text-center">
                     {review.content}
@@ -210,7 +210,7 @@ const Page = () => {
                   className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
                 >
                   <p className="font-semibold text-lg text-center">
-                    {review.rank}. {rank.title}
+                    {review.rank}. {review.title}
                   </p>
                   <p className="font-semibold text-sm text-center">
                     {review.content}
