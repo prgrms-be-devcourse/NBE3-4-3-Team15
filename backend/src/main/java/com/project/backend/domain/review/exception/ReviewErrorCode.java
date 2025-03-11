@@ -15,6 +15,7 @@ public enum ReviewErrorCode {
     UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN,"UNAUTHORIZED_ACCESS","권한이 없습니다"),
     INVALID_COMMENT_DEPTH(HttpStatus.BAD_REQUEST,"INVALID_COMMENT_DEPTH","대댓글에 댓글을 달수 없습니다.");
 
+
     private final HttpStatus status;
     private final String errorCode;
     private final String message;
