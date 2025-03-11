@@ -1,5 +1,6 @@
 package com.project.backend.domain.member.entity;
 
+import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
@@ -19,6 +20,7 @@ import java.util.List;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -29,7 +31,7 @@ public class Member extends BaseEntity {
     private Long id;
 
     @Column(unique = true, length = 30)
-    private String username;
+    public String username;
 
     private String password;
 
@@ -38,9 +40,11 @@ public class Member extends BaseEntity {
 
     private int gender;
 
-    private String nickname;
+    public String nickname;
 
     private LocalDate birth;
+
+    private long deposit;
 
     @ManyToMany(mappedBy = "recommendMember")
     private List<Review> recommendReviews;
@@ -54,6 +58,9 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Follow> followings;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Entry> entries;
+
     public void updateMemberInfo(String email, int gender, String nickname, LocalDate birth) {
         this.email = email;
         this.gender = gender;
@@ -63,6 +70,14 @@ public class Member extends BaseEntity {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void plusDeposit(long deposit) {
+        this.deposit += deposit;
+    }
+
+    public void minusDeposit(long deposit) {
+        this.deposit -= deposit;
     }
 
     /**
@@ -77,4 +92,6 @@ public class Member extends BaseEntity {
     public Long getId() {
         return id;
     }
+
+    public String getUserNameK(){return this.username;}
 }

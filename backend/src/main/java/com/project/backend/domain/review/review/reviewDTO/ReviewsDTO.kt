@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor
 import lombok.Builder
 import lombok.Data
 import lombok.NoArgsConstructor
+import net.bytebuddy.asm.Advice.Local
 import java.time.LocalDateTime
 import java.util.stream.Collectors
 
@@ -27,6 +28,8 @@ data class ReviewsDTO(
     val userId: Long,
     val content: String,
     val rating: Int,
+    val createdAt: LocalDateTime?,
+    val modifiedAt: LocalDateTime?
 
 ){
     companion object{
@@ -35,7 +38,10 @@ data class ReviewsDTO(
             bookId = review.bookId,
             userId=review.userId,
             content=review.content,
-            rating=review.rating
+            rating=review.rating ,
+            createdAt = review.createdAt,
+            modifiedAt = review.modifiedAt
         )
     }
+
 }

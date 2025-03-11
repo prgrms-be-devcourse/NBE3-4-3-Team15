@@ -106,7 +106,7 @@ class ReviewService(  private val reviewRepository: ReviewRepository,
 
 
         val memberDto = memberService.getMemberById(memberId) //리뷰 작성자
-        val followers = followService.getFollowers(memberDto.username) // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
+        val followers = followService.getFollowers(memberDto.userNameK) // 리뷰 작성자를 팔로우 하고 있는 팔로워 목록
 
 
 
@@ -117,7 +117,7 @@ class ReviewService(  private val reviewRepository: ReviewRepository,
                 consumerMemberId=follower.id,
                 reviewId=review.id,
                 isCheck=false,
-                content=notificationService.buildContent(memberDto.username, NotificationType.REVIEW),
+                content=notificationService.buildContent(memberDto.userNameK, NotificationType.REVIEW),
                 notificationType=NotificationType.REVIEW,
                 createdAt = LocalDateTime.now(),
                 id = null,

@@ -77,7 +77,7 @@ class ReviewCommentService(
             reviewCommentId = reviewComment.id,
             isCheck = false,
             notificationType = notificationType,
-            content = notificationService.buildContent(producer.username, notificationType),
+            content = notificationService.buildContent(producer.userNameK, notificationType),
             id = null,
             createdAt = LocalDateTime.now(),
             reviewId = null

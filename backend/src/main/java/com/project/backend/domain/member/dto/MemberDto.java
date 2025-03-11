@@ -33,12 +33,16 @@ public class MemberDto extends MineDto {
 
     @JsonProperty
     @NotBlank
-    @Length(min = 8)
+    @Length(min = 2)
     private String password1;
 
     @JsonProperty
     @NotBlank
     private String password2;
+
+    // 팔로워 수와 팔로잉 수 필드 추가
+    private Long followerCount;
+    private Long followingCount;
 
     public MemberDto(Member member) {
         this.id = member.getId();
@@ -49,7 +53,18 @@ public class MemberDto extends MineDto {
         this.birth = member.getBirth();
     }
 
+    // 팔로잉, 팔로워 카운트 설정 메서드 추가
+    public void setFollowCounts(Long followerCount, Long followingCount) {
+        this.followerCount = followerCount;
+        this.followingCount = followingCount;
+    }
+
     public Long getId(){
         return id;
     }
+
+    public String getUserNameK(){
+        return this.username;
+    }
+
 }

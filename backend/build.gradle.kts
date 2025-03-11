@@ -67,15 +67,14 @@ dependencies {
     implementation ("org.projectlombok:lombok:1.18.30")
     annotationProcessor ("org.projectlombok:lombok:1.18.30")
 
-    testImplementation ("org.junit.jupiter:junit-jupiter:5.9.2")
     testAnnotationProcessor ("org.projectlombok:lombok:1.18.30")
 
     // ✅ 테스트 관련 라이브러리
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0") // JUnit 최신 버전
+    testImplementation("org.junit.jupiter:junit-jupiter") // JUnit 최신 버전
     testImplementation("org.springframework.security:spring-security-test")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0") // JUnit 플랫폼 런처 추가
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // JUnit 플랫폼 런처 추가
 
     // ✅ perplexity 사용하기 위함
     implementation(platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")) // Spring AI BOM

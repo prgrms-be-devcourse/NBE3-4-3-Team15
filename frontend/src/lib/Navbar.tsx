@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Chatbot from "./chatbot";
 
 interface NavbarProps {
   accessToken: string | null;
@@ -57,7 +58,7 @@ const Navbar: React.FC<NavbarProps> = ({ accessToken }) => {
               onClick={() => router.push("/member/mine")}
             >
               내 프로필
-            </button>
+             </button>
             <button
               className="px-4 py-2 border rounded-lg"
               onClick={() => router.push("/notification/MyNotification")}
@@ -83,6 +84,7 @@ const Navbar: React.FC<NavbarProps> = ({ accessToken }) => {
           </>
         )}
       </div>
+      {isLoggedIn && <Chatbot></Chatbot>}
     </header>
   );
 };
