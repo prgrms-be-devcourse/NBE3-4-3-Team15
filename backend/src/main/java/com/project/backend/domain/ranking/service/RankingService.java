@@ -1,14 +1,10 @@
 package com.project.backend.domain.ranking.service;
 
-import com.project.backend.domain.book.exception.BookErrorCode;
-import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.ranking.common.RankingType;
 import com.project.backend.domain.ranking.exception.RankingErrorCode;
 import com.project.backend.domain.ranking.exception.RankingException;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
-import com.project.backend.domain.review.exception.ReviewErrorCode;
-import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.recommendation.repository.ReviewRecommendationRepository;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +42,6 @@ public class RankingService {
                 secondCounts = reviewRepository.findReviewCounts(start, end);
                 weight1 = 0.5;
                 weight2 = 0.5;
-                if (firstCounts.isEmpty()) { throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS); }
-                if (secondCounts.isEmpty()) throw createReviewException(ReviewErrorCode.REVIEW_NOT_FOUND);
                 break;
 
             case WEEKLY_REVIEWS:
@@ -56,8 +50,6 @@ public class RankingService {
                 secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
                 weight1 = (rankingType == RankingType.WEEKLY_REVIEWS) ? 0.7 : 0.6;
                 weight2 = (rankingType == RankingType.WEEKLY_REVIEWS) ? 0.3 : 0.4;
-                if (firstCounts.isEmpty()) throw createReviewException(ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND);
-                if (secondCounts.isEmpty()) throw createReviewException(ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND);
                 break;
 
             default:
@@ -65,10 +57,6 @@ public class RankingService {
         }
 
         updateRankingInRedis(rankingType.getKey(), firstCounts, secondCounts, weight1, weight2);
-    }
-
-    private ReviewException createReviewException(ReviewErrorCode errorCode) {
-        return new ReviewException(errorCode.getStatus(), errorCode.getErrorCode(), errorCode.getMessage());
     }
 
     private void updateRankingInRedis(String rankingKey, List<Object[]> counts1, List<Object[]> counts2, double weight1, double weight2) {
