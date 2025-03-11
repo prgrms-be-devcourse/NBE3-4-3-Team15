@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 리뷰 추천 정보를 담는 DTO
+ *
+ * @author 김남우
+ * @since 2025.03.10
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
