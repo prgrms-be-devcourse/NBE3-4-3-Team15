@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * -- 랭킹 서비스 --
@@ -33,22 +32,14 @@ public class RankingService {
     private static final String DAILY_REVIEWS_RANKING_KEY = "daily_books_ranking";
 
     public void updateRanking(String rankingKey, List<Object[]> Counts1, List<Object[]> Counts2, double weight1, double weight2) {
-        Map<Long, Integer> Counts1Map = Counts1.stream()
-                .collect(Collectors.toMap(data -> (Long) data[0], data -> ((Long) data[1]).intValue()));
-        Map<Long, Integer> Counts2Map = Counts2.stream()
-                .collect(Collectors.toMap(data -> (Long) data[0], data -> ((Long) data[1]).intValue()));
+        Map<Long, Double> scores = new HashMap<>();
 
-        Set<Long> allIds = new HashSet<>();
-        allIds.addAll(Counts1Map.keySet());
-        allIds.addAll(Counts2Map.keySet());
+        Counts1.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight1, Double::sum));
+        Counts2.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight2, Double::sum));
 
-        for (Long itemId : allIds) {
-            int Count1 = Counts1Map.getOrDefault(itemId, 0);
-            int Count2 = Counts2Map.getOrDefault(itemId, 0);
-            double score = (Count1 * weight1) + (Count2 * weight2);
-
-            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(itemId), score);
-        }
+        scores.forEach((itemId, score) ->
+                redisTemplate.opsForZSet().add(rankingKey, String.valueOf(itemId), score)
+        );
     }
 
     public List<Map<String, Object>> getRanking(String rankingKey) {
