@@ -144,7 +144,14 @@ public class NotificationService {
         }
     }
 
-
+    /**
+     * 특정 유저의 총 알람 수 반환
+     * @param memberDto
+     * @return Long
+     *
+     * @author 이광석
+     * @since 25.03.11
+     */
     public Long getNotificationTotalCount(MemberDto memberDto) {
         Long memberId = memberDto.getId();
 
