@@ -11,6 +11,8 @@ import com.project.backend.domain.notification.dto.NotificationDTO;
 import com.project.backend.domain.notification.service.NotificationService;
 import com.project.backend.domain.review.exception.ReviewErrorCode;
 import com.project.backend.domain.review.exception.ReviewException;
+import com.project.backend.domain.review.recommendation.entity.ReviewRecommendation;
+import com.project.backend.domain.review.recommendation.repository.ReviewRecommendationRepository;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO;
@@ -19,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -210,19 +212,21 @@ public class ReviewService {
                                 ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
                         ));
 
-        Set<Member> list = review.getRecommendMember();
+         Optional<ReviewRecommendation> existingRecommendation = reviewRecommendationRepository
+                 .findByReviewAndMember(review, member);
 
-        if (list.contains(member)) {
-            list.remove(member);
-            review.setRecommendMember(list);
-            reviewRepository.save(review);
-            return false;
-        }else{
-            list.add(member);
-            review.setRecommendMember(list);
-            reviewRepository.save(review);
-            return true;
-        }
+         if (existingRecommendation.isPresent()) {
+             reviewRecommendationRepository.delete(existingRecommendation.get());
+             return false; // 추천 취소
+         } else {
+             ReviewRecommendation recommendation = ReviewRecommendation.builder()
+                     .review(review)
+                     .member(member)
+                     .recommendAt(LocalDateTime.now()) // 추천한 시간 저장
+                     .build();
+             reviewRecommendationRepository.save(recommendation);
+             return true; // 추천 추가
+         }
 
 
     }
