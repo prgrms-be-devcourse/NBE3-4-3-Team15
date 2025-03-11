@@ -1,7 +1,7 @@
 package com.project.backend.domain.book.dto
 
 /**
- * -- BookDTO의 인터페이스 --
+ * -- BookDTO 인터페이스 --
  *
  * @author -- 정재익 --
  * @since -- 1월 27일 --

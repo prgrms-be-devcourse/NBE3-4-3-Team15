@@ -58,13 +58,20 @@ public class SecurityConfig {
                         // GET 요청은 모두 허용(책 목록, 리뷰 조회 등)
                         .requestMatchers(HttpMethod.GET, "/book","/book/{id}","/book/favorite").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/review/books/{bookId}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/review/{reviewId}/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ranking/weekly/book").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ranking/weekly/review").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ranking/daily/review").permitAll()
 
                         // 로그인 및 회원가입은 인증 없이 허용
-                        .requestMatchers("/members/login", "/members","members/{id}/followers", "members/{id}/followings").permitAll()
+                        .requestMatchers("/members/login",
+                                "/members",
+                                "members/{id}/followers",
+                                "members/{id}/followings",
+                                "redis/**",
+                                "rabbit/**",
+                                "notification/sse").permitAll()
 
                         // h2-console, swagger 접근 허용
                         .requestMatchers(PathRequest.toH2Console()).permitAll()

@@ -19,12 +19,31 @@ const Page = () => {
     const [bestSellers, setBestSellers] = useState<BookDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    const [updateTime, setUpdateTime] = useState(""); // 🕒 최신 기준 시간 상태 추가
 
     const router = useRouter();
 
     useEffect(() => {
         fetchBestSellers();
     }, [page]);
+
+    useEffect(() => {
+        updateCurrentTime();
+        const interval = setInterval(updateCurrentTime, 60 * 1000); // 매 분마다 업데이트
+        return () => clearInterval(interval);
+    }, []);
+
+    // 🕒 현재 시간 기준을 계산하는 함수
+    const updateCurrentTime = () => {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+
+        // 매시간 `10분`이 되면 그 시간 기준으로 설정
+        const displayHour = minutes >= 10 ? hours : hours - 1;
+
+        setUpdateTime(`${now.getMonth() + 1}월 ${now.getDate()}일 ${displayHour}시 기준`);
+    };
 
     const fetchBestSellers = async () => {
         setLoading(true);
@@ -65,7 +84,7 @@ const Page = () => {
             <section className="px-6 py-4 flex gap-4">
                 <div className="absolute left-[1%] w-[75vw] bg-white p-4 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-3">
-                        실시간 베스트셀러 TOP 100 <span className="text-sm text-gray-500"></span>
+                        실시간 베스트셀러 TOP 100 <span className="text-sm text-gray-500">({updateTime})</span>
                     </h2>
 
                     <div className="flex justify-between mb-2">
@@ -99,15 +118,13 @@ const Page = () => {
                     )}
                 </div>
 
-
-                {/* 오른쪽 영역: 일간 급상승 리뷰와 주간 추천 리뷰 */
-                }
+                {/* 오른쪽 영역: 일간 급상승 리뷰와 주간 추천 리뷰 */}
                 <div className="absolute top-[160px] right-[1%] w-[20vw] space-y-6">
                     {/* 일간 급상승 리뷰 */}
                     <div className="bg-white p-4 rounded-lg shadow">
                         <h2 className="text-xl font-semibold mb-3">일간 급상승 리뷰 TOP 5</h2>
                         <div className="flex flex-col gap-6">
-                            {Array.from({length: 5}).map((_, index) => (
+                            {Array.from({ length: 5 }).map((_, index) => (
                                 <div
                                     key={index}
                                     className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
@@ -122,7 +139,7 @@ const Page = () => {
                     <div className="bg-white p-4 rounded-lg shadow">
                         <h2 className="text-xl font-semibold mb-3">주간 추천 리뷰 TOP 10</h2>
                         <div className="grid grid-cols-1 gap-6">
-                            {Array.from({length: 10}).map((_, index) => (
+                            {Array.from({ length: 10 }).map((_, index) => (
                                 <div
                                     key={index}
                                     className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
@@ -135,8 +152,7 @@ const Page = () => {
                 </div>
             </section>
         </div>
-    )
-        ;
+    );
 };
 
 export default Page;

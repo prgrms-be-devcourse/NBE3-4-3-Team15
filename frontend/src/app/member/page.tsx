@@ -4,6 +4,7 @@ import client from "@/lib/client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
+
 /**
  * 회원가입 페이지
  *
@@ -48,12 +49,20 @@ export default function Join() {
             password: password1,
           },
         });
+      if (loginResponse.response.ok) {
+        localStorage.setItem("nickname", nickname); // 저장
+      }
 
         if (loginResponse.response.ok) {
           // 로그인 성공 후 홈으로 이동
           router.replace("/");
         } else {
           setErrorMessage("자동 로그인에 실패하였습니다.");
+        }
+
+        if (response.response.ok) {
+          localStorage.setItem("username", id); // 저장
+          router.replace("/");
         }
       } else {
         const errorDetails = response.error.errorDetails;
