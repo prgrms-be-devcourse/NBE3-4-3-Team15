@@ -30,4 +30,15 @@ public class RankingScheduler {
         rankingService.updateWeeklyBooksRanking(start, end);
         rankingService.updateWeeklyReviewsRanking(start, end);
     }
+
+//    @Scheduled(cron = "0 */10 * * * *") // 매시간 10분 마다 실행
+    @Scheduled(cron = "0 * * * * *")
+    public void updatedaliyRanking(){
+        LocalDateTime start = LocalDateTime.now().minusDays(1); // 1일 전부터
+        LocalDateTime end = LocalDateTime.now(); // 현재 시간까지
+
+        System.out.println("일간 랭킹 업데이트 : " + end);
+
+        rankingService.updateDailyReviewsRanking(start, end);
+    }
 }
