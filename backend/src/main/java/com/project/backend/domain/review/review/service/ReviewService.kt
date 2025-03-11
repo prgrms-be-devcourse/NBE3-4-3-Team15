@@ -9,6 +9,8 @@ import com.project.backend.domain.notification.entity.NotificationType
 import com.project.backend.domain.notification.service.NotificationService
 import com.project.backend.domain.review.exception.ReviewErrorCode
 import com.project.backend.domain.review.exception.ReviewException
+import com.project.backend.domain.review.recommendation.entity.ReviewRecommendation
+import com.project.backend.domain.review.recommendation.repository.ReviewRecommendationRepository
 import com.project.backend.domain.review.review.entity.Review
 import com.project.backend.domain.review.review.repository.ReviewRepository
 import com.project.backend.domain.review.review.reviewDTO.ReviewsDTO
@@ -33,7 +35,10 @@ class ReviewService(  private val reviewRepository: ReviewRepository,
                       private val memberRepository: MemberRepository,
                       private val memberService: MemberService,
                       private val notificationService: NotificationService,
-                      private val followService: FollowService) {
+                      private val followService: FollowService,
+                      private val reviewRecommendationRepository: ReviewRecommendationRepository
+
+) {
 
 
 
@@ -201,14 +206,15 @@ class ReviewService(  private val reviewRepository: ReviewRepository,
                 )
             }
 
-        return if (review.recommendMember.contains(member)) {
-            review.recommendMember.remove(member)
-            reviewRepository.save(review)
-            false
+        val existingRecommendation = reviewRecommendationRepository.findByReviewAndMember(review, member).orElse(null)
+
+        return if (existingRecommendation != null) {
+            reviewRecommendationRepository.delete(existingRecommendation)
+            false // 추천 취소
         } else {
-            review.recommendMember.add(member)
-            reviewRepository.save(review)
-            true
+            val recommendation = ReviewRecommendation.of(review, member)
+            reviewRecommendationRepository.save(recommendation)
+            true // 추천 추가
         }
     }
 

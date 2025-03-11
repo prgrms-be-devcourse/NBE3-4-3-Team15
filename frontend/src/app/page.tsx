@@ -21,6 +21,7 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [updateTime, setUpdateTime] = useState(""); // 🕒 최신 기준 시간 상태 추가
+  const [weeklyBooks, setWeeklyBooks] = useState([]);
   const [weeklyReviews, setWeeklyReviews] = useState([]);
   const [dailyReviews, setDailyReviews] = useState([]);
 
@@ -33,9 +34,10 @@ const Page = () => {
 
   // 랭킹 시스템
   useEffect(() => {
+    getWeeklyBookRanking();
     getWeeklyReviewRanking();
     getDailyReviewRanking();
-  });
+  }, []);
 
   // 현재 시간
   useEffect(() => {
@@ -76,20 +78,34 @@ const Page = () => {
     }
   };
 
+  const getWeeklyBookRanking = async () => {
+    try {
+      const response = await client.GET("/ranking/weekly/book");
+      const data = response.data?.data;
+      setWeeklyBooks((WeeklyBooks) => data);
+    } catch (error) {
+      console.error("주간 도서 랭킹 가져오기 오류:", error);
+    }
+  };
+
   const getWeeklyReviewRanking = async () => {
     try {
-      const response = client.GET("/ranking/weekly/review");
+      const response = await client.GET("/ranking/weekly/review");
       const data = response.data?.data;
       setWeeklyReviews((weeklyReviews) => data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("주간 리뷰 랭킹 가져오기 오류:", error);
+    }
   };
 
   const getDailyReviewRanking = async () => {
     try {
-      const response = client.GET("/ranking/daily/review");
+      const response = await client.GET("/ranking/daily/review");
       const data = response.data?.data;
       setDailyReviews((dailyReviews) => data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("일일 리뷰 랭킹 가져오기 오류:", error);
+    }
   };
 
   const nextPage = () => setPage((prev) => (prev < 9 ? prev + 1 : prev));
@@ -114,9 +130,34 @@ const Page = () => {
         />
       </div>
 
-      {/* 실시간 베스트셀러 TOP 100 */}
       <section className="px-6 py-4 flex gap-4">
-        <div className="absolute left-[1%] w-[75vw] bg-white p-4 rounded-lg shadow-md">
+        {/* 왼쪽: 주간 인기 도서 & 실시간 베스트셀러 */}
+        <div className="flex-1 space-y-6">
+          {/* 주간 인기 도서 TOP 10 */}
+          <div className="w-full bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-3 text-black">주간 인기 도서 TOP 10</h2>
+            <div className="grid grid-cols-5 gap-5">
+              {weeklyBooks.map((book) => (
+                <div
+                    key={book.rank}
+                    className="bg-gray-200 p-4 rounded-lg shadow w-full flex flex-col items-center"
+                >
+                  <p className="font-bold text-md text-black mt-2">{book.rank}</p>
+                  <img
+                      src={book.image}
+                      alt={book.title}
+                      className="w-24 h-32 object-cover rounded-md"
+                  />
+                  <p className="text-sm text-black text-center w-full truncate">
+                    {book.title}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        {/* 실시간 베스트셀러 TOP 100 */}
+        <div className="w-full bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-3">
             실시간 베스트셀러 TOP 100{" "}
             <span className="text-sm text-gray-500">({updateTime})</span>
@@ -170,55 +211,46 @@ const Page = () => {
             </div>
           )}
         </div>
+      </div>
 
-        {/* 오른쪽 영역: 일간 급상승 리뷰와 주간 추천 리뷰 */}
-        <div className="absolute top-[160px] right-[1%] w-[20vw] space-y-6">
+        {/* 오른쪽: 일간 급상승 리뷰 & 주간 추천 리뷰 */}
+        <div className="w-[20vw] space-y-6">
           {/* 일간 급상승 리뷰 */}
           <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-3">
-              일간 급상승 리뷰 TOP 5
-            </h2>
-            <div className="flex flex-col gap-6">
+            <h2 className="text-xl font-semibold mb-3 text-black">일간 급상승 리뷰 TOP 5</h2>
+            <div className="flex flex-col gap-4">
               {dailyReviews.map((review) => (
-                <div
-                  key={review.rank}
-                  className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
-                >
-                  <p className="font-semibold text-lg text-center">
-                    {review.rank}. {rank.title}
-                  </p>
-                  <p className="font-semibold text-sm text-center">
-                    {review.content}
-                  </p>
-                  <p className="font-semibold text-sm text-center">
-                    {review.score}
-                  </p>
-                </div>
+                  <div
+                      key={review.rank}
+                      className="bg-gray-200 p-4 rounded-lg shadow w-full h-[100px] flex flex-col items-center justify-center overflow-hidden"
+                  >
+                    <p className="font-semibold text-lg text-black text-center truncate w-full">
+                      {review.rank}. {review.title}
+                    </p>
+                    <p className="font-semibold text-sm text-black text-center truncate w-full">
+                      {review.content}
+                    </p>
+                  </div>
               ))}
             </div>
           </div>
 
           {/* 주간 추천 리뷰 */}
           <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-3">
-              주간 추천 리뷰 TOP 10
-            </h2>
-            <div className="grid grid-cols-1 gap-6">
+            <h2 className="text-xl font-semibold mb-3 text-black">주간 추천 리뷰 TOP 10</h2>
+            <div className="grid grid-cols-1 gap-4">
               {weeklyReviews.map((review) => (
-                <div
-                  key={review.rank}
-                  className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
-                >
-                  <p className="font-semibold text-lg text-center">
-                    {review.rank}. {rank.title}
-                  </p>
-                  <p className="font-semibold text-sm text-center">
-                    {review.content}
-                  </p>
-                  <p className="font-semibold text-sm text-center">
-                    {review.score}
-                  </p>
-                </div>
+                  <div
+                      key={review.rank}
+                      className="bg-gray-200 p-4 rounded-lg shadow w-full h-[100px] flex flex-col items-center justify-center overflow-hidden"
+                  >
+                    <p className="font-semibold text-lg text-black text-center truncate w-full">
+                      {review.rank}. {review.title}
+                    </p>
+                    <p className="font-semibold text-sm text-black text-center truncate w-full">
+                      {review.content}
+                    </p>
+                  </div>
               ))}
             </div>
           </div>

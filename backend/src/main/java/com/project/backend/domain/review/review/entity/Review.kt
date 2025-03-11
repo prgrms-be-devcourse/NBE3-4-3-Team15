@@ -2,6 +2,7 @@ package com.project.backend.domain.review.review.entity
 
 import com.project.backend.domain.member.entity.Member
 import com.project.backend.domain.review.comment.entity.ReviewComment
+import com.project.backend.domain.review.recommendation.entity.ReviewRecommendation
 import com.project.backend.global.baseEntity.BaseEntity
 import com.project.backend.global.baseEntity.BaseEntityK
 import jakarta.persistence.*
@@ -45,8 +46,8 @@ class Review (
     @OneToMany(mappedBy = "review", cascade = [CascadeType.ALL], orphanRemoval = true)
     var comments: MutableList<ReviewComment> = mutableListOf(),
 
-    @ManyToMany
-    var recommendMember: MutableSet<Member> = mutableSetOf(),
+    @OneToMany(mappedBy = "review", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var recommendations: MutableList<ReviewRecommendation> = mutableListOf(),
 
     var isDelete: Boolean = false
 ) :BaseEntityK()

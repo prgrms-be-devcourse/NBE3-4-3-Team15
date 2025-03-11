@@ -39,6 +39,13 @@ public class SpringDocConfig {
                 .build();
     }
     @Bean
+    public GroupedOpenApi groupRanking() {
+        return GroupedOpenApi.builder()
+                .group("ranking")
+                .pathsToMatch("/ranking/**")
+                .build();
+    }
+    @Bean
     public GroupedOpenApi groupChatbot() {
         return GroupedOpenApi.builder()
                 .group("chatbot")
