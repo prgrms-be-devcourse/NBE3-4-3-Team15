@@ -1,8 +1,8 @@
 package com.project.backend.domain.review.review.entity;
 
 
-import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
+import com.project.backend.domain.review.recommendation.entity.ReviewRecommendation;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -11,9 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -50,8 +48,8 @@ public class Review extends BaseEntity {
     @OneToMany(mappedBy = "review",cascade =CascadeType.ALL,orphanRemoval = true)
     private List<ReviewComment> comments;
 
-    @ManyToMany
-    private Set<Member> recommendMember;
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewRecommendation> recommendations;
 
     boolean isDelete;
 
