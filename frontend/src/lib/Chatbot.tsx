@@ -1,6 +1,6 @@
 "use cliendt";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import client from "./client";
 
 export default function Chatbot() {
@@ -12,6 +12,7 @@ export default function Chatbot() {
   ]);
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function getAnswer(question) {
     const response = client.GET(`/chatbot?message=${question}`);
@@ -25,8 +26,6 @@ export default function Chatbot() {
     return "";
   }
 
-  async function setBotMessage() {}
-
   const changeOpen = async (e) => {
     setIsOpen(!isOpen);
   };
@@ -35,13 +34,15 @@ export default function Chatbot() {
     e.preventDefault();
     if (!input.trim()) return;
 
+    setIsLoading((check) => !check);
+
     // Simulate bot response
     const [message, response] = await Promise.all([
       getQuestion(input),
       getAnswer(input),
     ]);
 
-    console.log(response.data.data.message);
+    setIsLoading((check) => !check);
 
     const botMessage = {
       role: "bot",
@@ -84,6 +85,16 @@ export default function Chatbot() {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="mb-2 text-left">
+                <div
+                  style={{ whiteSpace: "pre-wrap", display: "inline-block" }}
+                  className={"inline-block p-2 rounded-lg bg-gray-200"}
+                >
+                  Loading...
+                </div>
+              </div>
+            )}
           </div>
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
@@ -92,6 +103,7 @@ export default function Chatbot() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="메시지를 입력하세요..."
               className="flex-1 border rounded-lg p-2"
+              style={{ width: "calc(100% - 84px)" }}
             />
             <button
               type="submit"
