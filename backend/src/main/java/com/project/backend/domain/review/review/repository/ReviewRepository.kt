@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
+import java.util.*
 
 interface ReviewRepository : JpaRepository<Review,Long>{
     fun findAllByUserId(userId: Long): List<Review>
@@ -28,4 +29,13 @@ interface ReviewRepository : JpaRepository<Review,Long>{
         @Param("start") start: LocalDateTime,
         @Param("end") end: LocalDateTime
     ): List<Array<Any>>
+
+    /**
+     * 리뷰 내용 검색
+     *
+     * @author 김남우
+     * @since 2025.03.11
+     */
+    @Query("SELECT r.content FROM Review r WHERE r.id = :reviewId")
+    fun findContentById(@Param("reviewId") reviewId: Long): Optional<String>
 }
