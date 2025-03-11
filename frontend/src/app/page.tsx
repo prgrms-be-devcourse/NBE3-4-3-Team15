@@ -37,7 +37,7 @@ const Page = () => {
     getWeeklyBookRanking();
     getWeeklyReviewRanking();
     getDailyReviewRanking();
-  });
+  }, []);
 
   // 현재 시간
   useEffect(() => {
@@ -83,7 +83,9 @@ const Page = () => {
       const response = await client.GET("/ranking/weekly/book");
       const data = response.data?.data;
       setWeeklyBooks((WeeklyBooks) => data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("주간 도서 랭킹 가져오기 오류:", error);
+    }
   };
 
   const getWeeklyReviewRanking = async () => {
@@ -91,7 +93,9 @@ const Page = () => {
       const response = await client.GET("/ranking/weekly/review");
       const data = response.data?.data;
       setWeeklyReviews((weeklyReviews) => data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("주간 리뷰 랭킹 가져오기 오류:", error);
+    }
   };
 
   const getDailyReviewRanking = async () => {
@@ -99,7 +103,9 @@ const Page = () => {
       const response = await client.GET("/ranking/daily/review");
       const data = response.data?.data;
       setDailyReviews((dailyReviews) => data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("일일 리뷰 랭킹 가져오기 오류:", error);
+    }
   };
 
   const nextPage = () => setPage((prev) => (prev < 9 ? prev + 1 : prev));
@@ -138,9 +144,6 @@ const Page = () => {
                 >
                 <p className="font-semibold text-lg text-center">
                   {book.rank}. {book.title}
-                </p>
-                <p className="font-semibold text-sm text-center text-gray-600">
-                  {book.score}
                 </p>
               </div>
             ))}
@@ -223,9 +226,6 @@ const Page = () => {
                   <p className="font-semibold text-sm text-center">
                     {review.content}
                   </p>
-                  <p className="font-semibold text-sm text-center">
-                    {review.score}
-                  </p>
                 </div>
               ))}
             </div>
@@ -247,9 +247,6 @@ const Page = () => {
                   </p>
                   <p className="font-semibold text-sm text-center">
                     {review.content}
-                  </p>
-                  <p className="font-semibold text-sm text-center">
-                    {review.score}
                   </p>
                 </div>
               ))}
