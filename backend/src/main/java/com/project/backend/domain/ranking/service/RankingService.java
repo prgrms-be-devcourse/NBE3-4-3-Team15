@@ -32,26 +32,26 @@ public class RankingService {
     private static final String WEEKLY_REVIEWS_RANKING_KEY = "weekly_reviews_ranking";
     private static final String DAILY_REVIEWS_RANKING_KEY = "daily_books_ranking";
 
-    public void updateWeeklyRanking(String rankingKey, List<Object[]> favoriteCounts, List<Object[]> reviewCounts) {
-        Map<Long, Integer> favoriteMap = favoriteCounts.stream()
+    public void updateRanking(String rankingKey, List<Object[]> Counts1, List<Object[]> Counts2, double weight1, double weight2) {
+        Map<Long, Integer> Counts1Map = Counts1.stream()
                 .collect(Collectors.toMap(data -> (Long) data[0], data -> ((Long) data[1]).intValue()));
-        Map<Long, Integer> reviewMap = reviewCounts.stream()
+        Map<Long, Integer> Counts2Map = Counts2.stream()
                 .collect(Collectors.toMap(data -> (Long) data[0], data -> ((Long) data[1]).intValue()));
 
         Set<Long> allIds = new HashSet<>();
-        allIds.addAll(favoriteMap.keySet());
-        allIds.addAll(reviewMap.keySet());
+        allIds.addAll(Counts1Map.keySet());
+        allIds.addAll(Counts2Map.keySet());
 
         for (Long itemId : allIds) {
-            int favoriteCount = favoriteMap.getOrDefault(itemId, 0);
-            int reviewCount = reviewMap.getOrDefault(itemId, 0);
-            double score = (favoriteCount * 0.5) + (reviewCount * 0.5);
+            int Count1 = Counts1Map.getOrDefault(itemId, 0);
+            int Count2 = Counts2Map.getOrDefault(itemId, 0);
+            double score = (Count1 * weight1) + (Count2 * weight2);
 
             redisTemplate.opsForZSet().add(rankingKey, String.valueOf(itemId), score);
         }
     }
 
-    public List<Map<String, Object>> getWeeklyRanking(String rankingKey) {
+    public List<Map<String, Object>> getRanking(String rankingKey) {
         Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
                 .reverseRangeWithScores(rankingKey, 0, 9);
 
@@ -71,6 +71,7 @@ public class RankingService {
 
             ranking.put("rank", rank);
             ranking.put("item_id", itemId);
+            ranking.put("score", score);
             rankingList.add(ranking);
 
             prevScore = score;
@@ -84,28 +85,29 @@ public class RankingService {
         List<Object[]> favoriteCounts = favoriteRepository.findFavoriteCounts(start, end);
         List<Object[]> reviewCounts = reviewRepository.findReviewCounts(start, end);
 
-        updateWeeklyRanking(WEEKLY_BOOKS_RANKING_KEY, favoriteCounts, reviewCounts);
-    }
-
-    public List<Map<String, Object>> getWeeklyBookRanking() {
-        return getWeeklyRanking(WEEKLY_BOOKS_RANKING_KEY);
+        updateRanking(WEEKLY_BOOKS_RANKING_KEY, favoriteCounts, reviewCounts, 0.5, 0.5);
     }
 
     public void updateWeeklyReviewsRanking(LocalDateTime start, LocalDateTime end) {
         List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end); // 리뷰 랭킹에서는 찜 데이터 필요 없음
         List<Object[]> CommentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
 
-        updateWeeklyRanking(WEEKLY_REVIEWS_RANKING_KEY, recommendCounts, CommentCounts);
+        updateRanking(WEEKLY_REVIEWS_RANKING_KEY, recommendCounts, CommentCounts, 0.7, 0.3);
     }
 
-    public List<Map<String, Object>> getWeeklyReviewRanking() {
-        return getWeeklyRanking(WEEKLY_REVIEWS_RANKING_KEY);
-    }
     public void updateDailyReviewsRanking(LocalDateTime start, LocalDateTime end) {
         List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
         List<Object[]> commentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
 
         updateRanking(DAILY_REVIEWS_RANKING_KEY, recommendCounts, commentCounts, 0.6, 0.4);
+    }
+
+    public List<Map<String, Object>> getWeeklyBookRanking() {
+        return getRanking(WEEKLY_BOOKS_RANKING_KEY);
+    }
+
+    public List<Map<String, Object>> getWeeklyReviewRanking() {
+        return getRanking(WEEKLY_REVIEWS_RANKING_KEY);
     }
 
     public List<Map<String, Object>> getDailyReviewsRanking() {
