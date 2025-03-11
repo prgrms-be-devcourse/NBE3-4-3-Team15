@@ -34,4 +34,8 @@ public class ReviewRecommendation {
 
     @Column(nullable = false)
     private LocalDateTime recommendAt;
+
+    public static ReviewRecommendation of(Review review, Member member) {
+        return new ReviewRecommendation(null, review, member, LocalDateTime.now());
+    }
 }
