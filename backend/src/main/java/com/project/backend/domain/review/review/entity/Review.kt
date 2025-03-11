@@ -42,7 +42,7 @@ class Review (
     var rating:  Int,
 
     @OneToMany(mappedBy = "review", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var comments: List<ReviewComment> = emptyList(),
+    var comments: MutableList<ReviewComment> = mutableListOf(),
 
     @ManyToMany
     var recommendMember: MutableSet<Member> = mutableSetOf(),

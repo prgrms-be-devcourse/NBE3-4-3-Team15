@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional
 import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.*
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.stream.Collectors
 
 
@@ -111,14 +112,19 @@ class ReviewService(  private val reviewRepository: ReviewRepository,
 
         for (followDto in followers) {
             val follower = memberService.getMyProfile(followDto.username) // 리뷰 작성자를 팔로우 하는 팔로워
-            val notificationDTO = NotificationDTO.builder()
-                .producerMemberId(memberId)
-                .consumerMemberId(follower.id)
-                .reviewId(review.id)
-                .isCheck(false)
-                .content(notificationService.buildContent(memberDto.username, NotificationType.REVIEW))
-                .notificationType(NotificationType.REVIEW)
-                .build()
+            val notificationDTO = NotificationDTO(
+                producerMemberId=memberId,
+                consumerMemberId=follower.id,
+                reviewId=review.id,
+                isCheck=false,
+                content=notificationService.buildContent(memberDto.username, NotificationType.REVIEW),
+                notificationType=NotificationType.REVIEW,
+                createdAt = LocalDateTime.now(),
+                id = null,
+                reviewCommentId = null
+            )
+
+
             notificationService.create(notificationDTO)
         }
     }
