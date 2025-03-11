@@ -39,6 +39,7 @@ public class ReviewService {
     private final MemberService memberService;
     private final NotificationService notificationService;
     private final FollowService followService;
+    private final ReviewRecommendationRepository reviewRecommendationRepository;
 
 
     /**
