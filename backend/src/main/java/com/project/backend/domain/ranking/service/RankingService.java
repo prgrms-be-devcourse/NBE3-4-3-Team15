@@ -19,7 +19,7 @@ import java.util.*;
  * -- 랭킹 서비스 --
  *
  * @author -- 김남우 --
- * @since -- 3월 4일 --
+ * @since -- 2025.03.04 --
  */
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,16 @@ public class RankingService {
     private final ReviewCommentRepository reviewCommentRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 특정 기간 동안의 데이터를 기반으로 랭킹을 업데이트하는 메서드
+     *
+     * @param rankingType 랭킹 유형
+     * @param start 랭킹 집계 시작 시간
+     * @param end 랭킹 집계 종료 시간
+     *
+     * @author 김남우
+     * @since 2025.03.09
+     */
     public void updateRanking(RankingType rankingType, LocalDateTime start, LocalDateTime end) {
         List<Object[]> firstCounts;
         List<Object[]> secondCounts;
@@ -59,6 +69,19 @@ public class RankingService {
         updateRankingInRedis(rankingType.getKey(), firstCounts, secondCounts, weight1, weight2);
     }
 
+
+    /**
+     * Redis에 랭킹 데이터를 업데이트하는 메서드
+     *
+     * @param rankingKey Redis에 저장될 키 값
+     * @param counts1 첫 번째 기준 데이터 리스트
+     * @param counts2 두 번째 기준 데이터 리스트
+     * @param weight1 첫 번째 기준 가중치
+     * @param weight2 두 번째 기준 가중치
+     *
+     * @author 김남우
+     * @since 2025.03.11
+     */
     private void updateRankingInRedis(String rankingKey, List<Object[]> counts1, List<Object[]> counts2, double weight1, double weight2) {
         redisTemplate.delete(rankingKey);
 
@@ -75,6 +98,15 @@ public class RankingService {
         );
     }
 
+    /**
+     * Redis에서 랭킹 데이터를 조회하는 메서드
+     *
+     * @param rankingType 조회할 랭킹 유형
+     * @return 랭킹 리스트
+     *
+     * @author 김남우
+     * @since 2025.03.09
+     */
     public List<Map<String, Object>> getRanking(RankingType rankingType) {
         int maxRank = rankingType == RankingType.DAILY_REVIEWS ? 5 : 10;
         Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
