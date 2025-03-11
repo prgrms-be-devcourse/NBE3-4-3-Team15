@@ -1,13 +1,19 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
 import client from "@/lib/client";
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import type { components } from "@/lib/backend/schema";
+import { useRouter } from "next/navigation";
 
 type MineDto = components["schemas"]["MineDto"];
 
+/**
+ * 회원 프로필 조회, 수정, 탈퇴 페이지
+ *
+ * @author 손진영
+ * @since 2025.02.11
+ */
 export default function Mine() {
     const [userProfile, setUserProfile] = useState<{ id:number | undefined, username : string, email: string; nickname: string; gender?: number; birth?: string; } | null>(null);
     const [isEditing, setIsEditing] = useState(false);

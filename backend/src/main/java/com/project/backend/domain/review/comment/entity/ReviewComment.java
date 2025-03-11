@@ -1,17 +1,12 @@
 package com.project.backend.domain.review.comment.entity;
 
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.backend.domain.member.entity.Member;
-import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
 import com.project.backend.domain.review.review.entity.Review;
 import com.project.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

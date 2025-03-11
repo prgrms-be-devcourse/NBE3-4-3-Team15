@@ -104,11 +104,11 @@ public class ReviewCommentService {
             ReviewComment parentComment = findCommentById(reviewCommentDto.getParentId());
 
             if(parentComment.getDepth()+1>=2){
-               throw new ReviewException(
-                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getStatus(),
-                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getErrorCode(),
-                       ReviewErrorCode.INVALID_COMMENT_DEPTH.getMessage()
-               );
+                throw new ReviewException(
+                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getStatus(),
+                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getErrorCode(),
+                        ReviewErrorCode.INVALID_COMMENT_DEPTH.getMessage()
+                );
             }
             reviewComment.setParent(parentComment);
             reviewComment.setDepth(parentComment.getDepth()+1);
@@ -205,11 +205,11 @@ public class ReviewCommentService {
         ReviewComment reviewComment = findCommentById(commentId);
         Member member = memberRepository.findByUsername(username)
 
-                        .orElseThrow(()->new ReviewException(
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
-                                ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
-                        ));
+                .orElseThrow(()->new ReviewException(
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getStatus(),
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getErrorCode(),
+                        ReviewErrorCode.MEMBER_NOT_FOUND.getMessage()
+                ));
 
         Set<Member> members  = reviewComment.getRecommend();
         if(members.contains(member)){
