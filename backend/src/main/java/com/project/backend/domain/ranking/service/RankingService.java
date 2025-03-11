@@ -26,25 +26,22 @@ public class RankingService {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String WEEKLY_RANKING_KEY = "weekly_book_ranking";
 
-    public void updateWeeklyBooksRanking(LocalDateTime start, LocalDateTime end) {
-        List<Object[]> favoriteCounts = favoriteRepository.findFavoriteCounts(start, end);
-        List<Object[]> reviewCounts = reviewRepository.findReviewCounts(start, end);
-
+    public void updateWeeklyRanking(String rankingKey, List<Object[]> favoriteCounts, List<Object[]> reviewCounts) {
         Map<Long, Integer> favoriteMap = favoriteCounts.stream()
                 .collect(Collectors.toMap(data -> (Long) data[0], data -> ((Long) data[1]).intValue()));
         Map<Long, Integer> reviewMap = reviewCounts.stream()
                 .collect(Collectors.toMap(data -> (Long) data[0], data -> ((Long) data[1]).intValue()));
 
-        Set<Long> allBookIds = new HashSet<>();
-        allBookIds.addAll(favoriteMap.keySet());
-        allBookIds.addAll(reviewMap.keySet());
+        Set<Long> allIds = new HashSet<>();
+        allIds.addAll(favoriteMap.keySet());
+        allIds.addAll(reviewMap.keySet());
 
-        for (Long bookId : allBookIds) {
-            int favoriteCount = favoriteMap.getOrDefault(bookId, 0);
-            int reviewCount = reviewMap.getOrDefault(bookId, 0);
+        for (Long itemId : allIds) {
+            int favoriteCount = favoriteMap.getOrDefault(itemId, 0);
+            int reviewCount = reviewMap.getOrDefault(itemId, 0);
             double score = (favoriteCount * 0.5) + (reviewCount * 0.5);
 
-            redisTemplate.opsForZSet().add(WEEKLY_RANKING_KEY, String.valueOf(bookId), score);
+            redisTemplate.opsForZSet().add(rankingKey, String.valueOf(itemId), score);
         }
     }
 
