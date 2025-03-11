@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.util.*
 
 /**
  * -- 책 저장소 --
@@ -123,4 +124,13 @@ interface BookRepository : JpaRepository<Book, Long> {
     @Modifying
     @Query("DELETE FROM Book b WHERE b.favoriteCount = 0")
     fun deleteBooksZeroFavoriteCount()
+
+    /**
+     * -- 도서 제목 검색 --
+     *
+     * @author -- 김남우 --
+     * @since -- 2025.03.11 --
+     */
+    @Query("SELECT b.title FROM Book b WHERE b.id = :bookId")
+    fun findTitleById(@Param("bookId") bookId: Long): Optional<String>
 }
