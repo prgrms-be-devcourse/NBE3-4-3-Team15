@@ -1,10 +1,8 @@
 package com.project.backend.domain.review.comment.dto;
 
 import com.project.backend.domain.member.dto.MemberDto;
-import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -29,7 +27,7 @@ public class ReviewCommentDto {
     private Long id;
 
 
-    
+
     private Long reviewId;
 
 

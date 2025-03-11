@@ -238,4 +238,17 @@ public class MemberService {
 
         return new MemberDto(member);
     }
+
+    /**
+     * Username 기반 member 조회
+     *
+     * @param username
+     * @return MemberUsername
+     * @author 손진영
+     * @since 25.03.04
+     */
+    public Member getMemberByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
+    }
 }

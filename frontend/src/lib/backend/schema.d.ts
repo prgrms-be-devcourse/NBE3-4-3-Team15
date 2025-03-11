@@ -4,7 +4,25 @@
  */
 
 export interface paths {
-    "/review/{reviewId}/recommend/{memberId}": {
+    "/review/{reviewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 리뷰 수정 */
+        put: operations["putReviews"];
+        post?: never;
+        /** 리뷰 삭제 */
+        delete: operations["deleteReviews"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/review/{reviewId}/recommend": {
         parameters: {
             query?: never;
             header?: never;
@@ -56,7 +74,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/review/{id}": {
+    "/notification/{notificationId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -64,11 +82,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** 리뷰 수정 */
-        put: operations["putReviews"];
+        put: operations["notificationCheck"];
         post?: never;
-        /** 리뷰 삭제 */
-        delete: operations["deleteReviews"];
+        delete: operations["notificationDelete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -146,6 +162,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/notification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createNotification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/members": {
         parameters: {
             query?: never;
@@ -163,6 +195,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/members/{id}/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["followOrUnfollow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/members/logout": {
         parameters: {
             query?: never;
@@ -173,8 +221,8 @@ export interface paths {
         get?: never;
         put?: never;
         /** 로그아웃 */
-        post?: never;
-        delete: operations["logout"];
+        post: operations["logout"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -197,7 +245,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/book/{id}/favorite": {
+    "/challenge/{id}/validation": {
         parameters: {
             query?: never;
             header?: never;
@@ -206,25 +254,56 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 도서 찜 하기 */
-        post: operations["favoriteBook"];
+        post: operations["validation"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/review/{userId}": {
+    "/challenge/{id}/join": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 특정 유저의 리뷰 목록 조회 */
-        get: operations["getUserReviews"];
+        get?: never;
         put?: never;
-        post?: never;
+        post: operations["join_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/challenge/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/book/{isbn}/favorite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 도서 찜하기 / 찜취소하기 */
+        post: operations["favoriteBook"];
         delete?: never;
         options?: never;
         head?: never;
@@ -248,7 +327,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/review/{reviewId}/comments/review/comments/{userId}": {
+    "/review/{reviewId}/comments/review/comments": {
         parameters: {
             query?: never;
             header?: never;
@@ -265,7 +344,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/review/comments/{userId}": {
+    "/review/myReview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 특정 유저의 리뷰 목록 조회 */
+        get: operations["getUserReviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/review/comments": {
         parameters: {
             query?: never;
             header?: never;
@@ -281,6 +377,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/review/books/{bookId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getBookIdReviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/myNotification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getUserIdNotification"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/members/{id}/followings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFollowings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/members/{id}/followers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getFollowers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/book": {
         parameters: {
             query?: never;
@@ -288,8 +448,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** 도서 제목 검색 */
-        get: operations["searchTitleBooks"];
+        /** 도서 검색 */
+        get: operations["searchBooks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -305,25 +465,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** 도서 상세 조회 */
-        get: operations["searchDetailBook"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/book/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 도서 조회 */
-        get: operations["searchAllBooks"];
+        /** 도서 상세 검색 */
+        get: operations["searchDetailBooks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -340,7 +483,7 @@ export interface paths {
             cookie?: never;
         };
         /** 도서 찜 목록 */
-        get: operations["searchFavoriteBooks"];
+        get: operations["getFavoriteBooks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -353,17 +496,9 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        GenericResponseReviewsDTO: {
-            /** Format: date-time */
-            timestamp?: string;
-            message?: string;
-            data?: components["schemas"]["ReviewsDTO"];
-            success?: boolean;
-        };
         MemberDto: {
-            password?: string;
-            email: string;
             nickname: string;
+            email: string;
             /** Format: int32 */
             gender?: number;
             /** Format: date */
@@ -380,7 +515,7 @@ export interface components {
             /** Format: int64 */
             reviewId?: number;
             /** Format: int64 */
-            userId: number;
+            userId?: number;
             comment: string;
             /** Format: int64 */
             parentId?: number;
@@ -398,7 +533,7 @@ export interface components {
             /** Format: int64 */
             bookId: number;
             /** Format: int64 */
-            userId: number;
+            userId?: number;
             content: string;
             /** Format: int32 */
             rating: number;
@@ -409,6 +544,13 @@ export interface components {
             /** Format: date-time */
             modifiedAt?: string;
         };
+        GenericResponseReviewsDTO: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["ReviewsDTO"];
+            success?: boolean;
+        };
         GenericResponseReviewCommentDto: {
             /** Format: date-time */
             timestamp?: string;
@@ -416,9 +558,16 @@ export interface components {
             data?: components["schemas"]["ReviewCommentDto"];
             success?: boolean;
         };
+        GenericResponseString: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: string;
+            success?: boolean;
+        };
         MineDto: {
-            email: string;
             nickname: string;
+            email: string;
             /** Format: int32 */
             gender?: number;
             /** Format: date */
@@ -435,49 +584,51 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
-        GenericResponseString: {
+        NotificationDTO: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            memberId?: number;
+            /** Format: int64 */
+            reviewId?: number;
+            /** Format: int64 */
+            reviewComment?: number;
+            content?: string;
+            check?: boolean;
+        };
+        GenericResponseNotificationDTO: {
             /** Format: date-time */
             timestamp?: string;
             message?: string;
-            data?: string;
+            data?: components["schemas"]["NotificationDTO"];
             success?: boolean;
         };
         LoginDto: {
             password: string;
             username: string;
         };
-        FavoriteDTO: {
-            memberUsername?: string;
+        ChallengeDto: {
+            name: string;
+            content: string;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            /** @enum {string} */
+            status?: "WAITING" | "START" | "REFUNDING" | "END";
             /** Format: int64 */
-            bookId?: number;
+            totalDeposit?: number;
         };
-        GenericResponseListReviewsDTO: {
+        GenericResponseChallengeDto: {
             /** Format: date-time */
             timestamp?: string;
             message?: string;
-            data?: components["schemas"]["ReviewsDTO"][];
+            data?: components["schemas"]["ChallengeDto"];
             success?: boolean;
         };
-        GenericResponseListReviewCommentDto: {
-            /** Format: date-time */
-            timestamp?: string;
-            message?: string;
-            data?: components["schemas"]["ReviewCommentDto"][];
-            success?: boolean;
-        };
-        BookSimpleDTO: {
+        DepositDto: {
             /** Format: int64 */
-            id?: number;
-            title?: string;
-            author?: string;
-            image?: string;
-        };
-        GenericResponseListBookSimpleDTO: {
-            /** Format: date-time */
-            timestamp?: string;
-            message?: string;
-            data?: components["schemas"]["BookSimpleDTO"][];
-            success?: boolean;
+            deposit: number;
         };
         BookDTO: {
             /** Format: int64 */
@@ -486,8 +637,118 @@ export interface components {
             author?: string;
             description?: string;
             image?: string;
+            isbn?: string;
             /** Format: int32 */
             favoriteCount?: number;
+        };
+        GenericResponsePageReviewsDTO: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["PageReviewsDTO"];
+            success?: boolean;
+        };
+        PageReviewsDTO: {
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["ReviewsDTO"][];
+            /** Format: int32 */
+            number?: number;
+            sort?: components["schemas"]["Sortnull"];
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["Pageablenull"];
+            empty?: boolean;
+        };
+        Pageablenull: {
+            /** Format: int64 */
+            offset?: number;
+            sort?: components["schemas"]["Sortnull"];
+            paged?: boolean;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            unpaged?: boolean;
+        };
+        Sortnull: {
+            empty?: boolean;
+            sorted?: boolean;
+            unsorted?: boolean;
+        };
+        GenericResponseListReviewCommentDto: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["ReviewCommentDto"][];
+            success?: boolean;
+        };
+        GenericResponseListReviewsDTO: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["ReviewsDTO"][];
+            success?: boolean;
+        };
+        GenericResponseListNotificationDTO: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["NotificationDTO"][];
+            success?: boolean;
+        };
+        FollowResponseDto: {
+            username?: string;
+            nickname?: string;
+            /** Format: int64 */
+            followerCount?: number;
+            /** Format: int64 */
+            followingCount?: number;
+        };
+        GenericResponseListFollowResponseDto: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["FollowResponseDto"][];
+            success?: boolean;
+        };
+        GenericResponseMineDto: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["MineDto"];
+            success?: boolean;
+        };
+        GenericResponsePageBookDTO: {
+            /** Format: date-time */
+            timestamp?: string;
+            message?: string;
+            data?: components["schemas"]["PageBookDTO"];
+            success?: boolean;
+        };
+        PageBookDTO: {
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["BookDTO"][];
+            /** Format: int32 */
+            number?: number;
+            sort?: components["schemas"]["Sortnull"];
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["Pageablenull"];
+            empty?: boolean;
         };
         GenericResponseBookDTO: {
             /** Format: date-time */
@@ -508,13 +769,60 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    putReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reviewId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewsDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseReviewsDTO"];
+                };
+            };
+        };
+    };
+    deleteReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reviewId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseReviewsDTO"];
+                };
+            };
+        };
+    };
     recommendReview: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 reviewId: number;
-                memberId: number;
             };
             cookie?: never;
         };
@@ -588,7 +896,6 @@ export interface operations {
             path: {
                 reviewId: number;
                 id: number;
-                memberId: number;
             };
             cookie?: never;
         };
@@ -605,38 +912,12 @@ export interface operations {
             };
         };
     };
-    putReviews: {
+    notificationCheck: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReviewsDTO"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseReviewsDTO"];
-                };
-            };
-        };
-    };
-    deleteReviews: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
+                notificationId: number;
             };
             cookie?: never;
         };
@@ -648,7 +929,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseReviewsDTO"];
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseString"];
+                };
+            };
+        };
+    };
+    notificationDelete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notificationId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseString"];
                 };
             };
         };
@@ -668,7 +971,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseMemberDto"];
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseMineDto"];
                 };
             };
         };
@@ -747,7 +1050,10 @@ export interface operations {
     };
     getReviews: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -760,7 +1066,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListReviewsDTO"];
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponsePageReviewsDTO"];
                 };
             };
         };
@@ -837,6 +1143,30 @@ export interface operations {
             };
         };
     };
+    createNotification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseNotificationDTO"];
+                };
+            };
+        };
+    };
     join: {
         parameters: {
             query?: never;
@@ -861,12 +1191,32 @@ export interface operations {
             };
         };
     };
+    followOrUnfollow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseString"];
+                };
+            };
+        };
+    };
     logout: {
         parameters: {
             query?: never;
-            header: {
-                Authorization: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -907,36 +1257,12 @@ export interface operations {
             };
         };
     };
-    favoriteBook: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FavoriteDTO"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseString"];
-                };
-            };
-        };
-    };
-    getUserReviews: {
+    validation: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                userId: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -948,7 +1274,83 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListReviewsDTO"];
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseChallengeDto"];
+                };
+            };
+        };
+    };
+    join_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DepositDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseChallengeDto"];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChallengeDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseChallengeDto"];
+                };
+            };
+        };
+    };
+    favoriteBook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                isbn: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseString"];
                 };
             };
         };
@@ -979,9 +1381,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                userId: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -993,6 +1393,26 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["GenericResponseListReviewCommentDto"];
+                };
+            };
+        };
+    };
+    getUserReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListReviewsDTO"];
                 };
             };
         };
@@ -1001,9 +1421,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                userId: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -1019,10 +1437,101 @@ export interface operations {
             };
         };
     };
-    searchTitleBooks: {
+    getBookIdReviews: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                bookId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponsePageReviewsDTO"];
+                };
+            };
+        };
+    };
+    getUserIdNotification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListNotificationDTO"];
+                };
+            };
+        };
+    };
+    getFollowings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListFollowResponseDto"];
+                };
+            };
+        };
+    };
+    getFollowers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListFollowResponseDto"];
+                };
+            };
+        };
+    };
+    searchBooks: {
         parameters: {
             query: {
-                title: string;
+                query: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -1036,12 +1545,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListBookSimpleDTO"];
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponsePageBookDTO"];
                 };
             };
         };
     };
-    searchDetailBook: {
+    searchDetailBooks: {
         parameters: {
             query?: never;
             header?: never;
@@ -1063,11 +1572,11 @@ export interface operations {
             };
         };
     };
-    searchAllBooks: {
+    getFavoriteBooks: {
         parameters: {
             query?: {
-                sortBy?: string;
-                direction?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -1081,27 +1590,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListBookSimpleDTO"];
-                };
-            };
-        };
-    };
-    searchFavoriteBooks: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["GenericResponseListBookSimpleDTO"];
+                    "application/json;charset=UTF-8": components["schemas"]["GenericResponsePageBookDTO"];
                 };
             };
         };
