@@ -24,7 +24,7 @@ public class RankingService {
     private final FavoriteRepository favoriteRepository;
     private final ReviewRepository reviewRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private static final String WEEKLY_RANKING_KEY = "weekly_book_ranking";
+    private static final String WEEKLY_BOOKS_RANKING_KEY = "weekly_books_ranking";
 
     public void updateWeeklyRanking(String rankingKey, List<Object[]> favoriteCounts, List<Object[]> reviewCounts) {
         Map<Long, Integer> favoriteMap = favoriteCounts.stream()
@@ -72,5 +72,16 @@ public class RankingService {
         }
 
         return rankingList;
+    }
+
+    public void updateWeeklyBooksRanking(LocalDateTime start, LocalDateTime end) {
+        List<Object[]> favoriteCounts = favoriteRepository.findFavoriteCounts(start, end);
+        List<Object[]> reviewCounts = reviewRepository.findReviewCounts(start, end);
+
+        updateWeeklyRanking(WEEKLY_BOOKS_RANKING_KEY, favoriteCounts, reviewCounts);
+    }
+
+    public List<Map<String, Object>> getWeeklyBookRanking() {
+        return getWeeklyRanking(WEEKLY_BOOKS_RANKING_KEY);
     }
 }
