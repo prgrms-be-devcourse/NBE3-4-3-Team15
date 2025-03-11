@@ -29,7 +29,6 @@ public class RankingController {
 
     private final RankingService rankingService;
 
-
     @GetMapping("/weekly/book")
     @Operation(summary = "주간 인기 도서 랭킹")
     public ResponseEntity<List<Map<String, Object>>> getWeeklyBookRanking() {
