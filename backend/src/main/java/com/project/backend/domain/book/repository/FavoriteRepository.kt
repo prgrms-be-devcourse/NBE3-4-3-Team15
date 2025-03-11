@@ -62,6 +62,16 @@ interface FavoriteRepository : JpaRepository<Favorite, FavoriteId> {
     @Query("SELECT f.book.id FROM Favorite f WHERE f.member.id = :memberId")
     fun findBookIdsByMemberId(@Param("memberId") memberId: Long): List<Long>
 
+    /**
+     * 특정 기간 동안 등록된 찜 수를 도서별로 집계하여 조회하는 메서드
+     *
+     * @param start 조회 시작 날짜
+     * @param end 조회 종료 날짜
+     * @return 각 도서의 ID와 해당 기간 동안 추가된 즐겨찾기 개수를 포함한 리스트
+     *
+     * @author 김남우
+     * @since 2025.03.06
+     */
     @Query("SELECT f.book.id, COUNT(f.id) FROM Favorite f WHERE f.favoritedAt BETWEEN :start AND :end GROUP BY f.book.id")
     fun findFavoriteCounts(
         @Param("start") start: LocalDateTime,
