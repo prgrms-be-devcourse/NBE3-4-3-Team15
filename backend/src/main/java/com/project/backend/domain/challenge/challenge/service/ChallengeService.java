@@ -62,6 +62,7 @@ public class ChallengeService {
 
         entryService.join(challenge, member, deposit);
         challenge.plusDeposit(deposit);
+        member.plusDeposit(deposit);
 
         return challenge;
     }
@@ -80,6 +81,7 @@ public class ChallengeService {
             Entry entry = entryService.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
 
             challenge.minusDeposit(entry.getDeposit());
+            member.minusDeposit(entry.getDeposit());
             entryService.quit(entry);
         } else {
             throw new ChallengeException(

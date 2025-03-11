@@ -6,18 +6,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * 챌린지 스케줄러
+ *
+ * @author 손진영
+ * @since 2025년 3월 4일
+ */
 @Component
 @RequiredArgsConstructor
 public class ChallengeScheduler {
     private final ChallengeService challengeService;
     private final RewardService rewardService;
 
-    @Scheduled(cron = "0 22 16 * * ?")
+    /**
+     * 챌린지 상태 업데이트
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
     public void updateChallengeStatus() {
         challengeService.updateChallengeStatus();
     }
 
-    @Scheduled(cron = "0 23 16 * * ?")
+    /**
+     * 보상 처리
+     */
+    @Scheduled(cron = "0 20 1 * * ?")
     public void updateReward() {
         rewardService.processRewards();
     }

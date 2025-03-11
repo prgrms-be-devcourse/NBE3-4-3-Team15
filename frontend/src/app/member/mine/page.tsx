@@ -4,6 +4,7 @@ import client from "@/lib/client";
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import type { components } from "@/lib/backend/schema";
+import { useRouter } from "next/navigation";
 
 type MineDto = components["schemas"]["MineDto"];
 
@@ -20,6 +21,7 @@ export default function Mine() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 변경 모달 상태
   const [currentPassword, setCurrentPassword] = useState(""); // 비밀번호 상태
   const [newPassword, setNewPassword] = useState(""); // 새 비밀번호 상태
+  const router = useRouter();
 
   // 회원 정보 조회
   const getUserProfile = async () => {
@@ -243,6 +245,12 @@ export default function Mine() {
                           onClick={passwordEdit}
                         >
                           비밀번호 변경
+                        </button>
+                        <button
+                          className="btn btn-secondary mt-2"
+                          onClick={() => router.push("/member/mine/challenge")}
+                        >
+                          챌린지
                         </button>
                       </div>
                     </>

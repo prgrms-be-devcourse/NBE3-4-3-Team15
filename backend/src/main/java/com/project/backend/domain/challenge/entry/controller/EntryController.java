@@ -20,6 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 엔트리 컨트롤러
+ *
+ * @author 손진영
+ * @since 2025년 3월 4일
+ */
 @Tag(name = "EntryController", description = "엔트리 컨트롤러")
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +36,13 @@ public class EntryController {
     private final MemberService memberService;
     private final EntryService entryService;
 
+    /**
+     * 챌린지 ID로 참가 기록 조회
+     *
+     * @param user 인증된 사용자 정보
+     * @param id   챌린지 ID
+     * @return 참가 기록 정보
+     */
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<EntryDto>> item(
             @AuthenticationPrincipal CustomUserDetails user,
@@ -44,6 +57,12 @@ public class EntryController {
         ));
     }
 
+    /**
+     * 회원의 참가 기록 목록 조회
+     *
+     * @param user 인증된 사용자 정보
+     * @return 회원의 참가 기록 목록
+     */
     @GetMapping("/mine")
     public ResponseEntity<GenericResponse<List<EntryDto>>> mine(
             @AuthenticationPrincipal CustomUserDetails user
@@ -60,9 +79,15 @@ public class EntryController {
         ));
     }
 
+    /**
+     * 회원의 환급 목록 조회
+     *
+     * @param user 인증된 사용자 정보
+     * @return 회원의 환급 목록
+     */
     @GetMapping("/mine/refunds")
     public ResponseEntity<GenericResponse<List<RefundsDto>>> myRefunds(
-        @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
         Member member = memberService.getMemberByUsername(user.getUsername());
         List<RefundsDto> refundsDtos = entryService.findByMemberId(member.getId())

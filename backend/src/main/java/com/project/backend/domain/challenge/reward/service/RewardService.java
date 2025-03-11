@@ -1,10 +1,11 @@
 package com.project.backend.domain.challenge.reward.service;
 
-import com.project.backend.domain.challenge.attendance.service.AttendanceService;
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
 import com.project.backend.domain.challenge.challenge.service.ChallengeService;
 import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.challenge.entry.service.EntryService;
+import com.project.backend.domain.member.entity.Member;
+import com.project.backend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,14 +14,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 보상 서비스
+ *
+ * @author 손진영
+ * @since 2025년 3월 4일
+ */
 @Service
 @RequiredArgsConstructor
 public class RewardService {
 
     private final ChallengeService challengeService;
     private final EntryService entryService;
-    private final AttendanceService attendanceService;
+    private final MemberService memberService;
 
+    /**
+     * 보상 처리 (환불 진행 중인 챌린지에 대해)
+     */
     @Transactional
     public void processRewards() {
         List<Challenge> challenges = challengeService.findChallengesInRefundProgress();
@@ -29,6 +39,11 @@ public class RewardService {
             refundInProgress(challenge.getId());
     }
 
+    /**
+     * 환불 및 보상 처리 (챌린지 ID 기준)
+     *
+     * @param challengeId 챌린지 ID
+     */
     private void refundInProgress(Long challengeId) {
         // 1. 챌린지 정보 가져오기
         Challenge challenge = challengeService.getChallenge(challengeId);
@@ -52,12 +67,19 @@ public class RewardService {
         challenge.setStatus(Challenge.ChallengeStatus.REFUNDING);
     }
 
+    /**
+     * 참가 기록을 참여율에 따라 성공, 부분 성공, 실패로 그룹화
+     *
+     * @param entries 참가 기록 목록
+     * @return 그룹화된 참가 기록
+     */
     private Map<String, List<Entry>> groupEntriesByParticipation(List<Entry> entries) {
         return entries.stream().peek(entry -> {
                     double rate = entry.getRate();
                     if (rate >= 80) {
                         entry.setRefundAmount(entry.getDeposit());
                         entry.setRefunded(true);
+                        entry.getMember().minusDeposit(entry.getDeposit());
                     }
                 })
                 .collect(Collectors.groupingBy(entry -> {
@@ -69,6 +91,12 @@ public class RewardService {
                 }));
     }
 
+    /**
+     * 실패한 참가 기록의 패널티 금액 계산
+     *
+     * @param failedEntries 실패한 참가 기록 목록
+     * @return 총 패널티 금액
+     */
     private long calculatePenaltyAmount(List<Entry> failedEntries) {
         long totalPenalty = 0;
 
@@ -85,11 +113,19 @@ public class RewardService {
 
             entry.setRefundAmount(entry.getDeposit() - penaltyAmount);
             entry.setRefunded(true);
+            entry.getMember().minusDeposit(entry.getDeposit());
         }
 
         return totalPenalty;
     }
 
+    /**
+     * 성공한 참가 기록에 대한 보상 분배
+     *
+     * @param successfulEntries  성공한 참가 기록 목록
+     * @param totalPenaltyAmount 총 패널티 금액
+     * @param totalDeposit       챌린지 총 예치금
+     */
     private void distributeRewards(List<Entry> successfulEntries, long totalPenaltyAmount, long totalDeposit) {
         long companyAmount = totalPenaltyAmount;
         for (Entry entry : successfulEntries) {
@@ -99,10 +135,12 @@ public class RewardService {
             entry.setRewardAmount(rewardAmount);
             entry.setRefundAmount(entry.getDeposit() + rewardAmount);
             entry.setRefunded(true);
+            entry.getMember().minusDeposit(entry.getDeposit());
+
             companyAmount -= rewardAmount;
         }
 
-        //회사 돈
-        System.out.println("companyAmount = " + companyAmount);
+        Member member = memberService.getMemberByUsername("admin");
+        member.setDeposit(companyAmount);
     }
 }

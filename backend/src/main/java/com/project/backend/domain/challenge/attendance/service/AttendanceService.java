@@ -93,6 +93,13 @@ public class AttendanceService {
         }
     }
 
+    /**
+     * 출석 데이터 생성
+     *
+     * @param challenge 챌린지 정보
+     * @param member    회원 정보
+     * @return 생성된 출석 데이터 (Optional)
+     */
     public Optional<Attendance> createAttendance(Challenge challenge, Member member) {
 
         List<ReviewsDTO> todayReviews = findTodayReviews(member.getId());
@@ -143,14 +150,12 @@ public class AttendanceService {
         return Optional.empty();
     }
 
-    public List<Attendance> getAttendanceChallenge(Challenge challenge, Member member) {
-        return attendanceRepository.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
-    }
-
-    public List<Attendance> findByChallengeId(Long challengeId) {
-        return attendanceRepository.findByChallengeId(challengeId);
-    }
-
+    /**
+     * 오늘 작성한 리뷰 목록 조회
+     *
+     * @param memberId 회원 ID
+     * @return 오늘 작성한 리뷰 목록
+     */
     private List<ReviewsDTO> findTodayReviews(long memberId) {
         return Optional.ofNullable(reviewService.getUserReviews(memberId))
                 .orElse(Collections.emptyList())
@@ -159,6 +164,12 @@ public class AttendanceService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 오늘 작성한 리뷰 댓글 목록 조회
+     *
+     * @param memberId 회원 ID
+     * @return 오늘 작성한 리뷰 댓글 목록
+     */
     private List<ReviewCommentDto> findTodayComments(long memberId) {
         return Optional.ofNullable(reviewCommentService.findUserComment(memberId))
                 .orElse(Collections.emptyList())
@@ -167,6 +178,12 @@ public class AttendanceService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 참가 기록의 출석률 업데이트
+     *
+     * @param challenge 챌린지 정보
+     * @param member    회원 정보
+     */
     private void updateEntryRate(Challenge challenge, Member member) {
         Entry entry = entryService.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
 

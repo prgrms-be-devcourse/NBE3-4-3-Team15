@@ -5,6 +5,12 @@ import com.project.backend.domain.challenge.entry.entity.Entry;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 참가 기록 DTO
+ *
+ * @author 손진영
+ * @since 2025년 3월 4일
+ */
 @Getter
 @NoArgsConstructor
 public class EntryDto {

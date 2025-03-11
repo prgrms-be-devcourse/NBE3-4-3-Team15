@@ -20,6 +20,7 @@ import java.util.List;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -69,5 +70,13 @@ public class Member extends BaseEntity {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void plusDeposit(long deposit) {
+        this.deposit += deposit;
+    }
+
+    public void minusDeposit(long deposit) {
+        this.deposit -= deposit;
     }
 }
