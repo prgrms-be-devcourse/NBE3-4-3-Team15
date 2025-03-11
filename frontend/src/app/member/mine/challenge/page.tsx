@@ -43,7 +43,13 @@ export default function MyChallenges() {
   const handleValidation = async (id: number) => {
     try {
       const response = await client.POST(`/challenge/${id}/validation`);
-      alert(response.message || "출석 인증 성공!");
+
+      if (response.response.ok) {
+        alert(response.message || "출석 인증 성공!");
+        window.location.reload();
+      } else {
+        alert(response.error.message);
+      }
     } catch (error: any) {
       if (error.response?.data?.errorCode) {
         alert(`에러: ${error.response.data.errorCode}`);
