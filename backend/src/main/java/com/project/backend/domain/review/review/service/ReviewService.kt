@@ -290,7 +290,7 @@ class ReviewService(  private val reviewRepository: ReviewRepository,
      * @author shjung
      * @since 25. 3. 5.
      */
-    fun getBookIds(userId: Long?): List<Long> {
+    fun getBookIds(userId: Long): List<Long> {
         return reviewRepository.findAllByUserIdOrderByBookIdDesc(userId)
             .map{it.bookId}
             .take(3)
