@@ -10,4 +10,5 @@ public class RankingDTO {
     private String title;
     private String content;
     private double score;
+    private String image;
 }
