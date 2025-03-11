@@ -101,4 +101,14 @@ public class RankingService {
     public List<Map<String, Object>> getWeeklyReviewRanking() {
         return getWeeklyRanking(WEEKLY_REVIEWS_RANKING_KEY);
     }
+    public void updateDailyReviewsRanking(LocalDateTime start, LocalDateTime end) {
+        List<Object[]> recommendCounts = reviewRecommendationRepository.findReviewRecommendCounts(start, end);
+        List<Object[]> commentCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
+
+        updateRanking(DAILY_REVIEWS_RANKING_KEY, recommendCounts, commentCounts, 0.6, 0.4);
+    }
+
+    public List<Map<String, Object>> getDailyReviewsRanking() {
+        return getRanking(DAILY_REVIEWS_RANKING_KEY);
+    }
 }
