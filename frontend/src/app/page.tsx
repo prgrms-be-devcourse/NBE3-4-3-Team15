@@ -124,9 +124,31 @@ const Page = () => {
         />
       </div>
 
-      {/* 실시간 베스트셀러 TOP 100 */}
       <section className="px-6 py-4 flex gap-4">
-        <div className="absolute left-[1%] w-[75vw] bg-white p-4 rounded-lg shadow-md">
+        {/* 왼쪽: 주간 인기 도서 & 실시간 베스트셀러 */}
+        <div className="flex-1 space-y-6">
+          {/* 주간 인기 도서 TOP 10 */}
+          <div className="w-full bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-3">주간 인기 도서 TOP 10</h2>
+            <div className="grid grid-cols-5 gap-5">
+              {weeklyBooks.map((book) => (
+                <div
+                  key={book.rank}
+                  className="bg-gray-200 p-6 rounded-lg shadow w-full h-[120px] flex flex-col items-center justify-center"
+                >
+                <p className="font-semibold text-lg text-center">
+                  {book.rank}. {book.title}
+                </p>
+                <p className="font-semibold text-sm text-center text-gray-600">
+                  {book.score}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 실시간 베스트셀러 TOP 100 */}
+        <div className="w-full bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-3">
             실시간 베스트셀러 TOP 100{" "}
             <span className="text-sm text-gray-500">({updateTime})</span>
@@ -180,19 +202,20 @@ const Page = () => {
             </div>
           )}
         </div>
+      </div>
 
-        {/* 오른쪽 영역: 일간 급상승 리뷰와 주간 추천 리뷰 */}
-        <div className="absolute top-[160px] right-[1%] w-[20vw] space-y-6">
+        {/* 오른쪽: 일간 급상승 리뷰 & 주간 추천 리뷰 */}
+        <div className="w-[20vw] space-y-6">
           {/* 일간 급상승 리뷰 */}
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-3">
               일간 급상승 리뷰 TOP 5
             </h2>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {dailyReviews.map((review) => (
                 <div
-                  key={review.rank}
-                  className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
+                    key={review.rank}
+                    className="bg-gray-200 p-4 rounded-lg shadow w-full h-[100px] flex flex-col items-center justify-center"
                 >
                   <p className="font-semibold text-lg text-center">
                     {review.rank}. {review.title}
@@ -213,11 +236,11 @@ const Page = () => {
             <h2 className="text-xl font-semibold mb-3">
               주간 추천 리뷰 TOP 10
             </h2>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {weeklyReviews.map((review) => (
                 <div
-                  key={review.rank}
-                  className="bg-gray-200 p-6 rounded-lg shadow w-full h-[100px] flex items-center justify-center"
+                    key={review.rank}
+                    className="bg-gray-200 p-4 rounded-lg shadow w-full h-[100px] flex flex-col items-center justify-center"
                 >
                   <p className="font-semibold text-lg text-center">
                     {review.rank}. {review.title}
