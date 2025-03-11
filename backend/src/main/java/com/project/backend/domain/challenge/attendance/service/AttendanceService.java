@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- *
  * 출석 서비스
  *
  * @author 손진영
@@ -38,6 +37,13 @@ public class AttendanceService {
     private final ReviewCommentService reviewCommentService;
     private final EntryService entryService;
 
+    /**
+     * 오늘 출석 여부 확인
+     *
+     * @param challengeId 챌린지 ID
+     * @param memberId    회원 ID
+     * @return 출석 여부
+     */
     public boolean checkTodayAttendance(long challengeId, long memberId) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().plusDays(1).atStartOfDay().minusNanos(1);
@@ -47,10 +53,22 @@ public class AttendanceService {
         return op.isPresent();
     }
 
+    /**
+     * 출석 데이터 저장
+     *
+     * @param attendance 출석 데이터
+     * @return 저장된 출석 데이터
+     */
     public Attendance save(Attendance attendance) {
         return attendanceRepository.save(attendance);
     }
 
+    /**
+     * 출석 인증 및 처리
+     *
+     * @param challenge 챌린지 정보
+     * @param member    회원 정보
+     */
     public void validateAttendance(Challenge challenge, Member member) {
 
         if (!checkTodayAttendance(challenge.getId(), member.getId())) {
@@ -62,13 +80,11 @@ public class AttendanceService {
                         ChallengeErrorCode.DAILY_VERIFICATION.getErrorCode(),
                         ChallengeErrorCode.DAILY_VERIFICATION.getMessage()
                 );
-            }
-            else {
+            } else {
                 save(opAttendance.get());
                 updateEntryRate(challenge, member);
             }
-        }
-        else {
+        } else {
             throw new ChallengeException(
                     ChallengeErrorCode.ALREADY_VALID.getStatus(),
                     ChallengeErrorCode.ALREADY_VALID.getErrorCode(),

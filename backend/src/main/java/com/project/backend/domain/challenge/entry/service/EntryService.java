@@ -76,4 +76,8 @@ public class EntryService {
         }
         return entries;
     }
+
+    public void quit(Entry entry) {
+        entryRepository.delete(entry);
+    }
 }

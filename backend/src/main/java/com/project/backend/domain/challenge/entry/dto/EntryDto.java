@@ -1,5 +1,6 @@
 package com.project.backend.domain.challenge.entry.dto;
 
+import com.project.backend.domain.challenge.challenge.dto.ChallengeDto;
 import com.project.backend.domain.challenge.entry.entity.Entry;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EntryDto {
     private long id;
-    private long challengeId;
     private long memberId;
+    private ChallengeDto challenge;
     private long deposit;
     private long totalDeposit;
     private boolean isActive;
@@ -20,7 +21,7 @@ public class EntryDto {
 
     public EntryDto(Entry entry) {
         this.id = entry.getId();
-        this.challengeId = entry.getChallenge().getId();
+        this.challenge = new ChallengeDto(entry.getChallenge());
         this.memberId = entry.getMember().getId();
         this.deposit = entry.getDeposit();
         this.totalDeposit = entry.getChallenge().getTotalDeposit();

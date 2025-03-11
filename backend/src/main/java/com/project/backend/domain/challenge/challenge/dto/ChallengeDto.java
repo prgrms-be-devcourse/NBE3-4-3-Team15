@@ -8,8 +8,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
+/**
+ * 챌린지 DTO
+ *
+ * @author 손진영
+ * @since 2025년 3월 4일
+ */
 @Getter
 @NoArgsConstructor
 public class ChallengeDto {
@@ -25,10 +31,10 @@ public class ChallengeDto {
     private String content;
 
     @NotNull(message = "날짜를 지정해야 합니다.")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @NotNull(message = "날짜를 지정해야 합니다.")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     private Challenge.ChallengeStatus status;
 
@@ -38,8 +44,8 @@ public class ChallengeDto {
         this.id = challenge.getId();
         this.name = challenge.getName();
         this.content = challenge.getContent();
-        this.startDate = challenge.getStartDate();
-        this.endDate = challenge.getEndDate();
+        this.startDate = challenge.getStartDate().toLocalDate();
+        this.endDate = challenge.getEndDate().toLocalDate();
         this.status = challenge.getStatus();
         this.totalDeposit = challenge.getTotalDeposit();
     }

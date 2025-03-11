@@ -18,13 +18,20 @@ export default function ClientPage() {
 
   return (
     <div>
-      <div>
-        <span>{book.title}</span>
-        <span>{book.image}</span>
-        <span>{book.author}</span>
-        <span>{book.isbn}</span>
-      </div>
-      <div></div>
+      {true ? (
+        <div>Loading...</div>
+      ) : (
+        <div>
+          {book && (
+            <>
+              <span>{book.title}</span>
+              <span>{book.image}</span>
+              <span>{book.author}</span>
+              <span>{book.isbn}</span>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

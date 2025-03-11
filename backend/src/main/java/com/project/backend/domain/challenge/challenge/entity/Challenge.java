@@ -50,8 +50,22 @@ public class Challenge extends BaseEntity {
         END
     }
 
-    public void addDeposit(long deposit) {
+    /**
+     * 총 예치금 증가
+     *
+     * @param deposit 증가할 예치금
+     */
+    public void plusDeposit(long deposit) {
         totalDeposit += deposit;
+    }
+
+    /**
+     * 총 예치금 감소
+     *
+     * @param deposit 감소할 예치금
+     */
+    public void minusDeposit(long deposit) {
+        totalDeposit -= deposit;
     }
 
     public void updateStatus() {
@@ -66,6 +80,11 @@ public class Challenge extends BaseEntity {
         }
     }
 
+    /**
+     * 챌린지 기간의 총 일수
+     *
+     * @return 총 일수
+     */
     public int getTotalDays() {
         return (int) (endDate.toLocalDate().toEpochDay() -
                 startDate.toLocalDate().toEpochDay() + 1);

@@ -4,6 +4,7 @@ import com.project.backend.domain.challenge.attendance.service.AttendanceService
 import com.project.backend.domain.challenge.challenge.dto.ChallengeDto;
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
 import com.project.backend.domain.challenge.challenge.repository.ChallengeRepository;
+import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.challenge.entry.service.EntryService;
 import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
 import com.project.backend.domain.challenge.exception.ChallengeException;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,12 @@ public class ChallengeService {
     private final EntryService entryService;
     private final AttendanceService attendanceService;
 
+    /**
+     * ID로 챌린지 조회
+     *
+     * @param id 챌린지 ID
+     * @return 챌린지 정보
+     */
     public Challenge getChallenge(long id) {
         return challengeRepository.findById(id)
                 .orElseThrow(() -> new ChallengeException(
@@ -41,22 +49,61 @@ public class ChallengeService {
                 ));
     }
 
-    public Challenge join(long id, CustomUserDetails user, long deposit) {
-        Challenge challenge = getChallenge(id);
-        Member member = memberService.getMemberByUsername(user.getUsername());
+    /**
+     * 챌린지 참가
+     *
+     * @param challengeId 챌린지 ID
+     * @param member      회원 정보
+     * @param deposit     예치금
+     * @return 참가한 챌린지 정보
+     */
+    public Challenge join(long challengeId, Member member, long deposit) {
+        Challenge challenge = getChallenge(challengeId);
 
         entryService.join(challenge, member, deposit);
-        challenge.addDeposit(deposit);
+        challenge.plusDeposit(deposit);
 
         return challenge;
     }
 
+    /**
+     * 챌린지 참가 취소
+     *
+     * @param challengeId 챌린지 ID
+     * @param member      회원 정보
+     * @return 참가 취소한 챌린지 정보
+     */
+    public Challenge quit(long challengeId, Member member) {
+        Challenge challenge = getChallenge(challengeId);
+
+        if (challenge.getStatus().equals(Challenge.ChallengeStatus.WAITING)) {
+            Entry entry = entryService.findByChallengeIdAndMemberId(challenge.getId(), member.getId());
+
+            challenge.minusDeposit(entry.getDeposit());
+            entryService.quit(entry);
+        } else {
+            throw new ChallengeException(
+                    ChallengeErrorCode.CANCEL_IMPOSSIBLE.getStatus(),
+                    ChallengeErrorCode.CANCEL_IMPOSSIBLE.getErrorCode(),
+                    ChallengeErrorCode.CANCEL_IMPOSSIBLE.getMessage()
+            );
+        }
+
+        return challenge;
+    }
+
+    /**
+     * 챌린지 생성
+     *
+     * @param challengeDto 챌린지 정보
+     * @return 생성된 챌린지 정보
+     */
     public Challenge create(ChallengeDto challengeDto) {
         Challenge challenge = Challenge.builder()
                 .name(challengeDto.getName())
                 .content(challengeDto.getContent())
-                .startDate(challengeDto.getStartDate())
-                .endDate(challengeDto.getEndDate())
+                .startDate(challengeDto.getStartDate().atStartOfDay())
+                .endDate(challengeDto.getEndDate().atTime(LocalTime.MAX))
                 .totalDeposit(0)
                 .build();
 
@@ -64,7 +111,13 @@ public class ChallengeService {
         return challengeRepository.save(challenge);
     }
 
-
+    /**
+     * 챌린지 인증
+     *
+     * @param id   챌린지 ID
+     * @param user 인증된 사용자 정보
+     * @return 인증된 챌린지 정보
+     */
     public Challenge validation(long id, CustomUserDetails user) {
         Challenge challenge = getChallenge(id);
         Member member = memberService.getMemberByUsername(user.getUsername());
@@ -74,10 +127,18 @@ public class ChallengeService {
         return challenge;
     }
 
+    /**
+     * 최신 챌린지 조회 (Optional)
+     *
+     * @return 최신 챌린지 정보
+     */
     public Optional<Challenge> findLatest() {
         return challengeRepository.findFirstByOrderByIdDesc();
     }
 
+    /**
+     * 모든 챌린지 상태 업데이트
+     */
     @Transactional
     public void updateChallengeStatus() {
         challengeRepository.updateChallengeStatuses();
@@ -85,14 +146,23 @@ public class ChallengeService {
         entryService.updateIsActiveForEndedChallenges();
     }
 
+    /**
+     * 환불 진행 중인 챌린지 목록 조회
+     *
+     * @return 환불 진행 중인 챌린지 목록
+     */
     public List<Challenge> findChallengesInRefundProgress() {
         return challengeRepository.findChallengesInRefundProgress();
     }
 
+    /**
+     * 상태별 챌린지 목록 조회
+     *
+     * @param status 챌린지 상태
+     * @return 상태별 챌린지 목록
+     */
     public List<ChallengeDto> findByStatus(Challenge.ChallengeStatus status) {
-        System.out.println("status = " + status);
         List<Challenge> challenges = challengeRepository.findByStatus(status);
-        System.out.println(challenges);
 
         if (challenges.isEmpty()) {
             throw new ChallengeException(

@@ -4,6 +4,9 @@ import com.project.backend.domain.challenge.challenge.dto.ChallengeDto;
 import com.project.backend.domain.challenge.challenge.dto.DepositDto;
 import com.project.backend.domain.challenge.challenge.entity.Challenge;
 import com.project.backend.domain.challenge.challenge.service.ChallengeService;
+import com.project.backend.domain.challenge.exception.ChallengeErrorCode;
+import com.project.backend.domain.challenge.exception.ChallengeException;
+import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
 import com.project.backend.global.authority.CustomUserDetails;
 import com.project.backend.global.response.GenericResponse;
@@ -22,7 +25,7 @@ import java.util.List;
  * 챌린지 컨트롤러
  *
  * @author 손진영
- * @since 25. 3. 04.
+ * @since 2025년 3월 4일
  */
 @Tag(name = "ChallengeController", description = "챌린지 컨트롤러")
 @RestController
@@ -34,6 +37,12 @@ public class ChallengeController {
     private final ChallengeService challengeService;
     private final MemberService memberService;
 
+    /**
+     * 챌린지 목록 조회
+     *
+     * @param status 챌린지 상태 (기본값: WAITING)
+     * @return 챌린지 목록
+     */
     @GetMapping
     public ResponseEntity<GenericResponse<List<ChallengeDto>>> items(
             @RequestParam(name = "status", defaultValue = "WAITING") Challenge.ChallengeStatus status
@@ -46,6 +55,12 @@ public class ChallengeController {
         ));
     }
 
+    /**
+     * 챌린지 상세 조회
+     *
+     * @param id 챌린지 ID
+     * @return 챌린지 정보
+     */
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<ChallengeDto>> item(
             @PathVariable long id
@@ -58,10 +73,26 @@ public class ChallengeController {
         ));
     }
 
+    /**
+     * 챌린지 생성
+     *
+     * @param challengeDto 챌린지 정보
+     * @param user         인증된 사용자 정보
+     * @return 생성된 챌린지 정보
+     */
     @PostMapping("/create")
     public ResponseEntity<GenericResponse<ChallengeDto>> create(
-            @RequestBody @Valid ChallengeDto challengeDto
+            @RequestBody @Valid ChallengeDto challengeDto,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
+        if (!user.getUsername().equals("admin")) {
+            throw new ChallengeException(
+                    ChallengeErrorCode.CREATE_CHALLENGE.getStatus(),
+                    ChallengeErrorCode.CREATE_CHALLENGE.getErrorCode(),
+                    ChallengeErrorCode.CREATE_CHALLENGE.getMessage()
+            );
+        }
+
         Challenge challenge = challengeService.create(challengeDto);
 
         return ResponseEntity.ok(
@@ -72,6 +103,14 @@ public class ChallengeController {
         );
     }
 
+    /**
+     * 챌린지 참가
+     *
+     * @param id         챌린지 ID
+     * @param user       인증된 사용자 정보
+     * @param depositDto 예치금 정보
+     * @return 참가한 챌린지 정보
+     */
     @PostMapping("{id}/join")
     @Transactional
     public ResponseEntity<GenericResponse<ChallengeDto>> join(
@@ -79,8 +118,8 @@ public class ChallengeController {
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestBody DepositDto depositDto
     ) {
-
-        Challenge challenge = challengeService.join(id, user, depositDto.getDeposit());
+        Member member = memberService.getMemberByUsername(user.getUsername());
+        Challenge challenge = challengeService.join(id, member, depositDto.getDeposit());
 
         return ResponseEntity.ok(GenericResponse.of(
                 new ChallengeDto(challenge),
@@ -88,6 +127,35 @@ public class ChallengeController {
         ));
     }
 
+    /**
+     * 챌린지 참가 취소
+     *
+     * @param id   챌린지 ID
+     * @param user 인증된 사용자 정보
+     * @return 참가 취소한 챌린지 정보
+     */
+    @DeleteMapping("{id}/join")
+    @Transactional
+    public ResponseEntity<GenericResponse<ChallengeDto>> quit(
+            @PathVariable long id,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Member member = memberService.getMemberByUsername(user.getUsername());
+        Challenge challenge = challengeService.quit(id, member);
+
+        return ResponseEntity.ok(GenericResponse.of(
+                new ChallengeDto(challenge),
+                "%s 챌린지 취소 완료".formatted(challenge.getName())
+        ));
+    }
+
+    /**
+     * 챌린지 인증
+     *
+     * @param id   챌린지 ID
+     * @param user 인증된 사용자 정보
+     * @return 인증된 챌린지 정보
+     */
     @PostMapping("{id}/validation")
     @Transactional
     public ResponseEntity<GenericResponse<ChallengeDto>> validation(

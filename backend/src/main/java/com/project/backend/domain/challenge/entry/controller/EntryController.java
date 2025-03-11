@@ -2,6 +2,7 @@ package com.project.backend.domain.challenge.entry.controller;
 
 import com.project.backend.domain.challenge.entry.dto.EntryDto;
 import com.project.backend.domain.challenge.entry.dto.RefundsDto;
+import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.challenge.entry.service.EntryService;
 import com.project.backend.domain.member.entity.Member;
 import com.project.backend.domain.member.service.MemberService;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +29,20 @@ public class EntryController {
 
     private final MemberService memberService;
     private final EntryService entryService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GenericResponse<EntryDto>> item(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @PathVariable long id
+    ) {
+        Member member = memberService.getMemberByUsername(user.getUsername());
+        Entry entry = entryService.findByChallengeIdAndMemberId(id, member.getId());
+
+        return ResponseEntity.ok(GenericResponse.of(
+                new EntryDto(entry),
+                "해당 챌린지 참가 확인"
+        ));
+    }
 
     @GetMapping("/mine")
     public ResponseEntity<GenericResponse<List<EntryDto>>> mine(
