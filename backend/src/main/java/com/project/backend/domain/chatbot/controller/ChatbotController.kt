@@ -3,7 +3,6 @@ package com.project.backend.domain.chatbot.controller
 import com.project.backend.domain.chatbot.dto.AnswerDTO
 import com.project.backend.domain.chatbot.service.ChatbotService
 import com.project.backend.domain.member.service.MemberService
-import com.project.backend.domain.review.review.service.ReviewService
 import com.project.backend.global.authority.CustomUserDetails
 import com.project.backend.global.response.GenericResponse
 import io.swagger.v3.oas.annotations.Operation
