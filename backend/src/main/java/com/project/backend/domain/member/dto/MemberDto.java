@@ -62,4 +62,9 @@ public class MemberDto extends MineDto {
     public Long getId(){
         return id;
     }
+
+    public String getUserNameK(){
+        return this.username;
+    }
+
 }

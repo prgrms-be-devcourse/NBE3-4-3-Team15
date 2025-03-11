@@ -92,4 +92,6 @@ public class Member extends BaseEntity {
     public Long getId() {
         return id;
     }
+
+    public String getUserNameK(){return this.username;}
 }
