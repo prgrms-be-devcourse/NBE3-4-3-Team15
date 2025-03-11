@@ -2,7 +2,6 @@ package com.project.backend.domain.member.service;
 
 import com.project.backend.domain.book.repository.BookRepository;
 import com.project.backend.domain.book.repository.FavoriteRepository;
-import com.project.backend.domain.follow.service.FollowService;
 import com.project.backend.domain.member.dto.LoginDto;
 import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.member.dto.MineDto;
@@ -12,7 +11,6 @@ import com.project.backend.domain.member.exception.MemberException;
 import com.project.backend.domain.member.repository.MemberRepository;
 import com.project.backend.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -237,5 +235,18 @@ public class MemberService {
                 ));
 
         return new MemberDto(member);
+    }
+
+    /**
+     * Username 기반 member 조회
+     *
+     * @param username
+     * @return MemberUsername
+     * @author 손진영
+     * @since 25.03.04
+     */
+    public Member getMemberByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new MemberException(NON_EXISTING_USERNAME));
     }
 }
