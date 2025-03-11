@@ -51,6 +51,7 @@ public class EntryController {
         Member member = memberService.getMemberByUsername(user.getUsername());
         Entry entry = entryService.findByChallengeIdAndMemberId(id, member.getId());
 
+
         return ResponseEntity.ok(GenericResponse.of(
                 new EntryDto(entry),
                 "해당 챌린지 참가 확인"

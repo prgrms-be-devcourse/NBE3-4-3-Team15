@@ -1,5 +1,6 @@
 package com.project.backend.domain.member.entity;
 
+import com.project.backend.domain.challenge.entry.entity.Entry;
 import com.project.backend.domain.follow.entity.Follow;
 import com.project.backend.domain.review.comment.entity.ReviewComment;
 import com.project.backend.domain.review.review.entity.Review;
