@@ -26,7 +26,7 @@ data class NotificationDTO(
                 isCheck = notification.isCheck,
                 content = notification.content,
                 notificationType = notification.notificationType,
-                createdAt = notification.getCreatedAtSafe()
+                createdAt = notification.createdAt // getter 없이 바로 접근 가능
             )
         }
     }

@@ -2,7 +2,7 @@ package com.project.backend.domain.review.comment.entity
 
 import com.project.backend.domain.member.entity.Member
 import com.project.backend.domain.review.review.entity.Review
-import com.project.backend.global.baseEntity.BaseEntity
+import com.project.backend.global.baseEntity.BaseEntityK
 import jakarta.persistence.*
 
 /**
@@ -35,4 +35,4 @@ class ReviewComment(
 
     @OneToMany(mappedBy = "parent", cascade = [CascadeType.ALL], orphanRemoval = true)
     var replies: MutableList<ReviewComment> = mutableListOf()  // 자식 댓글 (대댓글)
-) : BaseEntity()
+) : BaseEntityK()

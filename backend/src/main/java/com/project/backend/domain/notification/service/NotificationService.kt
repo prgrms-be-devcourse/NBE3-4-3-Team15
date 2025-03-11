@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class NotificationService(
@@ -36,7 +37,9 @@ class NotificationService(
             reviewCommentId = notificationDTO.reviewCommentId,
             isCheck = notificationDTO.isCheck,
             content = notificationDTO.content,
-            notificationType = notificationDTO.notificationType
+            notificationType = notificationDTO.notificationType,
+            createdAt = LocalDateTime.now(),
+            modifiedAt = LocalDateTime.now()
         )
 
         redisPublisher.publishToUser(notification.consumerMemberId, notification.content)

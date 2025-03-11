@@ -19,7 +19,8 @@ class Notification(
     var content: String,
 
     @Enumerated(EnumType.STRING)
-    val notificationType: NotificationType
+    val notificationType: NotificationType,
 
-    va
+    val createdAt:LocalDateTime,
+    var modifiedAt:LocalDateTime
 )
