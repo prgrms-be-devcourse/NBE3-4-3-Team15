@@ -2,19 +2,15 @@ package com.project.backend.domain.follow.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class FollowException extends RuntimeException {
-    private final FollowErrorCode followErrorCode;
+class FollowException(
+    private val followErrorCode: FollowErrorCode
+) : RuntimeException(followErrorCode.message) {
 
-    public FollowException(FollowErrorCode followErrorCode) {
-        super(followErrorCode.message);
-        this.followErrorCode = followErrorCode;
+    fun getStatus(): HttpStatus {
+        return followErrorCode.status
     }
 
-    public HttpStatus getStatus() {
-        return followErrorCode.status;
-    }
-
-    public String getCode() {
-        return followErrorCode.code;
+    fun getCode(): String {
+        return followErrorCode.code
     }
 }
