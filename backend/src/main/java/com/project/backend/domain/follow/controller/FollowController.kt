@@ -1,15 +1,12 @@
 package com.project.backend.domain.follow.controller;
 
-import com.project.backend.domain.follow.dto.FollowResponseDto;
-import com.project.backend.domain.follow.service.FollowService;
-import com.project.backend.global.authority.CustomUserDetails;
-import com.project.backend.global.response.GenericResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import com.project.backend.domain.follow.dto.FollowResponseDto
+import com.project.backend.domain.follow.service.FollowService
+import com.project.backend.global.authority.CustomUserDetails
+import com.project.backend.global.response.GenericResponse
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.*
 
 /**
  * 팔로우 기능을 처리하는 컨트롤러
@@ -18,11 +15,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/members")
-@RequiredArgsConstructor
-public class FollowController {
-
-    private final FollowService followService;
-
+class FollowController(
+    private val followService: FollowService
+) {
     /**
      * @param username 팔로우를 하고자 하는 회원 username
      * @param userDetails 로그인한 회원의 정보
@@ -30,14 +25,15 @@ public class FollowController {
      * @return 팔로우 성공 여부
      */
     @PostMapping("/{id}/follow")
-    public ResponseEntity<GenericResponse<String>> follow(
-            @PathVariable("id") String username,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+    fun follow(
+        @PathVariable("id") username: String,
+        @AuthenticationPrincipal userDetails: CustomUserDetails
+    ): ResponseEntity<GenericResponse<String>> {
 
-        System.out.println(username);
-        String message = followService.follow(userDetails.getUsername(), username);
+        println(username)
+        val message = followService.follow(userDetails.username, username)
 
-        return ResponseEntity.ok(GenericResponse.of(message));
+        return ResponseEntity.ok(GenericResponse.of(message))
     }
 
     /**
@@ -47,14 +43,15 @@ public class FollowController {
      * @return 언팔로우 성공 여부
      */
     @PostMapping("/{id}/unfollow")
-    public ResponseEntity<GenericResponse<String>> unFollow(
-            @PathVariable("id") String username,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+    fun unFollow(
+        @PathVariable("id") username: String,
+        @AuthenticationPrincipal userDetails: CustomUserDetails
+    ): ResponseEntity<GenericResponse<String>> {
 
-        System.out.println(username);
-        String message = followService.unFollow(userDetails.getUsername(), username);
+        println(username)
+        val message = followService.unFollow(userDetails.username, username)
 
-        return ResponseEntity.ok(GenericResponse.of(message));
+        return ResponseEntity.ok(GenericResponse.of(message))
     }
 
     /**
@@ -64,11 +61,12 @@ public class FollowController {
      * @return 회원 ID에 해당하는 팔로잉 목록
      */
     @GetMapping("/{id}/followings")
-    public ResponseEntity<GenericResponse<List<FollowResponseDto>>> getFollowings(
-            @PathVariable("id") String username) {
-        List<FollowResponseDto> followings = followService.getFollowings(username);
+    fun getFollowings(
+        @PathVariable("id") username: String
+    ): ResponseEntity<GenericResponse<List<FollowResponseDto>>> {
+        val followings = followService.getFollowings(username)
 
-        return ResponseEntity.ok(GenericResponse.of(followings, "팔로잉 목록 조회 성공"));
+        return ResponseEntity.ok(GenericResponse.of(followings, "팔로잉 목록 조회 성공"))
     }
 
     /**
@@ -78,10 +76,11 @@ public class FollowController {
      * @return 회원 ID에 해당하는 팔로워 목록
      */
     @GetMapping("/{id}/followers")
-    public ResponseEntity<GenericResponse<List<FollowResponseDto>>> getFollowers(
-            @PathVariable("id") String username) {
-        List<FollowResponseDto> followers = followService.getFollowers(username);
+    fun getFollowers(
+        @PathVariable("id") username: String
+    ): ResponseEntity<GenericResponse<List<FollowResponseDto>>> {
+        val followers = followService.getFollowers(username)
 
-        return ResponseEntity.ok(GenericResponse.of(followers,"팔로워 목록 조회 성공"));
+        return ResponseEntity.ok(GenericResponse.of(followers, "팔로워 목록 조회 성공"))
     }
 }
