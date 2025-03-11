@@ -131,8 +131,9 @@ public class RankingService {
             // 책 제목과 리뷰 내용 가져오기
             String title = bookRepository.findTitleById(itemId).orElse("제목 없음");
             String content = reviewRepository.findContentById(itemId).orElse("내용 없음");
+            String image = bookRepository.findImageById(itemId).orElse("제목 없음");
 
-            rankingList.add(new RankingDTO(rank, title, content, score));
+            rankingList.add(new RankingDTO(rank, title, content, score, image));
 
             prevScore = score;
             index++;
