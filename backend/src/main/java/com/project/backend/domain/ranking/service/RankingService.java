@@ -60,7 +60,12 @@ public class RankingService {
     }
 
     private void updateRankingInRedis(String rankingKey, List<Object[]> counts1, List<Object[]> counts2, double weight1, double weight2) {
+        redisTemplate.delete(rankingKey);
+
         Map<Long, Double> scores = new HashMap<>();
+
+        counts1 = counts1 != null ? counts1 : new ArrayList<>();
+        counts2 = counts2 != null ? counts2 : new ArrayList<>();
 
         counts1.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight1, Double::sum));
         counts2.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight2, Double::sum));
