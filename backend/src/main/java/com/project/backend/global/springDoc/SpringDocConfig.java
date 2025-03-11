@@ -38,4 +38,11 @@ public class SpringDocConfig {
                 .pathsToMatch("/review/**")
                 .build();
     }
+    @Bean
+    public GroupedOpenApi groupChatbot() {
+        return GroupedOpenApi.builder()
+                .group("chatbot")
+                .pathsToMatch("/chatbot/**")
+                .build();
+    }
 }
