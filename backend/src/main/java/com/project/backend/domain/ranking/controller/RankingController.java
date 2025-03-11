@@ -34,4 +34,11 @@ public class RankingController {
         List<Map<String, Object>> weeklyBookRanking = rankingService.getWeeklyBookRanking();
         return ResponseEntity.ok(weeklyBookRanking);
     }
+
+    @GetMapping("/weekly/review")
+    @Operation(summary = "주간 인기 리뷰 랭킹")
+    public ResponseEntity<List<Map<String, Object>>> getWeeklyReviewRanking() {
+        List<Map<String, Object>> weeklyReviewRanking = rankingService.getWeeklyReviewRanking();
+        return ResponseEntity.ok(weeklyReviewRanking);
+    }
 }
