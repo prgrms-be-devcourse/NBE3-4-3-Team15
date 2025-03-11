@@ -5,9 +5,9 @@ package com.project.backend.domain.follow.dto;
  * author: 이원재
  * date: 2025.01.31
  */
-public record FollowResponseDto(
-        String username,
-        String nickname,
-        Long followerCount,
-        Long followingCount
+data class FollowResponseDto(
+        val username: String,
+        val nickname: String,
+        val followerCount: Long,
+        val followingCount: Long
 ) {}

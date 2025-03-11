@@ -129,7 +129,7 @@ public class ReviewService {
 
 
         for(FollowResponseDto followDto: followers){
-            MemberDto follower = memberService.getMyProfile(followDto.username());  // 리뷰 작성자를 팔로우 하는 팔로워
+            MemberDto follower = memberService.getMyProfile(followDto.getUsername());  // 리뷰 작성자를 팔로우 하는 팔로워
             NotificationDTO notificationDTO = NotificationDTO.builder()
                     .producerMemberId(memberId)
                     .consumerMemberId(follower.getId())
