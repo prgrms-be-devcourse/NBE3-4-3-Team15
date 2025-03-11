@@ -52,4 +52,11 @@ public class SpringDocConfig {
                 .pathsToMatch("/chatbot/**")
                 .build();
     }
+    @Bean
+    public GroupedOpenApi groupChallenge() {
+        return GroupedOpenApi.builder()
+                .group("challenge")
+                .pathsToMatch("/challenge/**")
+                .build();
+    }
 }

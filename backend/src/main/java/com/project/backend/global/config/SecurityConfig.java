@@ -73,6 +73,9 @@ public class SecurityConfig {
                                 "rabbit/**",
                                 "notification/sse").permitAll()
 
+                        // 챌린지 조회 접근 허용
+                        .requestMatchers("/challenge", "/challenge/{id}").permitAll()
+
                         // h2-console, swagger 접근 허용
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()

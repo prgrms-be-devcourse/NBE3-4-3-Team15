@@ -19,6 +19,7 @@ import java.util.List;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,6 +43,8 @@ public class Member extends BaseEntity {
 
     private LocalDate birth;
 
+    private long deposit;
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewRecommendation> reviewRecommendations;
 
@@ -54,6 +57,9 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Follow> followings;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Entry> entries;
+
     public void updateMemberInfo(String email, int gender, String nickname, LocalDate birth) {
         this.email = email;
         this.gender = gender;
@@ -63,6 +69,14 @@ public class Member extends BaseEntity {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void plusDeposit(long deposit) {
+        this.deposit += deposit;
+    }
+
+    public void minusDeposit(long deposit) {
+        this.deposit -= deposit;
     }
 
     /**
@@ -77,4 +91,6 @@ public class Member extends BaseEntity {
     public Long getId() {
         return id;
     }
+
+    public String getUserNameK(){return this.username;}
 }
