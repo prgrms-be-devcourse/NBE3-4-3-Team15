@@ -1,10 +1,14 @@
 package com.project.backend.domain.ranking.service;
 
+import com.project.backend.domain.book.exception.BookErrorCode;
+import com.project.backend.domain.book.exception.BookException;
 import com.project.backend.domain.book.repository.FavoriteRepository;
 import com.project.backend.domain.ranking.common.RankingType;
 import com.project.backend.domain.ranking.exception.RankingErrorCode;
 import com.project.backend.domain.ranking.exception.RankingException;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
+import com.project.backend.domain.review.exception.ReviewErrorCode;
+import com.project.backend.domain.review.exception.ReviewException;
 import com.project.backend.domain.review.recommendation.repository.ReviewRecommendationRepository;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +46,14 @@ public class RankingService {
                 secondCounts = reviewRepository.findReviewCounts(start, end);
                 weight1 = 0.5;
                 weight2 = 0.5;
+                if (firstCounts.isEmpty()) { throw new BookException(BookErrorCode.NO_FAVORITE_BOOKS); }
+                if (secondCounts.isEmpty()) {
+                    throw new ReviewException(
+                            ReviewErrorCode.REVIEW_NOT_FOUND.getStatus(),
+                            ReviewErrorCode.REVIEW_NOT_FOUND.getErrorCode(),
+                            ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                    );
+                }
                 break;
 
             case WEEKLY_REVIEWS:
@@ -49,6 +61,20 @@ public class RankingService {
                 secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
                 weight1 = 0.7;
                 weight2 = 0.3;
+                if (firstCounts.isEmpty()) {
+                    throw new ReviewException(
+                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getStatus(),
+                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getErrorCode(),
+                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getMessage()
+                    );
+                }
+                if (secondCounts.isEmpty()) {
+                    throw new ReviewException(
+                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getStatus(),
+                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getErrorCode(),
+                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getMessage()
+                    );
+                }
                 break;
 
             case DAILY_REVIEWS:
@@ -56,6 +82,20 @@ public class RankingService {
                 secondCounts = reviewCommentRepository.findReviewCommentCounts(start, end);
                 weight1 = 0.6;
                 weight2 = 0.4;
+                if (firstCounts.isEmpty()) {
+                    throw new ReviewException(
+                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getStatus(),
+                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getErrorCode(),
+                            ReviewErrorCode.REVIEW_RECOMMENDATION_NOT_FOUND.getMessage()
+                    );
+                }
+                if (secondCounts.isEmpty()) {
+                    throw new ReviewException(
+                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getStatus(),
+                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getErrorCode(),
+                            ReviewErrorCode.REVIEW_COMMENT_NOT_FOUND.getMessage()
+                    );
+                }
                 break;
 
             default:
