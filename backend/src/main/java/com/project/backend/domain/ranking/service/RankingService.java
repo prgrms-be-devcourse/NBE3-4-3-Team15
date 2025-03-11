@@ -1,6 +1,9 @@
 package com.project.backend.domain.ranking.service;
 
 import com.project.backend.domain.book.repository.FavoriteRepository;
+import com.project.backend.domain.ranking.common.RankingType;
+import com.project.backend.domain.ranking.exception.RankingErrorCode;
+import com.project.backend.domain.ranking.exception.RankingException;
 import com.project.backend.domain.review.comment.repository.ReviewCommentRepository;
 import com.project.backend.domain.review.recommendation.repository.ReviewRecommendationRepository;
 import com.project.backend.domain.review.review.repository.ReviewRepository;
@@ -31,20 +34,24 @@ public class RankingService {
     private static final String WEEKLY_REVIEWS_RANKING_KEY = "weekly_reviews_ranking";
     private static final String DAILY_REVIEWS_RANKING_KEY = "daily_books_ranking";
 
-    public void updateRanking(String rankingKey, List<Object[]> Counts1, List<Object[]> Counts2, double weight1, double weight2) {
+
+
+
+
+    private void updateRankingInRedis(String rankingKey, List<Object[]> counts1, List<Object[]> counts2, double weight1, double weight2) {
         Map<Long, Double> scores = new HashMap<>();
 
-        Counts1.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight1, Double::sum));
-        Counts2.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight2, Double::sum));
+        counts1.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight1, Double::sum));
+        counts2.forEach(data -> scores.merge((Long) data[0], ((Long) data[1]) * weight2, Double::sum));
 
         scores.forEach((itemId, score) ->
                 redisTemplate.opsForZSet().add(rankingKey, String.valueOf(itemId), score)
         );
     }
 
-    public List<Map<String, Object>> getRanking(String rankingKey) {
+    public List<Map<String, Object>> getRanking(RankingType rankingType) {
         Set<ZSetOperations.TypedTuple<Object>> rankings = redisTemplate.opsForZSet()
-                .reverseRangeWithScores(rankingKey, 0, 9);
+                .reverseRangeWithScores(rankingType.getKey(), 0, 9);
 
         List<Map<String, Object>> rankingList = new ArrayList<>();
         int rank = 1;
