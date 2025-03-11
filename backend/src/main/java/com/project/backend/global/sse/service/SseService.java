@@ -16,7 +16,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SseService {
     private final EmitterRepository emitterRepository;
-//    private final RedisService redisService;
     private static final Long DEFAULT_TIMEOUT = 600L *1000*60;
 
     /**
