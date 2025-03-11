@@ -1,7 +1,7 @@
 package com.project.backend.domain.review.review.reviewDTO;
 
-import com.project.backend.domain.member.dto.MemberDto;
 import com.project.backend.domain.review.comment.dto.ReviewCommentDto;
+import com.project.backend.domain.review.recommendation.dto.ReviewRecommendationDto;
 import com.project.backend.domain.review.review.entity.Review;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -40,7 +39,7 @@ public class ReviewsDTO {
 
     List<ReviewCommentDto>  reviewCommentDtos;
 
-    Set<MemberDto> recommendMemberDtos;
+    List<ReviewRecommendationDto> reviewRecommendationDtos;
 
     LocalDateTime createdAt;
 
@@ -57,9 +56,9 @@ public class ReviewsDTO {
                 .filter(comment->comment.getParent()==null)
                 .map(ReviewCommentDto::new)
                 .collect(Collectors.toList());
-        this.recommendMemberDtos = review.getRecommendMember().stream()
-                .map(MemberDto::new)
-                .collect(Collectors.toSet());
+        this.reviewRecommendationDtos = review.getRecommendations().stream() // 변경된 부분
+                .map(ReviewRecommendationDto::new)
+                .collect(Collectors.toList());
         this.createdAt=review.getCreatedAt();
         this.modifiedAt = review.getModifiedAt();
     }
