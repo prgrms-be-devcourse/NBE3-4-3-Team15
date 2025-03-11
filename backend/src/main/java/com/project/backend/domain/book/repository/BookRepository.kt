@@ -133,4 +133,13 @@ interface BookRepository : JpaRepository<Book, Long> {
      */
     @Query("SELECT b.title FROM Book b WHERE b.id = :bookId")
     fun findTitleById(@Param("bookId") bookId: Long): Optional<String>
+
+    /**
+     * -- 도서 이미지 검색 --
+     *
+     * @author -- 김남우 --
+     * @since -- 2025.03.11 --
+     */
+    @Query("SELECT b.image FROM Book b WHERE b.id = :id")
+    fun findImageById(@Param("id") id: Long): Optional<String>
 }
