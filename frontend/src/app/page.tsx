@@ -21,6 +21,7 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [updateTime, setUpdateTime] = useState(""); // 🕒 최신 기준 시간 상태 추가
+  const [weeklyBooks, setWeeklyBooks] = useState([]);
   const [weeklyReviews, setWeeklyReviews] = useState([]);
   const [dailyReviews, setDailyReviews] = useState([]);
 
@@ -33,6 +34,7 @@ const Page = () => {
 
   // 랭킹 시스템
   useEffect(() => {
+    getWeeklyBookRanking();
     getWeeklyReviewRanking();
     getDailyReviewRanking();
   });
@@ -74,6 +76,14 @@ const Page = () => {
     } finally {
       setLoading((loading) => false);
     }
+  };
+
+  const getWeeklyBookRanking = async () => {
+    try {
+      const response = await client.GET("/ranking/weekly/book");
+      const data = response.data?.data;
+      setWeeklyBooks((WeeklyBooks) => data);
+    } catch (error) {}
   };
 
   const getWeeklyReviewRanking = async () => {
