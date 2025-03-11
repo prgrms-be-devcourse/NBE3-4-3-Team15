@@ -13,7 +13,7 @@ import java.util.List;
  * 리뷰 레파지토리
  */
 public interface ReviewRepository extends JpaRepository<Review,Long> {
-    List<ReviewsDTO> findAllByUserId(Long userId);
+    List<Review> findAllByUserId(Long userId);
 
 
 

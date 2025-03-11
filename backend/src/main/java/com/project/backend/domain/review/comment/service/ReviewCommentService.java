@@ -54,11 +54,12 @@ public class ReviewCommentService {
      * @since -- 25.01.17
      */
     public List<ReviewCommentDto> findComment(Long reviewId) {
-        ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
-        List<ReviewCommentDto> comments= reviewsDTO.getReviewCommentDtos().stream()
-                .filter(comment->comment.getParentId()==null)
-                .collect(Collectors.toList());
-        return comments;
+//        ReviewsDTO reviewsDTO = reviewService.getReview(reviewId);
+//        List<ReviewCommentDto> comments= reviewsDTO.getReviewCommentDtos().stream()
+//                .filter(comment->comment.getParentId()==null)
+//                .collect(Collectors.toList());
+//        return comments;
+        return null;
     }
 
 
