@@ -65,10 +65,6 @@ public class RankingService {
         updateRankingInRedis(rankingType.getKey(), firstCounts, secondCounts, weight1, weight2);
     }
 
-
-
-
-
     private void updateRankingInRedis(String rankingKey, List<Object[]> counts1, List<Object[]> counts2, double weight1, double weight2) {
         Map<Long, Double> scores = new HashMap<>();
 
