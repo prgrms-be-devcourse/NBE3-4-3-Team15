@@ -1,15 +1,11 @@
-package com.project.backend.domain.follow.entity;
+package com.project.backend.domain.follow.entity
 
-import com.project.backend.domain.member.entity.Member;
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import com.project.backend.domain.member.entity.Member
+import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.io.Serializable
+import java.time.LocalDateTime
 
 /**
  * 팔로우 엔티티
@@ -21,13 +17,10 @@ import java.time.LocalDateTime;
  * author: 이원재
  * since: 2025-01-27
  */
-
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 제한
 @Entity
-@EntityListeners(AuditingEntityListener.class)
-@IdClass(Follow.FollowId.class) // 복합 키를 정의하기 위해 IdClass 사용
-public class Follow {
+@EntityListeners(AuditingEntityListener::class)
+@IdClass(Follow.FollowId::class) // 복합 키를 정의하기 위해 IdClass 사용
+class Follow {
 
     /**
      * 팔로워
@@ -37,7 +30,7 @@ public class Follow {
     @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "follower_id", nullable = false)
-    private Member follower;
+    lateinit var follower: Member
 
     /**
      * 팔로잉
@@ -47,20 +40,25 @@ public class Follow {
     @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "following_id", nullable = false)
-    private Member following;
+    lateinit var following: Member
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    lateinit var createdAt: LocalDateTime
+
+    /**
+     * JPA를 위한 protected 기본 생성자
+     */
+    protected constructor()
 
     /**
      * 팔로우 생성자
      * @param follower 팔로워(팔로우 요청 회원)
      * @param following 팔로잉(팔로우 대상 회원)
      */
-    public Follow(Member follower, Member following) {
-        this.follower = follower;
-        this.following = following;
+    constructor(follower: Member, following: Member) {
+        this.follower = follower
+        this.following = following
     }
 
     /**
@@ -68,20 +66,36 @@ public class Follow {
      * 팔로우 엔티티의 복합 기본 키 클래스
      * Serializable 인터페이스를 구현하여 직렬화 가능
      */
-    @Getter
-    @NoArgsConstructor
-    public static class FollowId implements Serializable {
-        private Long follower;  // 팔로워 ID
-        private Long following; // 팔로잉 ID
+    class FollowId : Serializable {
+        var follower: Long? = null  // 팔로워 ID
+        var following: Long? = null // 팔로잉 ID
+
+        constructor() // 기본 생성자
 
         /**
          * FollowId 생성자
          * @param follower 팔로워 ID
          * @param following 팔로잉 ID
          */
-        public FollowId(Long follower, Long following) {
-            this.follower = follower;
-            this.following = following;
+        constructor(follower: Long, following: Long) {
+            this.follower = follower
+            this.following = following
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is FollowId) return false
+
+            if (follower != other.follower) return false
+            if (following != other.following) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = follower?.hashCode() ?: 0
+            result = 31 * result + (following?.hashCode() ?: 0)
+            return result
         }
     }
 }
